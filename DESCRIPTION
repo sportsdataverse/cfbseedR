@@ -1,0 +1,36 @@
+Package: cfbseedR
+Title: Functions to Efficiently Simulate and Evaluate College Football
+    Seasons
+Version: 0.1.0
+Authors@R:
+    person("Saiem", "Gilani", email = "saiem.gilani@gmail.com",
+           role = c("cre", "aut"),
+           comment = "Adapted from nflseedR by Sebastian Carl and Lee Sharpe")
+Description: A set of functions to simulate college football seasons and
+    compute standings, conference ranks, conference champions, and College
+    Football Playoff seeds. The package is an adaptation of the 'nflseedR'
+    package by Sebastian Carl and Lee Sharpe (MIT licensed) with college
+    football semantics: conferences instead of divisions, independents,
+    conference championship games, and 12-team playoff straight seeding.
+License: MIT + file LICENSE
+URL: https://github.com/sportsdataverse/cfbseedR,
+    https://cfbseedR.sportsdataverse.org
+BugReports: https://github.com/sportsdataverse/cfbseedR/issues
+Depends:
+    R (>= 4.1.0)
+Imports:
+    cli,
+    dplyr (>= 1.1.0),
+    purrr,
+    rlang,
+    stats,
+    tibble,
+    tidyr,
+    utils
+Suggests:
+    cfbfastR,
+    testthat (>= 3.0.0)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Config/testthat/edition: 3
