@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: cfbseedR documentation
+    url: https://cfbseedR.sportsdataverse.org/
+    about: Browse the pkgdown reference, articles, and changelog before filing an issue.
+  - name: SportsDataverse Discord
+    url: https://discord.com/invite/s8c7p3HrWj
+    about: Chat with the SportsDataverse community for usage help, ideas, and quick questions.
+  - name: nflseedR (the upstream original)
+    url: https://nflseedr.com/
+    about: cfbseedR adapts nflseedR — its docs explain the shared simulation architecture.
+  - name: SportsDataverse home
+    url: https://sportsdataverse.org/
+    about: Explore the broader SportsDataverse ecosystem of sports data packages.
