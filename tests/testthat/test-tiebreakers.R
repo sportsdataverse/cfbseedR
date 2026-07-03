@@ -81,3 +81,36 @@ test_that("independents never receive a conference rank or championship", {
   expect_true(is.na(st$conf_rank[st$team == "I1"]))
   expect_false(st$conf_champ[st$team == "I1"])
 })
+
+# Cross-language parity: the official-registry SEC/Big 12 cascades run on
+# the shared oracle fixture and must match sdv-py's `cfb_standings.py`
+# output exactly (see tests/testthat/fixtures/cfb_toy_tiebreakers/README.md).
+# If this diverges, the bug is in the R engine - never edit the expected CSV.
+test_that("official registry cascades match the sdv-py cross-language oracle", {
+  games <- load_registry_games()
+  teams <- load_registry_teams()
+  expected <- load_registry_expected()
+
+  st <- cfb_standings(games, teams, tiebreaker_depth = "POINTS", verbosity = "NONE")
+  st <- st[order(st$sim, st$conference, st$conf_rank), ]
+  expected <- expected[order(expected$sim, expected$conference, expected$conf_rank), ]
+
+  expect_identical(st$team, expected$team)
+  expect_identical(as.integer(st$conf_rank), as.integer(expected$conf_rank))
+  expect_identical(st$conf_champ, as.logical(expected$conf_champ))
+})
+
+test_that("registry rungs record skip notes when optional inputs are absent", {
+  teams <- load_registry_teams()
+  teams$division <- NULL
+  games <- load_registry_games()
+  games$home_points <- NULL
+  games$away_points <- NULL
+
+  st <- cfb_standings(games, teams, tiebreaker_depth = "POINTS", verbosity = "NONE")
+  notes <- attr(st, "tiebreak_notes")
+
+  expect_true(any(grepl("capped_scoring_margin skipped", notes)))
+  expect_true(any(grepl("total_wins FCS cap not applied", notes)))
+  expect_true(any(grepl("analytics_rating skipped", notes)))
+})

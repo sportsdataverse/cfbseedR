@@ -109,9 +109,18 @@ test_that("standings input validation errors are informative", {
                   verbosity = "NONE"),
     regexp = "identifiers"
   )
+})
 
-  expect_error(
-    cfb_standings(games, teams[teams$team != "I1", ], verbosity = "NONE"),
-    regexp = "I1"
-  )
+test_that("a team missing from `teams` is excluded, not an error", {
+  # `teams` need not exhaustively list every team in `games` - an unlisted
+  # opponent (e.g. an FCS-or-lower team, or here I1 with I1 removed) simply
+  # gets no standings row of its own, while its games still count for its
+  # opponents' own records (A4/B4 still show their games against I1). This
+  # is the same "unknown opponent" convention the Big 12 `total_wins` FCS
+  # cap relies on (see the `cfb_toy_tiebreakers` parity fixture).
+  games <- load_toy_games()
+  teams <- load_toy_teams()
+  st <- cfb_standings(games, teams[teams$team != "I1", ], verbosity = "NONE")
+  expect_false("I1" %in% st$team)
+  expect_equal(sum(st$team == "A4"), 1L)
 })
