@@ -5,14 +5,30 @@
 @import url('https://fonts.googleapis.com/css2?family=Fira+Mono');
 @import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap');
 
-/* Theme-aware body text: the shared SDV css hardcoded #0f0f0f, which is
-   invisible on the BS5 dark theme. Light theme keeps the exact same color. */
+/* ------------------------------------------------------------------ *
+ * Palette sampled from the hex logo:
+ *   navy  #0D1B2A  (logo field)     gold  #FFB612  (border + diamond)
+ *   cyan  #A9D6E5  (bracket leaves) slate #41566B  (bracket connectors)
+ *   white #FFFFFF  (wordmark)
+ * Theme-aware variables (SDV shared-CSS fix: never hardcode near-black
+ * text colors that vanish on the BS5 dark theme).
+ * ------------------------------------------------------------------ */
 :root,
 [data-bs-theme="light"] {
-  --sdv-body-color: #0f0f0f;
+  --sdv-body-color: #0D1B2A;      /* navy text on white */
+  --sdv-heading-color: #0D1B2A;
+  --sdv-link-color: #B8860B;      /* darkened gold: AA on white */
+  --sdv-link-hover: #FFB612;
+  --sdv-code-accent: #0D1B2A;
+  --sdv-border-color: #41566B;
 }
 [data-bs-theme="dark"] {
-  --sdv-body-color: #EAEBEC;
+  --sdv-body-color: #F4F7FA;      /* near-white on navy */
+  --sdv-heading-color: #FFFFFF;
+  --sdv-link-color: #FFB612;      /* pure gold pops on navy */
+  --sdv-link-hover: #A9D6E5;      /* cyan hover, like the bracket leaves */
+  --sdv-code-accent: #A9D6E5;
+  --sdv-border-color: #41566B;
 }
 
 body {
@@ -20,12 +36,18 @@ body {
   color: var(--sdv-body-color);
   font-size: 18px;
 }
+/* Dark theme sits on the logo's navy field */
+[data-bs-theme="dark"] body,
+[data-bs-theme="dark"] .navbar + .container,
+[data-bs-theme="dark"] main {
+  background-color: #0D1B2A;
+}
 
 h1, h2, .h1, .h2 {
   font-family: "Chivo";
   letter-spacing: 1px;
   line-height: 2.2rem; /* increases, so wrapping headers don't overlap */
-  color: var(--sdv-body-color);
+  color: var(--sdv-heading-color);
   font-weight: 500;
   font-size: 22px;
 }
@@ -34,7 +56,7 @@ h3, h4, h5, h6, .h3, .h4 {
   font-family: "Chivo";
   letter-spacing: 1px;
   line-height: 1.8rem; /* increases, so wrapping headers don't overlap */
-  color: var(--sdv-body-color);
+  color: var(--sdv-heading-color);
   font-weight: 500;
   font-size: 18px;
 }
@@ -42,9 +64,25 @@ h3, h4, h5, h6, .h3, .h4 {
 pre, code {
   font-family: "Fira Mono", Consolas, Inconsolata, monospace;
 }
+/* Inline code picks up the theme accent (cyan on navy, navy on white) */
+:not(pre) > code {
+  color: var(--sdv-code-accent);
+}
 .figure {
    margin-top: 10px;
    margin-bottom: 10px;
+}
+
+a {
+  color: var(--sdv-link-color);
+}
+a:hover, a:focus {
+  color: var(--sdv-link-hover);
+}
+
+hr, .dropdown-divider {
+  border-top: 1px solid var(--sdv-border-color);
+  opacity: 1;
 }
 
 #tocnav ul ul {
@@ -60,65 +98,81 @@ pre, code {
   font-size: 14px;
   line-height: 1.65rem;
 }
-#navbar ul ul {
-  font-family: "Fira Mono";
-  letter-spacing: 0.05px;
-  line-height: 1.25rem;
-  color: #fff;
-  font-weight: 400;
-  font-size: 12px;
-}
-.nav li a {
-  font-family: "Fira Mono";
-  letter-spacing: 0.05px;
-  line-height: 1.55rem;
-  color: #fff;
-  font-weight: 400;
-  font-size: 11px;
-}
 .pkgdown {
   display: none;
 }
+.pkgdown-footer-right {
+  display: none;
+}
 
+/* Gold glow on the brand wordmark, tinted to the logo's border color */
 @-webkit-keyframes glow {
   from {
-    text-shadow: 0 0 8px #E7196B, 0 0 10px #FB0466;
+    text-shadow: 0 0 8px #FFB612, 0 0 10px #FFD166;
   }
 
   to {
-    text-shadow: 0 0 10px #E7196B, 0 0 11px #FB0466;
+    text-shadow: 0 0 10px #FFB612, 0 0 11px #FFD166;
   }
 }
 
 @keyframes glow {
     to {
-     text-shadow: 0 0 10px #E7196B, 0 0 11px #FB0466;
+     text-shadow: 0 0 10px #FFB612, 0 0 11px #FFD166;
     }
   }
 
-.dropdown-header {
-  font-family: "Chivo";
-  letter-spacing: 0.1px;
-  line-height: 1.3rem;
-  color: #FDFDFD;
-  font-weight: 700;
-  font-size: 14px;
-  animation: glow 2.5s ease-in-out infinite alternate;
+/* ------------------------------------------------------------------ *
+ * Navbar: the logo's navy field in BOTH color modes, white text, gold
+ * hover/active. BS3-era .navbar-dark selectors are dead in BS5's
+ * data-bs-theme markup - style .navbar directly (SDV shared-CSS fix).
+ * ------------------------------------------------------------------ */
+.navbar {
+  background-color: #0D1B2A !important;
+  border-bottom: 2px solid #FFB612;
 }
 
-/* bootstrap 5 version changes  */
-
-.pkgdown-footer-right {
-  display: none;
+.navbar-brand {
+    font-family: "Bungee";
+    font-size: 16px;
+    color: #FFFFFF;
+    animation: glow 3s ease-in-out infinite alternate;
 }
 
-.dropdown-menu {
-  box-shadow: 0 6px 12px rgba(5, 5, 5, 0.18);
-  background-color: #222;
+.navbar-nav {
+    font-family: "Fira Mono";
+    font-size: small;
 }
+.navbar-nav .nav-link {
+    font-family: "Fira Mono";
+    font-size: small;
+    color: #E6ECF2;
+    padding: 0.5rem 1rem;
+}
+.navbar-nav .nav-link:hover, .navbar-nav .nav-link:focus,
+.navbar-nav .show > .nav-link, .navbar-nav .nav-link.active {
+    color: #FFB612;
+}
+.navbar-nav .active > .nav-link, .navbar-nav .focus > .nav-link {
+    font-family: "Fira Mono";
+    font-size: small;
+    background: #41566B;
+    color: #FFB612;
+}
+.navbar-nav .nav-item > .nav-link:hover {
+    background: rgba(65, 86, 107, 0.35);
+    color: #FFB612;
+}
+.bg-primary .navbar-nav .show > .nav-link, .bg-primary .navbar-nav .nav-link.active, .bg-primary .navbar-nav .nav-link:hover, .bg-primary .navbar-nav .nav-link:focus {
+    font-family: "Fira Mono";
+    font-size: small;
+    color: #FFB612;
+}
+
+/* Version badge legible on the navy navbar (BS5 .text-muted otherwise wins). */
 small.nav-text {
     --bs-text-opacity: 1;
-    border-color: #ecdddd;
+    border-color: #41566B;
     display: inline;
     padding: 0.2em 0.6em 0.3em;
     font-size: 75%;
@@ -130,84 +184,38 @@ small.nav-text {
     vertical-align: baseline;
     border-radius: 0.25em;
 }
+small.nav-text.text-muted { color: #A9D6E5 !important; }
+
+/* Dropdowns share the navy field */
+.dropdown-menu {
+  box-shadow: 0 6px 12px rgba(5, 5, 5, 0.18);
+  background-color: #0D1B2A;
+}
 .dropdown-item {
-    color: #F3F3F3;
+    color: #E6ECF2;
     font-family: "Fira Mono";
     font-size: small;
 }
-
-.navbar-nav {
-    font-family: "Fira Mono";
-    font-size: small;
+.dropdown-item:hover, .dropdown-item:focus {
+    color: #0D1B2A;
+    background-color: #FFB612;
 }
-.nav-link:hover, .nav-link:focus {
-    color: #EC261C;
-}
-.navbar-nav .active>.nav-link, .navbar-nav .focus>.nav-link {
-    font-family: "Fira Mono";
-    font-size: small;
-    background: #574646;
-    color: #EC261C;
-}
-.navbar-nav .nav-item>.nav-link:hover {
-    background: rgba(34,26,77,0.1);
-    color: #EC261C;
-}
-.navbar-nav .show>.nav-link, .navbar-nav .nav-link.active, .navbar-nav .nav-link:hover, .navbar-nav .nav-link:focus {
-    font-family: "Fira Mono";
-    font-size: small;
-    color: #EC261C;
-}
-
-.bg-primary .navbar-nav .show>.nav-link, .bg-primary .navbar-nav .nav-link.active, .bg-primary .navbar-nav .nav-link:hover, .bg-primary .navbar-nav .nav-link:focus {
-    font-family: "Fira Mono";
-    font-size: small;
-    color: #EC261C;
-}
-
-.navbar-brand {
-    font-family: "Bungee";
-    font-size: 16px;
-    color: #FDFDFD;
-    animation: glow 3s ease-in-out infinite alternate;
-}
-
-.dropdown-divider {
-    height: 0;
-    margin: 0.5rem 0;
-    overflow: hidden;
-    border-top: 1px solid #ffffff;
+.dropdown-header {
+  font-family: "Chivo";
+  letter-spacing: 0.1px;
+  line-height: 1.3rem;
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 14px;
+  animation: glow 2.5s ease-in-out infinite alternate;
 }
 
 input[type="search"] {
-    border-color: #EC261C;
+    border-color: #FFB612;
     background-color: #ffffff;
-    color: #3b3e3f;
+    color: #0D1B2A;
 }
 
 [role="button"] {
-    color: #EC261C;
-}
-
-/* Restore the dark navbar (BS5 color-mix had regressed it to light, hiding the
-   white brand). The navbar is #222222 in BOTH color modes, so BS3-era
-   .navbar-dark selectors are unnecessary (and dead in BS5's data-bs-theme
-   markup) - style .navbar directly. */
-.navbar { background-color: #222222 !important; }
-/* Version badge legible on the dark navbar (BS5 .text-muted otherwise wins). */
-small.nav-text.text-muted { color: #EAEBEC !important; }
-
-/* Dark-mode link accent (body text is handled by --sdv-body-color above;
-   light theme, fonts, glow, and navbar are untouched). */
-[data-bs-theme="dark"] :is(#main, aside) a {
-  color: #2680E4;
-}
-
-/* Navbar menu text light gray; hover/active keep the red accent. The navbar
-   is #222222 in both modes, so this works in both. */
-.navbar-nav .nav-link {
-  font-family: "Fira Mono";
-  font-size: small;
-  color: #D3D3D3;
-  padding: 0.5rem 1rem;
+    color: var(--sdv-link-color);
 }

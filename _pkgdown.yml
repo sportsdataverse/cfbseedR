@@ -11,24 +11,45 @@ template:
   includes:
     in_header: |
       <script defer data-domain="cfbseedr.sportsdataverse.org" src="https://plausible.io/js/plausible.js"></script>
+  # Palette sampled from the hex logo: navy #0D1B2A field, gold #FFB612
+  # border/diamond, cyan #A9D6E5 bracket leaves, slate #41566B connectors.
+  # Bootstrap 5.3 color-modes derive dark mode from these vars automatically;
+  # the light/dark split (navy-as-navbar vs navy-as-page-bg, gold vs cyan
+  # link-hover) is finished with `[data-bs-theme]`-scoped CSS custom
+  # properties in pkgdown/extra.css, since bslib's `template.bslib` block is
+  # a single theme, not a light/dark pair.
   bslib:
-    primary: "#222222"
-    secondary: "#222222"
-    success: "#2680E4"
-    link-color: "#2680E4"
-    link-hover-color: "#2680E4"
-    nav-link-hover-color: "#2680E4"
-    nav-link-focus-color: "#2680E4"
-    nav-link-dropdown-toggle-hover-color: "#2680E4"
-    navbar-hover-color: "#2680E4"
-    navbar-brand-hover-color: "#2680E4"
-    nav-tabs-link-active-bg: "#2680E4"
-    nav-pills-link-active-color: "#2680E4"
-    btn-link-color: "#2680E4"
-    btn-link-hover-color: "#2680E4"
-    dropdown-link-color: "#2680E4"
-    input-btn-focus-color: "#2680E4"
-    dropdown-dark-link-hover-bg: "#2680E4"
+    bg: "#FFFFFF"
+    fg: "#0D1B2A"
+    primary: "#0D1B2A"
+    secondary: "#41566B"
+    success: "#FFB612"
+    link-color: "#B8860B"
+    link-hover-color: "#B8860B"
+    code-color: "#41566B"
+    border-color: "#41566B"
+    navbar-light-bg: "#0D1B2A"
+    navbar-light-color: "#E8EEF2"
+    navbar-light-hover-color: "#FFB612"
+    navbar-light-active-color: "#FFB612"
+    navbar-light-brand-color: "#FFFFFF"
+    navbar-light-brand-hover-color: "#FFB612"
+    navbar-dark-bg: "#0D1B2A"
+    navbar-dark-color: "#E8EEF2"
+    navbar-dark-hover-color: "#A9D6E5"
+    navbar-dark-active-color: "#FFB612"
+    nav-link-hover-color: "#FFB612"
+    nav-link-focus-color: "#FFB612"
+    nav-link-dropdown-toggle-hover-color: "#FFB612"
+    navbar-hover-color: "#FFB612"
+    navbar-brand-hover-color: "#FFB612"
+    nav-tabs-link-active-bg: "#FFB612"
+    nav-pills-link-active-color: "#B8860B"
+    btn-link-color: "#B8860B"
+    btn-link-hover-color: "#FFB612"
+    dropdown-link-color: "#B8860B"
+    input-btn-focus-color: "#FFB612"
+    dropdown-dark-link-hover-bg: "#FFB612"
     border-radius: 0.5rem
     btn-border-radius: 0.25rem
   opengraph:
