@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="591" viewBox="0 0 512 591"><metadata><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"><rdf:Description><dc:creator>RealFaviconGenerator</dc:creator><dc:source>https://realfavicongenerator.net</dc:source></rdf:Description></rdf:RDF></metadata><defs>
+    <clipPath id="hexclip">
+      <polygon points="256,8 497,147 497,444 256,583 15,444 15,147"></polygon>
+    </clipPath>
+  </defs><polygon points="256,0 504,143 504,448 256,591 8,448 8,143" fill="#FFB612"></polygon><polygon points="256,22 485,154 485,437 256,569 27,437 27,154" fill="#0D1B2A"></polygon><g clip-path="url(#hexclip)">
+    <!-- wordmark -->
+    <text x="256" y="185" font-family="'DejaVu Sans','Segoe UI',Verdana,sans-serif" font-size="88" font-weight="600" fill="#FFFFFF" text-anchor="middle">cfbseedR</text>
+    <!-- bracket: left half (8 leaves -> 4 -> 2 -> final), mirrored right -->
+    <g stroke="#41566B" stroke-width="9" fill="none">
+      <!-- left leaves to round-2 -->
+      <path d="M96,268 h34 v30 h-34 M130,283 h30"></path>
+      <path d="M96,338 h34 v-25 M130,313 h30"></path>
+      <path d="M96,398 h34 v30 h-34 M130,413 h30"></path>
+      <path d="M96,468 h34 v-25 M130,443 h30"></path>
+      <!-- left round-2 to semi -->
+      <path d="M160,283 v30 M160,298 h36"></path>
+      <path d="M160,413 v30 M160,428 h36"></path>
+      <!-- left semi to final -->
+      <path d="M196,298 v130 M196,363 h42"></path>
+      <!-- right leaves to round-2 (mirror) -->
+      <path d="M416,268 h-34 v30 h34 M382,283 h-30"></path>
+      <path d="M416,338 h-34 v-25 M382,313 h-30"></path>
+      <path d="M416,398 h-34 v30 h34 M382,413 h-30"></path>
+      <path d="M416,468 h-34 v-25 M382,443 h-30"></path>
+      <path d="M352,283 v30 M352,298 h-36"></path>
+      <path d="M352,413 v30 M352,428 h-36"></path>
+      <path d="M316,298 v130 M316,363 h-42"></path>
+    </g>
+    <!-- leaf nodes (cyan) -->
+    <g fill="#A9D6E5">
+      <circle cx="96" cy="268" r="13"></circle><circle cx="96" cy="298" r="13"></circle>
+      <circle cx="96" cy="338" r="13"></circle><circle cx="96" cy="313" r="0"></circle>
+      <circle cx="130" cy="313" r="13"></circle>
+      <circle cx="96" cy="398" r="13"></circle><circle cx="96" cy="428" r="13"></circle>
+      <circle cx="96" cy="468" r="13"></circle><circle cx="130" cy="443" r="13"></circle>
+      <circle cx="416" cy="268" r="13"></circle><circle cx="416" cy="298" r="13"></circle>
+      <circle cx="416" cy="338" r="13"></circle><circle cx="382" cy="313" r="13"></circle>
+      <circle cx="416" cy="398" r="13"></circle><circle cx="416" cy="428" r="13"></circle>
+      <circle cx="416" cy="468" r="13"></circle><circle cx="382" cy="443" r="13"></circle>
+    </g>
+    <!-- championship diamond (gold) -->
+    <rect x="256" y="363" width="34" height="34" fill="#FFB612" transform="rotate(45 256 363) translate(-17 -17)"></rect>
+  </g></svg>
