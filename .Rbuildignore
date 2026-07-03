@@ -6,3 +6,5 @@
 ^README\.md$
 ^\.github$
 ^docs$
+^README\.Rmd$
+^README\.html$
