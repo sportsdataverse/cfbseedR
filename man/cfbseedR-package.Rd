@@ -6,6 +6,8 @@
 \alias{cfbseedR-package}
 \title{cfbseedR: Functions to Efficiently Simulate and Evaluate College Football Seasons}
 \description{
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
 A set of functions to simulate college football seasons and compute standings, conference ranks, conference champions, and College Football Playoff seeds. The package adapts the approach of the 'nflseedR' package by Sebastian Carl and Lee Sharpe (MIT licensed) to college football semantics: conferences instead of divisions, independents, conference championship games, and 12-team playoff straight seeding.
 }
 \seealso{
