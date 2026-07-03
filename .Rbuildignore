@@ -8,3 +8,7 @@
 ^docs$
 ^README\.Rmd$
 ^README\.html$
+^\.positai$
+^\.claude$
+^data-raw$
+^vignettes$

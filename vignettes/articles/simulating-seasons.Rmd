@@ -1,0 +1,178 @@
+---
+title: "Simulating seasons"
+description: "Custom compute_results functions, the tiebreaker ladder, and CFP-12 seeding."
+output: rmarkdown::html_document
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This article goes deeper than the
+[Getting started](https://cfbseedR.sportsdataverse.org/articles/getting-started.html)
+walkthrough: writing a custom `compute_results` function, controlling the
+tiebreaker cascade with `tiebreaker_depth`, and how the 12-team CFP
+straight-seeding rules are applied. Everything runs offline on the bundled
+toy season.
+
+```{r setup}
+library(cfbseedR)
+
+games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
+teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
+games$result[games$week >= 3] <- NA
+```
+
+## Custom `compute_results` functions
+
+`cfb_simulations()` calls `compute_results(teams, games, week_num, ...)`
+once per remaining week. The contract (identical to nflseedR's):
+
+* return `list(teams = teams, games = games)`,
+* fill `result` for exactly the games with
+  `week == week_num & is.na(result)`,
+* never modify any other result, remove rows/columns from `games`, or
+  produce a tie (`result == 0`) outside the regular season.
+
+Here is a deliberately simple generator: every missing result is a home win
+by 3 (postseason-safe since 3 is never a tie):
+
+```{r custom-fn}
+home_field_rules <- function(teams, games, week_num, ...) {
+  fill <- games$week == week_num & is.na(games$result)
+  games$result[fill] <- 3
+  list(teams = teams, games = games)
+}
+```
+
+`simulations_verify_fct()` checks a custom function against the full
+contract before you burn simulation time on it:
+
+```{r verify}
+simulations_verify_fct(home_field_rules)
+```
+
+Then plug it in:
+
+```{r custom-sim}
+set.seed(1)
+sim <- cfb_simulations(
+  games, teams,
+  compute_results = home_field_rules,
+  simulations = 10, playoff_seeds = 4
+)
+sim$overall[, c("team", "wins", "conf_champ", "playoff")]
+```
+
+Anything extra your generator needs (a ratings vector, market lines, an
+externally trained model) can be passed through the `...` of
+`cfb_simulations()`. The default generator accepts initial ELO ratings that
+way:
+
+```{r elo-passthrough}
+elo <- setNames(seq(1700, 1300, length.out = nrow(teams)), teams$team)
+set.seed(2)
+sim_elo <- cfb_simulations(
+  games, teams,
+  simulations = 10, playoff_seeds = 4,
+  elo = elo
+)
+sim_elo$overall[, c("team", "wins", "playoff")]
+```
+
+## The `tiebreaker_depth` ladder
+
+Conference ranks are seeded by conference win percentage; ties are broken
+by a cascade whose depth you control:
+
+| `tiebreaker_depth` | Cascade applied before the coin flip |
+|---|---|
+| `"RANDOM"` | Nothing - coin flip immediately. |
+| `"PRE-SOV"` | Head-to-head, then common conference opponents. |
+| `"SOS"` (default) | `"PRE-SOV"` + strength of victory, then strength of schedule. |
+| `"POINTS"` | `"SOS"` + conference point differential. |
+
+`verbosity = "MAX"` logs every step the cascade takes, which is the easiest
+way to understand (and trust) a rank:
+
+```{r tiebreakers}
+played <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
+standings <- cfb_standings(played, teams,
+                           tiebreaker_depth = "POINTS", verbosity = "MAX")
+standings[, c("team", "conference", "conf_pct", "sov", "sos", "conf_rank")]
+```
+
+### The conference-scoped `sov`/`sos` ruling
+
+All cascade quantities - head-to-head, common opponents, `sov`, `sos`, and
+point differential - are computed **over regular-season conference games
+only**, so conference ranks depend only on conference play. Concretely:
+
+* `sov` = beaten conference opponents' conference wins divided by their
+  conference games (strength of victory over **conference victories**),
+* `sos` = all conference opponents' conference wins divided by their
+  conference games (strength of schedule over **conference opponents**),
+* independents have no conference games, so both are `0.0`.
+
+This is a documented simplification: real CFB tiebreakers are
+conference-specific, and a full-schedule SOS would let non-conference
+results leak into conference seeding.
+
+## CFP-12 straight seeding
+
+`cfb_playoff_seeds()` implements the 2025 **straight seeding** rule:
+
+1. Order all teams by committee rank (`rankings`); unranked teams fall back
+   behind ranked ones (and to win pct, SOV, SOS, and point differential
+   when `rankings = NULL`).
+2. The 5 highest-ranked **conference champions** are guaranteed a spot
+   (fewer if fewer champions exist).
+3. Fill the remaining spots with the best-ranked at-large teams.
+4. Seed the field strictly in ranking order - champions are **not** bumped
+   up to the top-4 seeds (that was the pre-2025 rule).
+
+A synthetic 16-team example with 6 conference champions shows the
+guarantee and the straight ordering; champion `F1` (ranked 14th) displaces
+the lowest at-large team but keeps its rank-order seed:
+
+```{r cfp12}
+st <- data.frame(
+  sim = 1,
+  team = sprintf("%s1", LETTERS[1:16]),
+  conference = c(LETTERS[1:6], LETTERS[1:10]),
+  conf_champ = c(rep(TRUE, 6), rep(FALSE, 10)),
+  win_pct = seq(1, 0.4, length.out = 16),
+  sov = 0.5, sos = 0.5, pd = 100
+)
+rankings <- data.frame(
+  team = st$team,
+  rank = c(1, 2, 3, 5, 8, 14, 4, 6, 7, 9, 10, 11, 12, 13, 15, 16)
+)
+seeded <- cfb_playoff_seeds(st, rankings = rankings, playoff_seeds = 12)
+seeded[!is.na(seeded$seed), c("team", "conf_champ", "seed")] |>
+  (\(x) x[order(x$seed), ])()
+```
+
+In `cfb_simulations()`, the bracket generated from these seeds is the fixed
+CFP-12 bracket (first round hosted by the higher seed, later rounds
+neutral-site, no reseeding), and committee `rankings` are held static
+across simulations.
+
+## Real schedules
+
+With cfbfastR installed, a real season plugs straight in:
+
+```{r real, eval = FALSE}
+# Not run: requires network access via cfbfastR
+sched <- cfbfastR::load_cfb_schedules(2024)
+games_2024 <- cfb_games_from_schedule(sched)
+games_2024 <- games_2024[games_2024$game_type != "POST", ]
+teams_2024 <- unique(data.frame(
+  team = c(sched$home_team, sched$away_team),
+  conference = c(sched$home_conference, sched$away_conference)
+))
+sim <- cfb_simulations(games_2024, teams_2024, simulations = 1000)
+```

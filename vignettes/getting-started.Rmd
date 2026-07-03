@@ -1,0 +1,116 @@
+---
+title: "Getting started with cfbseedR"
+description: "Compute standings, playoff seeds, and run a small season simulation."
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started with cfbseedR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+cfbseedR simulates and evaluates college football seasons: standings with a
+documented tiebreaker cascade, conference champions, College Football
+Playoff (CFP) seeding, and week-by-week season simulation with a pluggable
+results generator.
+
+Everything in this article runs offline using the toy season bundled with
+the package (9 teams: two 4-team conferences, "Alpha" and "Beta", plus one
+independent).
+
+```{r setup}
+library(cfbseedR)
+
+games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
+teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
+
+head(games)
+teams
+```
+
+## Standings from a games frame
+
+`cfb_standings()` needs a games frame (`sim`/`season`, `game_type`, `week`,
+`home_team`, `away_team`, `result`) and a teams frame (`team`,
+`conference`). It returns one row per team with overall and conference
+records, conference ranks (via the tiebreaker cascade), and conference
+champions.
+
+```{r standings}
+standings <- cfb_standings(games, teams, verbosity = "NONE")
+standings[, c("team", "conference", "wins", "losses", "conf_pct",
+              "conf_rank", "conf_champ")]
+```
+
+Two college-football-specific semantics to be aware of:
+
+* **Conference championship games** (`game_type == "CONF_CHAMP"`) count
+  toward the overall record and decide the conference champion, but not
+  toward the conference record/rank.
+* **`sov` / `sos` are conference-scoped**: strength of victory and strength
+  of schedule are computed over regular-season conference games only
+  (`sov` over conference victories, `sos` over conference opponents);
+  independents get `0.0`.
+
+If you have real data, `cfb_games_from_schedule()` maps a
+`cfbfastR::load_cfb_schedules()` frame into this schema:
+
+```{r cfbfastR, eval = FALSE}
+# Not run: requires network access via cfbfastR
+sched <- cfbfastR::load_cfb_schedules(2024)
+games_2024 <- cfb_games_from_schedule(sched)
+```
+
+## Playoff seeds with a rankings frame
+
+`cfb_playoff_seeds()` implements CFP **straight seeding** (2025 rule): the
+field is the best-ranked teams with the 5 highest-ranked conference
+champions guaranteed inclusion, seeded strictly in ranking order. Pass a
+committee-style rankings frame (`team`, `rank`); without one, a documented
+fallback ordering (win pct, SOV, SOS, point differential) is used.
+
+```{r seeds}
+rankings <- data.frame(team = c("B1", "I1", "A1", "A3"), rank = 1:4)
+seeded <- cfb_playoff_seeds(standings, rankings = rankings, playoff_seeds = 4)
+seeded[!is.na(seeded$seed), c("team", "conference", "conf_champ", "seed")]
+```
+
+## A small simulation
+
+`cfb_simulations()` fills in the missing (`NA`) results week by week using
+a `compute_results` function - by default `cfbseedR_compute_results()`, an
+ELO-based generator adapted from nflseedR - then computes standings,
+champions, seeds, and (with `sim_include = "POST"`) the playoff bracket.
+
+```{r simulation}
+games$result[games$week >= 3] <- NA
+set.seed(42)
+sim <- cfb_simulations(games, teams, simulations = 50, playoff_seeds = 4)
+sim$overall
+```
+
+The returned `cfbseedR_simulation` list also carries per-simulation
+`standings`, all simulated `games`, `team_wins` win-total probabilities,
+per-matchup `game_summary`, and the `sim_params` used.
+
+For deeper topics - custom `compute_results` functions, the
+`tiebreaker_depth` ladder, and the CFP-12 seeding rules - see the
+[Simulating seasons](https://cfbseedR.sportsdataverse.org/articles/simulating-seasons.html)
+article.
+
+## Acknowledgments
+
+cfbseedR is an adaptation of
+[nflseedR](https://nflseedr.com) (MIT) by **Lee Sharpe** and **Sebastian
+Carl**. The entire architecture - the standings engine, the tiebreaking
+cascade design, the week-loop simulator with a pluggable `compute_results`
+contract, and the ELO-based default generator - is their design, re-derived
+here with college football semantics. Thank you to Lee, Sebastian, and the
+broader [nflverse](https://nflverse.nflverse.com) team whose open-source
+work this package builds on.
