@@ -11,6 +11,7 @@ cfb_standings(
   tiebreaker_depth = c("SOS", "PRE-SOV", "POINTS", "RANDOM"),
   playoff_seeds = NULL,
   rankings = NULL,
+  tiebreaker_data = NULL,
   verbosity = c("MIN", "MAX", "NONE")
 )
 }
@@ -23,11 +24,22 @@ cfb_standings(
 \item{home_team, away_team}{Team names matching \code{teams$team}.}
 \item{result}{Home margin, i.e. home score minus away score. Must not
 be \code{NA} (play or simulate the games first).}
-}}
+}
+Optional \code{home_points}/\code{away_points} columns (per-game scores) feed the
+official SEC \code{capped_scoring_margin} tiebreaker rung (see "Official
+per-conference tiebreakers" below); \code{\link[=cfb_games_from_schedule]{cfb_games_from_schedule()}} emits
+both. Absent -> that rung is skipped, not an error.}
 
 \item{teams}{A data frame with columns \code{team} and \code{conference}. Teams with
 conference \code{"FBS Independents"} or \code{NA} are treated as independents:
-they appear in overall standings but receive no conference rank.}
+they appear in overall standings but receive no conference rank. An
+optional \code{division} column (e.g. \code{"FBS"}/\code{"FCS"}) feeds the Big 12
+\code{total_wins} FCS cap; absent -> that cap degrades to uncapped win
+totals (noted, see \code{tiebreak_notes} below). \code{teams} need not list every
+team that appears in \code{games} - an unlisted opponent (e.g. an
+FCS-or-lower team) gets no standings row of its own, but its games
+still count toward its opponents' records and toward the Big 12
+\code{total_wins} FCS cap (an unknown opponent counts as FCS-or-lower).}
 
 \item{...}{Currently unused.}
 
@@ -39,7 +51,11 @@ falling back to a coin flip:
 \item \code{"PRE-SOV"}: head-to-head and common opponents only.
 \item \code{"SOS"}: adds strength of victory, then strength of schedule.
 \item \code{"POINTS"}: adds conference point differential.
-}}
+}
+
+This depth ladder gates ONLY the generic fallback cascade used by
+unregistered conferences; the SEC/Big Ten/Big 12/ACC/MAC official
+procedures below always run in full.}
 
 \item{playoff_seeds}{If not \code{NULL}, a \code{seed} column is added via
 \code{\link[=cfb_playoff_seeds]{cfb_playoff_seeds()}} with this number of playoff spots.}
@@ -48,8 +64,14 @@ falling back to a coin flip:
 \code{team} and \code{rank}, passed to \code{\link[=cfb_playoff_seeds]{cfb_playoff_seeds()}}. Ignored when
 \code{playoff_seeds} is \code{NULL}.}
 
+\item{tiebreaker_data}{Optional named list of external inputs for the
+official registry rungs. Currently supported: \code{analytics_ratings}, a
+data frame with columns \code{team} and \code{rating} (feeds the SportSource
+Analytics-style rating rung used by Big Ten/Big 12/ACC/MAC). Missing
+-> that rung is skipped for those conferences (noted).}
+
 \item{verbosity}{One of \code{"MIN"} (default), \code{"MAX"}, or \code{"NONE"}.
-\code{"MAX"} logs every tiebreaker step.}
+\code{"MAX"} logs every tied group as it's broken.}
 }
 \value{
 A tibble of standings, one row per (\code{sim}, \code{team}) (the id column
@@ -57,7 +79,11 @@ is named \code{season} if the input used \code{season}), sorted by sim,
 conference, conference rank, and team. Note that \code{sov} and \code{sos} are
 \strong{conference-REG-scoped}: they are computed over regular-season
 conference games only, \code{sov} over conference victories and \code{sos} over
-conference opponents; independents get \code{0.0} for both.\tabular{lll}{
+conference opponents; independents get \code{0.0} for both. The result also
+carries a character vector \code{attr(result, "tiebreak_notes")} recording
+any registry rungs skipped for lack of their optional input (see
+"Official per-conference tiebreakers" above); empty when nothing was
+skipped.\tabular{lll}{
    Column \tab Type \tab Description \cr
    \code{sim} / \code{season} \tab integer \tab Season or simulation ID (name follows the input). \cr
    \code{team} \tab character \tab Team name. \cr
@@ -93,14 +119,43 @@ toward the overall record (and deciding the champion) but not the
 conference record.
 }
 \details{
-The tiebreaker cascade is a documented simplification - real CFB
-tiebreakers are conference-specific. Conference ranks are seeded by
-conference win percentage; ties are broken by head-to-head record among
-the tied teams, record vs. common conference opponents (minimum one),
-conference-scoped strength of victory, conference-scoped strength of
-schedule, conference point differential, and finally a coin flip. All
-cascade quantities are computed over regular-season conference games so
-conference ranks depend only on conference play.
+Conference ranks are seeded by conference win percentage; ties within a
+tier are broken by a documented cascade. \strong{Registered conferences} (SEC,
+Big Ten, Big 12, ACC, MAC) use their \strong{official 2024+ procedures} (see
+"Official per-conference tiebreakers" below); every other conference uses
+the \strong{generic fallback}: head-to-head record among the tied teams,
+record vs. common conference opponents (minimum one), conference-scoped
+strength of victory, conference-scoped strength of schedule, conference
+point differential, and finally a coin flip, gated by \code{tiebreaker_depth}.
+All cascade quantities are computed over regular-season conference games
+so conference ranks depend only on conference play.
+\subsection{Official per-conference tiebreakers}{
+
+\code{CONFERENCE_TIEBREAKERS} (internal) registers the SEC, Big Ten, Big 12,
+ACC, and MAC 2024+ procedures as rung lists, ported verbatim from sdv-py's
+\code{cfb_standings.py} so both engines produce identical output on the shared
+cross-language parity fixture. Rung primitives: \code{h2h} (multi-team combined
+head-to-head, applied only when every tied pair played; otherwise only
+"defeated-all" elimination - the symmetric "lost-to-all" elimination is
+intentionally not modeled, a documented simplification, see
+\code{R/tiebreakers.R}), \code{record_vs_common}, \code{record_vs_common_desc} (descend
+the standings from best to worst, comparing a tied GROUP of common
+opponents collectively - the Big 12 rule, adopted for every registry
+descent rung), \code{opp_conf_win_pct} (pooled opponents' conference win pct -
+this reuses the existing \code{sos} column, which already computes the pooled
+sum-of-wins/sum-of-games formula), \code{capped_scoring_margin} (SEC: points
+scored capped at 42 / allowed capped at 48, per game, summed over
+conference games; needs \code{home_points}/\code{away_points}), \code{total_wins} (Big
+12: overall wins with at most one win vs an FCS-or-lower opponent
+counted; needs \code{teams$division}), \code{analytics_rating} (external, via
+\code{tiebreaker_data$analytics_ratings}), and \code{coin_toss}. After each team is
+seeded/eliminated the procedure restarts from the first rung with the
+remaining tied set; when a rung's required input is unavailable it is
+skipped deterministically and the skip is recorded once (per conference)
+in \code{attr(result, "tiebreak_notes")}. Under registry conferences,
+\code{conf_rank} 1-2 are the two teams that reach the conference championship
+game (the cascade only orders them - see the design brief).
+}
 }
 \examples{
 games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
@@ -108,6 +163,14 @@ teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
 standings <- cfb_standings(games, teams, tiebreaker_depth = "POINTS",
                            verbosity = "NONE")
 standings[, c("team", "conference", "conf_rank", "conf_champ")]
+
+# An official-registry analytics rating input (used by Big Ten/Big
+# 12/ACC/MAC when their cascade reaches the `analytics_rating` rung)
+ratings <- data.frame(team = teams$team, rating = seq(90, 70, length.out = nrow(teams)))
+standings2 <- cfb_standings(games, teams,
+                            tiebreaker_data = list(analytics_ratings = ratings),
+                            verbosity = "NONE")
+attr(standings2, "tiebreak_notes")
 
 }
 \seealso{

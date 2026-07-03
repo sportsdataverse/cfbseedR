@@ -25,7 +25,14 @@ computed seeds.}
 
 \item{teams}{A data frame with columns \code{team} and \code{conference}. Teams with
 conference \code{"FBS Independents"} or \code{NA} are treated as independents:
-they appear in overall standings but receive no conference rank.}
+they appear in overall standings but receive no conference rank. An
+optional \code{division} column (e.g. \code{"FBS"}/\code{"FCS"}) feeds the Big 12
+\code{total_wins} FCS cap; absent -> that cap degrades to uncapped win
+totals (noted, see \code{tiebreak_notes} below). \code{teams} need not list every
+team that appears in \code{games} - an unlisted opponent (e.g. an
+FCS-or-lower team) gets no standings row of its own, but its games
+still count toward its opponents' records and toward the Big 12
+\code{total_wins} FCS cap (an unknown opponent counts as FCS-or-lower).}
 
 \item{compute_results}{A function computing results of games, with
 the required arguments \code{teams}, \code{games}, and \code{week_num}. See
@@ -47,7 +54,11 @@ falling back to a coin flip:
 \item \code{"PRE-SOV"}: head-to-head and common opponents only.
 \item \code{"SOS"}: adds strength of victory, then strength of schedule.
 \item \code{"POINTS"}: adds conference point differential.
-}}
+}
+
+This depth ladder gates ONLY the generic fallback cascade used by
+unregistered conferences; the SEC/Big Ten/Big 12/ACC/MAC official
+procedures below always run in full.}
 
 \item{sim_include}{One of \code{"POST"} (default) or \code{"REG"}:
 \itemize{

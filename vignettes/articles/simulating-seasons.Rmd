@@ -121,6 +121,41 @@ This is a documented simplification: real CFB tiebreakers are
 conference-specific, and a full-schedule SOS would let non-conference
 results leak into conference seeding.
 
+### Official per-conference tiebreakers
+
+The generic cascade above is the fallback used for conferences without a
+registered procedure. The **SEC, Big Ten, Big 12, ACC, and MAC** instead use
+their **official 2024+ tiebreaker procedures** (ported from the same
+registry as sdv-py's `cfb_standings.py`, so both engines agree on a shared
+cross-language fixture). These add rungs the generic cascade doesn't have -
+record vs. common opponents by order of finish, a pooled conference
+opponents' win percentage, the SEC's capped relative scoring margin (points
+scored capped at 42 / allowed at 48 per game), the Big 12's `total_wins`
+with its FCS-or-lower win cap, and an external analytics rating - and they
+always run to completion (`tiebreaker_depth` only gates the generic
+fallback). Two optional inputs feed these rungs when available:
+`home_points`/`away_points` on `games` (the SEC cap) and a `division`
+column on `teams` (the Big 12 FCS cap); `tiebreaker_data =
+list(analytics_ratings = ratings)` supplies the external rating rung. Any
+rung whose input is missing is skipped, and the skip is recorded in
+`attr(standings, "tiebreak_notes")`:
+
+```{r registry}
+sec_teams <- data.frame(
+  team = c("A", "B", "C"), conference = "SEC", division = "FBS"
+)
+sec_games <- data.frame(
+  sim = 2024, week = 1:3, game_type = "REG",
+  home_team = c("A", "B", "C"), away_team = c("B", "C", "A"),
+  result = c(50, 3, 3), neutral = 0,
+  home_points = c(50, 20, 20), away_points = c(0, 17, 17)
+)
+sec_standings <- cfb_standings(sec_games, sec_teams,
+                               tiebreaker_depth = "POINTS", verbosity = "NONE")
+sec_standings[, c("team", "conf_rank")]
+attr(sec_standings, "tiebreak_notes")
+```
+
 ## CFP-12 straight seeding
 
 `cfb_playoff_seeds()` implements the 2025 **straight seeding** rule:

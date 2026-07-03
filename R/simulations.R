@@ -106,7 +106,7 @@ cfb_simulations <- function(games,
        please see {.fun cfb_standings}."
     )
   }
-  teams <- standings_validate_teams(teams, games)
+  teams <- standings_validate_teams(teams)
   if (!"neutral" %in% names(games)) games$neutral <- 0L
 
   # Replicate games and teams across simulations
@@ -133,11 +133,19 @@ cfb_simulations <- function(games,
 
   # STANDINGS, CHAMPIONS, SEEDS ----------------------------------------------
   dg <- standings_double_games(sim_games, teams)
-  standings <- standings_init(dg)
+  standings <- standings_init(dg, teams)
+  standings <- standings_add_tiebreak_metrics(standings, dg, teams)
+  division_absent <- !("division" %in% names(teams))
+  notes_env <- new.env(parent = emptyenv())
+  notes_env$notes <- character(0)
   depth <- switch(tiebreaker_depth,
     "RANDOM" = 0L, "PRE-SOV" = 1L, "SOS" = 2L, "POINTS" = 3L
   )
-  standings <- standings_add_conf_ranks(standings, dg, depth, verbosity = 0L)
+  standings <- standings_add_conf_ranks(
+    standings, dg, depth, verbosity = 0L, notes_env, division_absent
+  )
+  standings <- standings |>
+    dplyr::select(-dplyr::any_of(c("capped_margin", "capped_wins", "analytics_rating")))
   standings <- standings_add_conf_champ(standings, dg)
   standings <- cfb_playoff_seeds(
     standings, rankings = rankings, playoff_seeds = playoff_seeds

@@ -1,6 +1,7 @@
 # Internal standings helpers. Mirrors nflseedR's standings_utils.R /
 # standings_init.R architecture, adapted to CFB (conferences, independents,
-# CONF_CHAMP games).
+# CONF_CHAMP games), plus the official per-conference tiebreaker registry
+# in `R/tiebreakers.R` (ported from sdv-py `cfb_standings.py`).
 
 is_independent <- function(conference) {
   is.na(conference) | conference == "FBS Independents"
@@ -44,7 +45,17 @@ standings_validate_games <- function(games, allow_na_results = FALSE,
   games
 }
 
-standings_validate_teams <- function(teams, games, call = rlang::caller_env()) {
+# Validate the teams input. Unlike a prior revision of this function, teams
+# are NOT required to exhaustively list every team that appears in `games`:
+# an opponent absent from `teams` (e.g. an FCS-or-lower team an FBS
+# conference member scheduled) simply gets no standings row of its own -
+# its games still count toward the listed team's own record and toward the
+# Big 12 `total_wins` FCS cap (an unknown opponent counts as FCS-or-lower;
+# see `standings_add_capped_wins()`). This mirrors sdv-py's `cfb_standings.py`
+# `_validate_teams`, which never cross-checks `teams` against `games` at all,
+# and is exercised by the `cfb_toy_tiebreakers` parity fixture (Big 12 teams
+# there play unlisted `FCS1`/`FCS2`/`FCS3` opponents on purpose).
+standings_validate_teams <- function(teams, call = rlang::caller_env()) {
   teams <- tibble::as_tibble(teams)
   if (!all(c("team", "conference") %in% names(teams))) {
     cli::cli_abort(
@@ -53,30 +64,30 @@ standings_validate_teams <- function(teams, games, call = rlang::caller_env()) {
       call = call
     )
   }
-  game_teams <- unique(c(games$home_team, games$away_team))
-  missing <- setdiff(game_teams, teams$team)
-  if (length(missing) > 0) {
-    cli::cli_abort(
-      "The following teams appear in {.arg games} but not in {.arg teams}:
-       {.val {missing}}",
-      call = call
-    )
-  }
   dplyr::distinct(teams, .data$team, .keep_all = TRUE)
 }
 
 # Long format: one row per (game, team perspective). Adapted from
-# nflseedR::standings_double_games().
+# nflseedR::standings_double_games(). Carries `pf`/`pa` (points for/against)
+# when `games` has `home_points`/`away_points` - feeds the SEC
+# `capped_scoring_margin` official tiebreaker rung; NA otherwise (that rung
+# is then skipped, see `standings_add_capped_margin()`).
 standings_double_games <- function(games, teams) {
   conf_vec <- setNames(teams$conference, teams$team)
+  if (!all(c("home_points", "away_points") %in% names(games))) {
+    games$home_points <- NA_real_
+    games$away_points <- NA_real_
+  }
   dg <- dplyr::bind_rows(
     dplyr::transmute(
       games, .data$sim, .data$game_type, .data$week,
-      team = .data$away_team, opp = .data$home_team, result = -.data$result
+      team = .data$away_team, opp = .data$home_team, result = -.data$result,
+      pf = .data$away_points, pa = .data$home_points
     ),
     dplyr::transmute(
       games, .data$sim, .data$game_type, .data$week,
-      team = .data$home_team, opp = .data$away_team, result = .data$result
+      team = .data$home_team, opp = .data$away_team, result = .data$result,
+      pf = .data$home_points, pa = .data$away_points
     )
   )
   dg |>
@@ -101,7 +112,18 @@ standings_double_games <- function(games, teams) {
 # conference record over conference REG games only, and conference-scoped
 # SOV/SOS (nflseedR formula applied to conference games with opponents'
 # conference records). Adapted from nflseedR::standings_init().
-standings_init <- function(dg) {
+#
+# Unlike the pre-registry revision, standings are seeded from a (sim x
+# `teams`) cross join rather than from whichever teams happen to appear in
+# `dg` - this is what excludes unlisted opponents (see
+# `standings_validate_teams()`) from getting their own standings row while
+# their games still count for everyone else, matching sdv-py's
+# `_standings_base` cross-join base.
+standings_init <- function(dg, teams) {
+  sims <- dplyr::distinct(dg, .data$sim)
+  base <- tidyr::expand_grid(sims, team = teams$team) |>
+    dplyr::left_join(dplyr::select(teams, "team", "conference"), by = "team")
+
   overall <- dg |>
     dplyr::summarise(
       games = dplyr::n(),
@@ -110,7 +132,6 @@ standings_init <- function(dg) {
       ties = sum(.data$outcome == 0.5),
       win_pct = sum(.data$outcome) / dplyr::n(),
       pd = sum(.data$result),
-      conference = .data$team_conf[1],
       .by = c("sim", "team")
     )
 
@@ -129,6 +150,8 @@ standings_init <- function(dg) {
   # Conference-scoped strength of victory / schedule:
   # sov = sum(conf wins of beaten conf opponents) / sum(their conf games)
   # sos = sum(conf wins of all conf opponents) / sum(their conf games)
+  # (this `sos` formula is already the POOLED opponents' conference win pct
+  # the registry's `opp_conf_win_pct` rung needs - see `R/tiebreakers.R`.)
   opp_rec <- conf_rec |>
     dplyr::transmute(
       .data$sim, opp = .data$team,
@@ -148,159 +171,165 @@ standings_init <- function(dg) {
       .by = c("sim", "team")
     )
 
-  overall |>
+  base |>
+    dplyr::left_join(overall, by = dplyr::join_by("sim", "team")) |>
     dplyr::left_join(conf_rec, by = dplyr::join_by("sim", "team")) |>
     dplyr::left_join(sov_sos, by = dplyr::join_by("sim", "team")) |>
-    dplyr::mutate(dplyr::across(
-      c("conf_games", "conf_wins", "conf_losses", "conf_ties",
-        "conf_pct", "conf_pd", "sov", "sos"),
-      \(x) dplyr::coalesce(x, 0)
-    )) |>
-    dplyr::relocate("conference", .after = "team")
-}
-
-# Head-to-head record over conference REG games. Adapted from
-# nflseedR::standings_h2h().
-standings_h2h <- function(dg) {
-  dg |>
-    dplyr::filter(.data$conf_game == TRUE) |>
-    dplyr::summarise(
-      h2h_games = dplyr::n(),
-      h2h_wins = sum(.data$outcome),
-      .by = c("sim", "team", "opp")
+    dplyr::mutate(
+      dplyr::across(c("games", "wins", "losses", "ties"), \(x) dplyr::coalesce(x, 0L)),
+      dplyr::across(
+        c("conf_games", "conf_wins", "conf_losses", "conf_ties",
+          "conf_pct", "conf_pd", "sov", "sos"),
+        \(x) dplyr::coalesce(x, 0)
+      ),
+      win_pct = dplyr::coalesce(.data$win_pct, 0),
+      pd = dplyr::coalesce(.data$pd, 0)
     )
 }
 
-# Break a tie among `tied` teams (character vector, length >= 2) within one
-# (sim, conference) group. Returns the single winning team.
-#
-# Cascade (each step keeps the argmax subset; if the subset shrinks, the
-# cascade restarts from the first step with the survivors - NFL-style):
-#   depth >= 1: head-to-head win pct among tied teams (skipped unless every
-#               tied team played at least one other tied team)
-#   depth >= 1: record vs common conference opponents (min 1 common)
-#   depth >= 2: conference-scoped SOV, then SOS
-#   depth >= 3: conference point differential (POINTS)
-#   fallback  : coin flip
-break_tie <- function(tied, st, h2h, cg, depth, verbosity) {
-  tol <- 1e-12
-  keep_max <- function(teams, values) {
-    teams[values >= max(values) - tol]
+# SEC capped relative scoring margin over conference games (per game: points
+# scored capped at 42, points allowed capped at 48). Returns NULL when
+# `games` never carried `home_points`/`away_points` at all (the rung is then
+# always skipped); a team whose conference games have any missing points
+# gets `NA` (that team's comparison is skipped, matching sdv-py).
+standings_add_capped_margin <- function(dg, has_pts) {
+  if (!has_pts) return(NULL)
+  dg |>
+    dplyr::filter(.data$conf_game == TRUE) |>
+    dplyr::summarise(
+      pts_null = sum(is.na(.data$pf) | is.na(.data$pa)),
+      cm_sum = sum(pmin(.data$pf, SEC_OFF_CAP) - pmin(.data$pa, SEC_DEF_CAP)),
+      .by = c("sim", "team")
+    ) |>
+    dplyr::mutate(
+      capped_margin = dplyr::if_else(.data$pts_null > 0, NA_real_, .data$cm_sum)
+    ) |>
+    dplyr::select("sim", "team", "capped_margin")
+}
+
+# Big 12 total wins with the FCS cap (max `fcs_cap` wins vs an FCS-or-lower
+# opponent counted, over ALL games - not just conference games). An opponent
+# counts as FCS-or-lower when it's absent from `teams` entirely, or carries
+# a non-FBS `division`. Returns NULL when `teams` has no `division` column
+# at all (the rung then falls back to uncapped win totals, noted).
+standings_add_capped_wins <- function(dg, teams, fcs_cap) {
+  if (!"division" %in% names(teams)) return(NULL)
+  opp_info <- teams |>
+    dplyr::transmute(opp = .data$team, opp_div = .data$division, opp_known = TRUE)
+  dg |>
+    dplyr::left_join(opp_info, by = "opp") |>
+    dplyr::mutate(
+      is_fcs = is.na(.data$opp_known) |
+        (!is.na(.data$opp_div) & tolower(.data$opp_div) != "fbs")
+    ) |>
+    dplyr::summarise(
+      fcs_w = sum(.data$outcome == 1 & .data$is_fcs),
+      all_w = sum(.data$outcome == 1),
+      .by = c("sim", "team")
+    ) |>
+    dplyr::mutate(capped_wins = .data$all_w - .data$fcs_w + pmin(.data$fcs_w, fcs_cap)) |>
+    dplyr::select("sim", "team", "capped_wins")
+}
+
+# Attach the three registry-rung metric columns (`capped_margin`,
+# `capped_wins`, `analytics_rating`) shared by `cfb_standings()` and
+# `cfb_simulations()`. Each degrades deterministically (see the two helpers
+# above + the `analytics_rating` branch here) when its optional input is
+# absent; `standings_add_conf_ranks()` records the degradation once per
+# conference in `tiebreak_notes`.
+standings_add_tiebreak_metrics <- function(standings, dg, teams, tiebreaker_data = NULL) {
+  has_pts <- all(c("pf", "pa") %in% names(dg))
+  cm <- standings_add_capped_margin(dg, has_pts)
+  standings <- if (is.null(cm)) {
+    dplyr::mutate(standings, capped_margin = NA_real_)
+  } else {
+    dplyr::left_join(standings, cm, by = dplyr::join_by("sim", "team"))
   }
-  log_step <- function(step, survivors) {
-    if (verbosity >= 2L) {
-      cli::cli_inform(
-        "Tie of {.val {tied}} reduced to {.val {survivors}} via {step}."
+
+  cw <- standings_add_capped_wins(dg, teams, B12_FCS_CAP)
+  standings <- if (is.null(cw)) {
+    dplyr::mutate(standings, capped_wins = as.double(.data$wins))
+  } else {
+    dplyr::left_join(standings, cw, by = dplyr::join_by("sim", "team")) |>
+      dplyr::mutate(capped_wins = dplyr::coalesce(.data$capped_wins, 0))
+  }
+
+  if (!is.null(tiebreaker_data) && !is.null(tiebreaker_data$analytics_ratings)) {
+    ar <- tibble::as_tibble(tiebreaker_data$analytics_ratings) |>
+      dplyr::transmute(
+        team = as.character(.data$team),
+        analytics_rating = as.double(.data$rating)
       )
-    }
+    standings <- dplyr::left_join(standings, ar, by = "team")
+  } else {
+    standings <- dplyr::mutate(standings, analytics_rating = NA_real_)
   }
-
-  repeat {
-    if (length(tied) == 1L) return(tied)
-
-    if (depth >= 1L) {
-      # Head-to-head among the tied teams
-      hh <- h2h[h2h$team %in% tied & h2h$opp %in% tied, ]
-      if (nrow(hh) > 0 && all(tied %in% hh$team)) {
-        pct <- hh |>
-          dplyr::summarise(
-            v = sum(.data$h2h_wins) / sum(.data$h2h_games), .by = "team"
-          )
-        survivors <- keep_max(pct$team, pct$v)
-        if (length(survivors) < length(tied)) {
-          log_step("head-to-head", survivors)
-          tied <- survivors
-          next
-        }
-      }
-
-      # Record vs common conference opponents (min 1 common)
-      opp_sets <- lapply(tied, \(t) unique(cg$opp[cg$team == t]))
-      common <- setdiff(Reduce(intersect, opp_sets), tied)
-      if (length(common) >= 1L) {
-        vs <- cg[cg$team %in% tied & cg$opp %in% common, ] |>
-          dplyr::summarise(v = sum(.data$outcome) / dplyr::n(), .by = "team")
-        survivors <- keep_max(vs$team, vs$v)
-        if (length(survivors) < length(tied)) {
-          log_step("common opponents", survivors)
-          tied <- survivors
-          next
-        }
-      }
-    }
-
-    if (depth >= 2L) {
-      shrunk <- FALSE
-      for (metric in c("sov", "sos")) {
-        vals <- st[[metric]][match(tied, st$team)]
-        survivors <- keep_max(tied, vals)
-        if (length(survivors) < length(tied)) {
-          log_step(metric, survivors)
-          tied <- survivors
-          shrunk <- TRUE
-          break
-        }
-      }
-      if (shrunk) next
-    }
-
-    if (depth >= 3L) {
-      vals <- st$conf_pd[match(tied, st$team)]
-      survivors <- keep_max(tied, vals)
-      if (length(survivors) < length(tied)) {
-        log_step("point differential", survivors)
-        tied <- survivors
-        next
-      }
-    }
-
-    # Coin flip
-    winner <- sample(tied, 1L)
-    if (verbosity >= 2L) {
-      cli::cli_inform("Tie of {.val {tied}} broken via coin flip: {.val {winner}}.")
-    }
-    return(winner)
-  }
+  standings
 }
 
-# Assign conference ranks within one (sim, conference) group.
-# Iteratively picks the best remaining team: primary key is conference win
-# pct, ties resolved via break_tie().
-rank_conference <- function(st, h2h, cg, depth, verbosity) {
-  remaining <- st$team
-  out <- setNames(integer(length(remaining)), remaining)
-  r <- 1L
-  tol <- 1e-12
-  while (length(remaining) > 0L) {
-    pct <- st$conf_pct[match(remaining, st$team)]
-    best <- remaining[pct >= max(pct) - tol]
-    winner <- if (length(best) == 1L) {
-      best
-    } else {
-      break_tie(best, st, h2h, cg, depth, verbosity)
-    }
-    out[[winner]] <- r
-    r <- r + 1L
-    remaining <- setdiff(remaining, winner)
-  }
-  out
-}
-
-# Add conf_rank to standings. Independents get NA.
-standings_add_conf_ranks <- function(standings, dg, depth, verbosity) {
-  h2h_all <- standings_h2h(dg)
+# Add conf_rank to standings. Independents get NA. Ties within a
+# conference win-pct tier are broken by the conference's registered
+# official procedure (`CONFERENCE_TIEBREAKERS`, `R/tiebreakers.R`), falling
+# back to `.generic_cascade` for unregistered conferences (byte-identical
+# to the pre-registry behavior, including `tiebreaker_depth` gating).
+#
+# ponytail: one `dplyr::group_split()` per (sim, conference) with a rung
+# walk inside - fine at toy/test scale and the existing simulation scale
+# this package already exercises; vectorize the rung engine if 10k-sim
+# tiebreaking of many-conference schedules ever becomes a hot path (mirrors
+# the same ponytail note in sdv-py's `_build_rec_map`).
+standings_add_conf_ranks <- function(standings, dg, depth, verbosity,
+                                     notes_env, division_absent) {
+  non_ind <- standings |> dplyr::filter(!is_independent(.data$conference))
   cg_all <- dg |> dplyr::filter(.data$conf_game == TRUE)
 
-  ranked <- standings |>
-    dplyr::filter(!is_independent(.data$conference)) |>
+  ranked <- non_ind |>
     dplyr::group_split(.data$sim, .data$conference) |>
-    purrr::map(\(st) {
-      h2h <- h2h_all[h2h_all$sim == st$sim[1], ]
-      cg <- cg_all[cg_all$sim == st$sim[1] & cg_all$team_conf == st$conference[1], ]
-      ranks <- rank_conference(st, h2h, cg, depth, verbosity)
-      tibble::tibble(
-        sim = st$sim[1], team = names(ranks), conf_rank = unname(ranks)
+    purrr::map(function(grp) {
+      sim_id <- grp$sim[1]
+      conf_name <- grp$conference[1]
+      rungs <- CONFERENCE_TIEBREAKERS[[conf_name]]
+      if (is.null(rungs)) rungs <- .generic_cascade
+      cg <- cg_all[cg_all$sim == sim_id & cg_all$team_conf == conf_name, ]
+
+      conf_pct_by_team <- setNames(grp$conf_pct, grp$team)
+      metrics <- setNames(
+        purrr::map(seq_len(nrow(grp)), function(i) {
+          list(
+            sov = grp$sov[i],
+            sos = grp$sos[i],
+            conf_pd = grp$conf_pd[i],
+            opp_wp_pooled = grp$sos[i],
+            capped_margin = grp$capped_margin[i],
+            capped_wins = grp$capped_wins[i],
+            analytics_rating = grp$analytics_rating[i]
+          )
+        }),
+        grp$team
       )
+      ctx <- list(
+        conf_name = conf_name,
+        conf_pct_by_team = conf_pct_by_team,
+        division_absent = division_absent
+      )
+
+      pct_rounded <- round(grp$conf_pct, 9)
+      rank <- 1L
+      rows <- list()
+      for (p in sort(unique(pct_rounded), decreasing = TRUE)) {
+        tier <- grp$team[pct_rounded == p]
+        if (length(tier) > 1L) {
+          if (verbosity >= 2L) {
+            cli::cli_inform("Breaking tie of {.val {tier}} in {.val {conf_name}} (sim {sim_id}).")
+          }
+          tier <- .order_tied(tier, metrics, cg, rungs, depth, ctx, notes_env)
+        }
+        for (team in tier) {
+          rows[[length(rows) + 1L]] <- tibble::tibble(sim = sim_id, team = team, conf_rank = rank)
+          rank <- rank + 1L
+        }
+      }
+      purrr::list_rbind(rows)
     }) |>
     purrr::list_rbind()
 
