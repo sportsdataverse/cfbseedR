@@ -1,6 +1,6 @@
 # MIT License
 
-Copyright (c) 2026 cfbseedR authors
+Copyright (c) 2026 Saiem Gilani
 
 Portions of this package are adapted from nflseedR
 (https://github.com/nflverse/nflseedR), Copyright (c) 2020
