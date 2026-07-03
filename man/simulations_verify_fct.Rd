@@ -35,7 +35,9 @@ game results are changed as expected, and errors with a hint at the
 first problem found.
 }
 \examples{
+\donttest{
 simulations_verify_fct(cfbseedR_compute_results)
+}
 
 }
 \seealso{

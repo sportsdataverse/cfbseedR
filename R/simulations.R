@@ -44,26 +44,26 @@
 #' Simulations run sequentially (no chunk/parallel support). Set a seed
 #' with `set.seed()` for reproducibility.
 #'
-#' @return A list of class `cfbseedR_simulation` with the elements
-#' \describe{
-#'  \item{standings}{Per-simulation standings incl. `seed` and (with
-#'    `sim_include = "POST"`) `exit` (0 = missed playoff, r = eliminated in
-#'    round r, max + 1 = national champion).}
-#'  \item{games}{All simulated games of all simulations.}
-#'  \item{overall}{Per-team probabilities across simulations: mean `wins`,
-#'    `conf_champ`, `playoff`, `seed1`, `won_natty`.}
-#'  \item{team_wins}{Probabilities of clearing each half-win threshold.}
-#'  \item{game_summary}{Per-matchup aggregate results.}
-#'  \item{sim_params}{The simulation parameters.}
-#' }
+#' @return A list of class `cfbseedR_simulation` with these elements:
+#'
+#' | Element | Type | Description |
+#' |---|---|---|
+#' | `standings` | tibble | Per-simulation standings in the [cfb_standings()] schema (see its column table; `sov`/`sos` are conference-REG-scoped) plus `seed` and - with `sim_include = "POST"` - `exit` (integer: 0 = missed playoff, r = eliminated in round r, max round + 1 = national champion). |
+#' | `games` | tibble | All games of all simulations (`sim`, `game_type`, `week`, `home_team`, `away_team`, `result`, `neutral`), incl. generated playoff games. |
+#' | `overall` | tibble | Per-team means across simulations: `wins` (average), and probabilities `conf_champ`, `playoff`, `seed1`, `won_natty`. |
+#' | `team_wins` | tibble | Per-team probability of clearing each half-win threshold (`team`, `wins`, `over_prob`, `under_prob`). |
+#' | `game_summary` | tibble | Per-matchup aggregates: `away_wins`, `home_wins`, `ties`, mean `result`, `games_played`, `away_percentage`, `home_percentage`. |
+#' | `sim_params` | list | The simulation parameters (number of simulations, seeds, depth, etc.). |
 #'
 #' @examples
+#' \donttest{
 #' games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
 #' teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
 #' games$result[games$week >= 3] <- NA
 #' set.seed(4)
 #' sim <- cfb_simulations(games, teams, simulations = 4, playoff_seeds = 4)
 #' sim$overall
+#' }
 #'
 #' @seealso [cfb_standings()], [cfb_playoff_seeds()],
 #'   [cfbseedR_compute_results()], [simulations_verify_fct()],

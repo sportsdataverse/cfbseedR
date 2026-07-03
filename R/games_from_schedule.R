@@ -18,9 +18,18 @@
 #' CFBD marks conference championship games as regular-season games with a
 #' championship note.
 #'
-#' @return A tibble with columns `season`, `week`, `game_type`, `home_team`,
-#'   `away_team`, `result` (home margin, `NA` for unplayed games), and
-#'   `neutral` (0/1) - ready for [cfb_standings()] / [cfb_simulations()].
+#' @return A tibble in the engine games schema, ready for
+#'   [cfb_standings()] / [cfb_simulations()]:
+#'
+#' | Column | Type | Description |
+#' |---|---|---|
+#' | `season` | integer | Season taken from the schedule. |
+#' | `week` | integer | Week number of the game. |
+#' | `game_type` | character | `"REG"`, `"CONF_CHAMP"` (notes mention "championship"), or `"POST"` (`season_type == "postseason"`). |
+#' | `home_team` | character | Home team name. |
+#' | `away_team` | character | Away team name. |
+#' | `result` | numeric | Home margin (home minus away points); `NA` for unplayed games. |
+#' | `neutral` | integer | Neutral-site flag (0/1). |
 #'
 #' @examples
 #' schedule <- data.frame(
@@ -35,7 +44,9 @@
 #' cfb_games_from_schedule(schedule)
 #'
 #' @seealso [cfb_standings()], [cfb_simulations()],
-#'   `cfbfastR::load_cfb_schedules()`
+#'   `cfbfastR::load_cfb_schedules()` from
+#'   [cfbfastR](https://cfbfastR.sportsdataverse.org),
+#'   the nflseedR original: <https://nflseedr.com>
 #' @export
 cfb_games_from_schedule <- function(schedule) {
   schedule <- tibble::as_tibble(schedule)

@@ -29,8 +29,13 @@
 #' 3-point margin. nflseedR's rest-day adjustment is dropped (no rest data
 #' in the CFB schema).
 #'
-#' @return A list with the updated `teams` and `games` tables, as required
-#'   by the `compute_results` contract (see [simulations_verify_fct()]).
+#' @return A list with two elements, as required by the `compute_results`
+#'   contract (see [simulations_verify_fct()]):
+#'
+#' | Element | Type | Description |
+#' |---|---|---|
+#' | `teams` | data.frame | The input `teams` table with the `elo` column added/updated from this week's results. |
+#' | `games` | data.frame | The input `games` table with `result` filled for this week's previously missing results (home margin, integer). |
 #'
 #' @examples
 #' games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))

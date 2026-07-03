@@ -24,7 +24,9 @@
 #' @return Returns `TRUE` invisibly if no problems are found.
 #'
 #' @examples
+#' \donttest{
 #' simulations_verify_fct(cfbseedR_compute_results)
+#' }
 #'
 #' @seealso [cfb_simulations()], [cfbseedR_compute_results()]
 #' @export

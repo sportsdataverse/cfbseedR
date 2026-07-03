@@ -21,8 +21,11 @@ schedule, point differential, and team name.}
 \item{playoff_seeds}{Number of playoff spots (default 12).}
 }
 \value{
-The \code{standings} input with a \code{seed} column added (\code{NA} for teams
-outside the playoff field).
+The \code{standings} input (all its columns unchanged; see
+\code{\link[=cfb_standings]{cfb_standings()}} for the column table) with one column added:\tabular{lll}{
+   Column \tab Type \tab Description \cr
+   \code{seed} \tab integer \tab CFP seed in straight-seeding order; \code{NA} for teams outside the playoff field. \cr
+}
 }
 \description{
 Implements 12-team CFP \strong{straight seeding} (2025 rule): the field is the
@@ -48,5 +51,6 @@ seeded[!is.na(seeded$seed), c("team", "seed")]
 
 }
 \seealso{
-\code{\link[=cfb_standings]{cfb_standings()}}
+\code{\link[=cfb_standings]{cfb_standings()}}, \code{\link[=cfb_simulations]{cfb_simulations()}},
+the nflseedR original: \url{https://nflseedr.com}
 }

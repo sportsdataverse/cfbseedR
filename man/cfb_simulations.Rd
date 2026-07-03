@@ -62,17 +62,14 @@ back to the per-simulation standings ordering (see
 \code{\link[=cfb_playoff_seeds]{cfb_playoff_seeds()}}).}
 }
 \value{
-A list of class \code{cfbseedR_simulation} with the elements
-\describe{
-\item{standings}{Per-simulation standings incl. \code{seed} and (with
-\code{sim_include = "POST"}) \code{exit} (0 = missed playoff, r = eliminated in
-round r, max + 1 = national champion).}
-\item{games}{All simulated games of all simulations.}
-\item{overall}{Per-team probabilities across simulations: mean \code{wins},
-\code{conf_champ}, \code{playoff}, \code{seed1}, \code{won_natty}.}
-\item{team_wins}{Probabilities of clearing each half-win threshold.}
-\item{game_summary}{Per-matchup aggregate results.}
-\item{sim_params}{The simulation parameters.}
+A list of class \code{cfbseedR_simulation} with these elements:\tabular{lll}{
+   Element \tab Type \tab Description \cr
+   \code{standings} \tab tibble \tab Per-simulation standings in the \code{\link[=cfb_standings]{cfb_standings()}} schema (see its column table; \code{sov}/\code{sos} are conference-REG-scoped) plus \code{seed} and - with \code{sim_include = "POST"} - \code{exit} (integer: 0 = missed playoff, r = eliminated in round r, max round + 1 = national champion). \cr
+   \code{games} \tab tibble \tab All games of all simulations (\code{sim}, \code{game_type}, \code{week}, \code{home_team}, \code{away_team}, \code{result}, \code{neutral}), incl. generated playoff games. \cr
+   \code{overall} \tab tibble \tab Per-team means across simulations: \code{wins} (average), and probabilities \code{conf_champ}, \code{playoff}, \code{seed1}, \code{won_natty}. \cr
+   \code{team_wins} \tab tibble \tab Per-team probability of clearing each half-win threshold (\code{team}, \code{wins}, \code{over_prob}, \code{under_prob}). \cr
+   \code{game_summary} \tab tibble \tab Per-matchup aggregates: \code{away_wins}, \code{home_wins}, \code{ties}, mean \code{result}, \code{games_played}, \code{away_percentage}, \code{home_percentage}. \cr
+   \code{sim_params} \tab list \tab The simulation parameters (number of simulations, seeds, depth, etc.). \cr
 }
 }
 \description{
@@ -97,12 +94,14 @@ Simulations run sequentially (no chunk/parallel support). Set a seed
 with \code{set.seed()} for reproducibility.
 }
 \examples{
+\donttest{
 games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
 teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
 games$result[games$week >= 3] <- NA
 set.seed(4)
 sim <- cfb_simulations(games, teams, simulations = 4, playoff_seeds = 4)
 sim$overall
+}
 
 }
 \seealso{

@@ -54,12 +54,32 @@ falling back to a coin flip:
 \value{
 A tibble of standings, one row per (\code{sim}, \code{team}) (the id column
 is named \code{season} if the input used \code{season}), sorted by sim,
-conference, conference rank, and team. Columns: \code{sim}/\code{season}, \code{team},
-\code{conference}, \code{games}, \code{wins}, \code{losses}, \code{ties}, \code{win_pct}, \code{pd},
-\code{conf_games}, \code{conf_wins}, \code{conf_losses}, \code{conf_ties}, \code{conf_pct},
-\code{conf_pd}, \code{sov}, \code{sos}, \code{conf_rank}, \code{conf_champ} (+ \code{seed} if
-\code{playoff_seeds} was supplied). \code{wins}/\code{losses} are true win/loss counts;
-\code{win_pct} counts ties as half a win. \code{sov}/\code{sos} are conference-scoped.
+conference, conference rank, and team. Note that \code{sov} and \code{sos} are
+\strong{conference-REG-scoped}: they are computed over regular-season
+conference games only, \code{sov} over conference victories and \code{sos} over
+conference opponents; independents get \code{0.0} for both.\tabular{lll}{
+   Column \tab Type \tab Description \cr
+   \code{sim} / \code{season} \tab integer \tab Season or simulation ID (name follows the input). \cr
+   \code{team} \tab character \tab Team name. \cr
+   \code{conference} \tab character \tab Conference name (\code{"FBS Independents"} / \code{NA} = independent). \cr
+   \code{games} \tab integer \tab Games played (\code{REG} + \code{CONF_CHAMP}). \cr
+   \code{wins} \tab integer \tab True win count (ties not counted). \cr
+   \code{losses} \tab integer \tab True loss count. \cr
+   \code{ties} \tab integer \tab Tie count. \cr
+   \code{win_pct} \tab numeric \tab Overall win percentage; a tie counts as half a win. \cr
+   \code{pd} \tab integer \tab Overall point differential. \cr
+   \code{conf_games} \tab numeric \tab Regular-season conference games played (0 for independents). \cr
+   \code{conf_wins} \tab numeric \tab Wins over regular-season conference games. \cr
+   \code{conf_losses} \tab numeric \tab Losses over regular-season conference games. \cr
+   \code{conf_ties} \tab numeric \tab Ties over regular-season conference games. \cr
+   \code{conf_pct} \tab numeric \tab Conference win percentage (\code{CONF_CHAMP} games excluded). \cr
+   \code{conf_pd} \tab numeric \tab Point differential over regular-season conference games. \cr
+   \code{sov} \tab numeric \tab Strength of victory, conference-REG-scoped: beaten conference opponents' conference wins divided by their conference games. Independents: \code{0.0}. \cr
+   \code{sos} \tab numeric \tab Strength of schedule, conference-REG-scoped: all conference opponents' conference wins divided by their conference games. Independents: \code{0.0}. \cr
+   \code{conf_rank} \tab integer \tab Rank within the conference via the tiebreaker cascade (\code{NA} for independents). \cr
+   \code{conf_champ} \tab logical \tab Conference champion flag (decided by the \code{CONF_CHAMP} game). \cr
+   \code{seed} \tab integer \tab CFP seed, only when \code{playoff_seeds} is not \code{NULL} (\code{NA} outside the field). \cr
+}
 }
 \description{
 Computes overall and conference standings from a table of game results,
@@ -92,5 +112,7 @@ standings[, c("team", "conference", "conf_rank", "conf_champ")]
 }
 \seealso{
 \code{\link[=cfb_playoff_seeds]{cfb_playoff_seeds()}}, \code{\link[=cfb_simulations]{cfb_simulations()}},
-the nflseedR original: \url{https://nflseedr.com}
+\code{\link[=cfb_games_from_schedule]{cfb_games_from_schedule()}},
+the nflseedR original: \url{https://nflseedr.com},
+and \href{https://cfbfastR.sportsdataverse.org}{cfbfastR} for real schedules
 }

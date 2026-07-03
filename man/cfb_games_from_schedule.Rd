@@ -14,9 +14,17 @@ present: \code{home_points}/\code{away_points} (to compute \code{result}),
 are classified as \code{"CONF_CHAMP"}).}
 }
 \value{
-A tibble with columns \code{season}, \code{week}, \code{game_type}, \code{home_team},
-\code{away_team}, \code{result} (home margin, \code{NA} for unplayed games), and
-\code{neutral} (0/1) - ready for \code{\link[=cfb_standings]{cfb_standings()}} / \code{\link[=cfb_simulations]{cfb_simulations()}}.
+A tibble in the engine games schema, ready for
+\code{\link[=cfb_standings]{cfb_standings()}} / \code{\link[=cfb_simulations]{cfb_simulations()}}:\tabular{lll}{
+   Column \tab Type \tab Description \cr
+   \code{season} \tab integer \tab Season taken from the schedule. \cr
+   \code{week} \tab integer \tab Week number of the game. \cr
+   \code{game_type} \tab character \tab \code{"REG"}, \code{"CONF_CHAMP"} (notes mention "championship"), or \code{"POST"} (\code{season_type == "postseason"}). \cr
+   \code{home_team} \tab character \tab Home team name. \cr
+   \code{away_team} \tab character \tab Away team name. \cr
+   \code{result} \tab numeric \tab Home margin (home minus away points); \code{NA} for unplayed games. \cr
+   \code{neutral} \tab integer \tab Neutral-site flag (0/1). \cr
+}
 }
 \description{
 Maps the schedule shape returned by \code{cfbfastR::load_cfb_schedules()} to
@@ -45,5 +53,7 @@ cfb_games_from_schedule(schedule)
 }
 \seealso{
 \code{\link[=cfb_standings]{cfb_standings()}}, \code{\link[=cfb_simulations]{cfb_simulations()}},
-\code{cfbfastR::load_cfb_schedules()}
+\code{cfbfastR::load_cfb_schedules()} from
+\href{https://cfbfastR.sportsdataverse.org}{cfbfastR},
+the nflseedR original: \url{https://nflseedr.com}
 }

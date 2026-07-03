@@ -22,8 +22,12 @@ columns \code{sim} and \code{team}. May carry an \code{elo} column between weeks
 from \code{rnorm(1500, 150)}.}
 }
 \value{
-A list with the updated \code{teams} and \code{games} tables, as required
-by the \code{compute_results} contract (see \code{\link[=simulations_verify_fct]{simulations_verify_fct()}}).
+A list with two elements, as required by the \code{compute_results}
+contract (see \code{\link[=simulations_verify_fct]{simulations_verify_fct()}}):\tabular{lll}{
+   Element \tab Type \tab Description \cr
+   \code{teams} \tab data.frame \tab The input \code{teams} table with the \code{elo} column added/updated from this week's results. \cr
+   \code{games} \tab data.frame \tab The input \code{games} table with \code{result} filled for this week's previously missing results (home margin, integer). \cr
+}
 }
 \description{
 The default \code{compute_results} function used by \code{\link[=cfb_simulations]{cfb_simulations()}}. It is

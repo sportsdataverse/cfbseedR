@@ -6,19 +6,25 @@
 \alias{cfbseedR-package}
 \title{cfbseedR: Functions to Efficiently Simulate and Evaluate College Football Seasons}
 \description{
-A set of functions to simulate college football seasons and compute standings, conference ranks, conference champions, and College Football Playoff seeds. The package is an adaptation of the 'nflseedR' package by Sebastian Carl and Lee Sharpe (MIT licensed) with college football semantics: conferences instead of divisions, independents, conference championship games, and 12-team playoff straight seeding.
+A set of functions to simulate college football seasons and compute standings, conference ranks, conference champions, and College Football Playoff seeds. The package adapts the approach of the 'nflseedR' package by Sebastian Carl and Lee Sharpe (MIT licensed) to college football semantics: conferences instead of divisions, independents, conference championship games, and 12-team playoff straight seeding.
 }
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/sportsdataverse/cfbseedR}
   \item \url{https://cfbseedR.sportsdataverse.org}
+  \item \url{https://github.com/sportsdataverse/cfbseedR}
   \item Report bugs at \url{https://github.com/sportsdataverse/cfbseedR/issues}
 }
 
 }
 \author{
-\strong{Maintainer}: Saiem Gilani \email{saiem.gilani@gmail.com} (Adapted from nflseedR by Sebastian Carl and Lee Sharpe)
+\strong{Maintainer}: Saiem Gilani \email{saiem.gilani@gmail.com} (\href{https://orcid.org/0000-0002-7194-9067}{ORCID})
+
+Authors:
+\itemize{
+  \item Sebastian Carl \email{mrcaseb@gmail.com} (Author of nflseedR, from which cfbseedR is adapted)
+  \item Lee Sharpe (Author of nflseedR, from which cfbseedR is adapted)
+}
 
 }
 \keyword{internal}

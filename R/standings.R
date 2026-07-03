@@ -51,12 +51,33 @@
 #'
 #' @return A tibble of standings, one row per (`sim`, `team`) (the id column
 #'   is named `season` if the input used `season`), sorted by sim,
-#'   conference, conference rank, and team. Columns: `sim`/`season`, `team`,
-#'   `conference`, `games`, `wins`, `losses`, `ties`, `win_pct`, `pd`,
-#'   `conf_games`, `conf_wins`, `conf_losses`, `conf_ties`, `conf_pct`,
-#'   `conf_pd`, `sov`, `sos`, `conf_rank`, `conf_champ` (+ `seed` if
-#'   `playoff_seeds` was supplied). `wins`/`losses` are true win/loss counts;
-#'   `win_pct` counts ties as half a win. `sov`/`sos` are conference-scoped.
+#'   conference, conference rank, and team. Note that `sov` and `sos` are
+#'   **conference-REG-scoped**: they are computed over regular-season
+#'   conference games only, `sov` over conference victories and `sos` over
+#'   conference opponents; independents get `0.0` for both.
+#'
+#' | Column | Type | Description |
+#' |---|---|---|
+#' | `sim` / `season` | integer | Season or simulation ID (name follows the input). |
+#' | `team` | character | Team name. |
+#' | `conference` | character | Conference name (`"FBS Independents"` / `NA` = independent). |
+#' | `games` | integer | Games played (`REG` + `CONF_CHAMP`). |
+#' | `wins` | integer | True win count (ties not counted). |
+#' | `losses` | integer | True loss count. |
+#' | `ties` | integer | Tie count. |
+#' | `win_pct` | numeric | Overall win percentage; a tie counts as half a win. |
+#' | `pd` | integer | Overall point differential. |
+#' | `conf_games` | numeric | Regular-season conference games played (0 for independents). |
+#' | `conf_wins` | numeric | Wins over regular-season conference games. |
+#' | `conf_losses` | numeric | Losses over regular-season conference games. |
+#' | `conf_ties` | numeric | Ties over regular-season conference games. |
+#' | `conf_pct` | numeric | Conference win percentage (`CONF_CHAMP` games excluded). |
+#' | `conf_pd` | numeric | Point differential over regular-season conference games. |
+#' | `sov` | numeric | Strength of victory, conference-REG-scoped: beaten conference opponents' conference wins divided by their conference games. Independents: `0.0`. |
+#' | `sos` | numeric | Strength of schedule, conference-REG-scoped: all conference opponents' conference wins divided by their conference games. Independents: `0.0`. |
+#' | `conf_rank` | integer | Rank within the conference via the tiebreaker cascade (`NA` for independents). |
+#' | `conf_champ` | logical | Conference champion flag (decided by the `CONF_CHAMP` game). |
+#' | `seed` | integer | CFP seed, only when `playoff_seeds` is not `NULL` (`NA` outside the field). |
 #'
 #' @examples
 #' games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
@@ -66,7 +87,9 @@
 #' standings[, c("team", "conference", "conf_rank", "conf_champ")]
 #'
 #' @seealso [cfb_playoff_seeds()], [cfb_simulations()],
-#'   the nflseedR original: <https://nflseedr.com>
+#'   [cfb_games_from_schedule()],
+#'   the nflseedR original: <https://nflseedr.com>,
+#'   and [cfbfastR](https://cfbfastR.sportsdataverse.org) for real schedules
 #' @export
 cfb_standings <- function(games,
                           teams,
@@ -133,8 +156,12 @@ cfb_standings <- function(games,
 #' and is seeded by its rank order within the field (i.e. it takes the last
 #' seed).
 #'
-#' @return The `standings` input with a `seed` column added (`NA` for teams
-#'   outside the playoff field).
+#' @return The `standings` input (all its columns unchanged; see
+#'   [cfb_standings()] for the column table) with one column added:
+#'
+#' | Column | Type | Description |
+#' |---|---|---|
+#' | `seed` | integer | CFP seed in straight-seeding order; `NA` for teams outside the playoff field. |
 #'
 #' @examples
 #' games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
@@ -145,7 +172,8 @@ cfb_standings <- function(games,
 #' seeded <- cfb_playoff_seeds(standings, rankings = rankings, playoff_seeds = 4)
 #' seeded[!is.na(seeded$seed), c("team", "seed")]
 #'
-#' @seealso [cfb_standings()]
+#' @seealso [cfb_standings()], [cfb_simulations()],
+#'   the nflseedR original: <https://nflseedr.com>
 #' @export
 cfb_playoff_seeds <- function(standings, rankings = NULL, playoff_seeds = 12L) {
   standings <- tibble::as_tibble(standings)
