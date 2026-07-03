@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# cfbseedR <a href='https://cfbseedR.sportsdataverse.org'></a>
+# cfbseedR <a href='https://cfbseedR.sportsdataverse.org'><img src='https://raw.githubusercontent.com/sportsdataverse/cfbseedR/main/man/figures/logo.png' align="right" width="25%" min-width="120px" /></a>
 
 <!-- badges: start -->
 [![Version-Number](https://img.shields.io/github/r-package/v/sportsdataverse/cfbseedR?label=cfbseedR&logo=R&style=for-the-badge)](https://github.com/sportsdataverse/cfbseedR/)

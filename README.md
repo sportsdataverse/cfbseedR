@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# cfbseedR <a href='https://cfbseedR.sportsdataverse.org'></a>
+# cfbseedR <a href='https://cfbseedR.sportsdataverse.org'><img src='https://raw.githubusercontent.com/sportsdataverse/cfbseedR/main/man/figures/logo.png' align="right" width="25%" min-width="120px" /></a>
 
 <!-- badges: start -->
 
