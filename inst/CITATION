@@ -1,0 +1,24 @@
+# DESCRIPTION carries no Date field, so fall back to the build year.
+year <- if (!is.null(meta$Date)) sub("-.*", "", meta$Date) else format(Sys.Date(), "%Y")
+note <- sprintf("R package version %s", meta$Version)
+
+bibentry(
+  bibtype  = "Misc",
+  header   = "To cite the cfbseedR R package in publications, use:",
+  key      = "gilani_cfbseedR",
+  author   = person("Saiem", "Gilani"),
+  title    = "cfbseedR: The SportsDataverse's R Package to Simulate and Evaluate College Football Seasons.",
+  url      = "https://cfbseedR.sportsdataverse.org/",
+  year     = year,
+  note     = note,
+  textVersion = paste0(
+    "Saiem Gilani (", year, "). cfbseedR: The SportsDataverse's R Package ",
+    "to Simulate and Evaluate College Football Seasons. ", note,
+    ". Retrieved from https://cfbseedR.sportsdataverse.org/"
+  ),
+  footer = paste(
+    "cfbseedR adapts the season-simulation methodology of nflseedR by",
+    "Sebastian Carl and Lee Sharpe. If you use that methodology, please",
+    "also cite nflseedR: https://nflseedr.com"
+  )
+)
