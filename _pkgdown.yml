@@ -1,0 +1,149 @@
+url: https://cfbseedR.sportsdataverse.org/
+
+# llms.txt generation needs pandoc >= 3; keep builds reproducible across
+# environments that ship older pandoc.
+llm-docs: false
+
+template:
+  bootstrap: 5
+  light-switch: true
+  bootswatch: cosmo
+  includes:
+    in_header: |
+      <script defer data-domain="cfbseedr.sportsdataverse.org" src="https://plausible.io/js/plausible.js"></script>
+  bslib:
+    primary: "#222222"
+    secondary: "#222222"
+    success: "#2680E4"
+    link-color: "#2680E4"
+    link-hover-color: "#2680E4"
+    nav-link-hover-color: "#2680E4"
+    nav-link-focus-color: "#2680E4"
+    nav-link-dropdown-toggle-hover-color: "#2680E4"
+    navbar-hover-color: "#2680E4"
+    navbar-brand-hover-color: "#2680E4"
+    nav-tabs-link-active-bg: "#2680E4"
+    nav-pills-link-active-color: "#2680E4"
+    btn-link-color: "#2680E4"
+    btn-link-hover-color: "#2680E4"
+    dropdown-link-color: "#2680E4"
+    input-btn-focus-color: "#2680E4"
+    dropdown-dark-link-hover-bg: "#2680E4"
+    border-radius: 0.5rem
+    btn-border-radius: 0.25rem
+  opengraph:
+    twitter:
+      creator: "@saiemgilani"
+      site: "@cfbfastR"
+      card: summary
+
+authors:
+  Saiem Gilani:
+    href: https://x.com/saiemgilani
+  Sebastian Carl:
+    href: https://x.com/mrcaseb
+  Lee Sharpe:
+    href: https://x.com/LeeSharpeNFL
+
+home:
+  title: cfbseedR • Simulate College Football Seasons
+  description: >
+    Functions to efficiently simulate and evaluate college football seasons,
+    including conference standings, championships, and College Football
+    Playoff seeding. Adapted from nflseedR.
+  icon: fa-home
+  href: index.html
+
+navbar:
+  structure:
+    left: [home, reference, articles, news, network, repo]
+    right: [search, twitter, github, lightswitch]
+  components:
+    articles:
+      icon: "fas fa-book-reader"
+      text: " Articles"
+      href: articles/index.html
+    news:
+      icon: "fas fa-newspaper"
+      text: " Changelog"
+      href: news/index.html
+    network:
+      icon: "fas fa-project-diagram"
+      text: " SDV"
+      menu:
+      - text: SportsDataverse
+        href: https://sportsdataverse.org/
+      - text: --------------------------------
+      - text: "R Packages"
+      - text: sportsdataverse-R
+        href: https://r.sportsdataverse.org/
+      - text: cfbfastR
+        href: https://cfbfastR.sportsdataverse.org/
+      - text: cfb4th
+        href: https://cfb4th.sportsdataverse.org/
+      - text: cfbplotR
+        href: https://cfbplotR.sportsdataverse.org/
+      - text: hoopR
+        href: https://hoopR.sportsdataverse.org/
+      - text: wehoop
+        href: https://wehoop.sportsdataverse.org/
+      - text: fastRhockey
+        href: https://fastRhockey.sportsdataverse.org/
+      - text: baseballr
+        href: https://baseballr.sportsdataverse.org/
+      - text: oddsapiR
+        href: https://oddsapiR.sportsdataverse.org/
+      - text: sportyR
+        href: https://sportyR.sportsdataverse.org/
+      - text: softballR
+        href: https://github.com/sportsdataverse/softballR/
+      - text: recruitR
+        href: https://recruitR.sportsdataverse.org/
+      - text: --------------------------------
+      - text: "nflverse"
+      - text: nflseedR (the original)
+        href: https://nflseedr.com/
+      - text: nflfastR
+        href: https://www.nflfastr.com/
+      - text: --------------------------------
+      - text: "Python Packages"
+      - text: sportsdataverse-py
+        href: https://py.sportsdataverse.org/
+      - text: sportypy
+        href: https://sportypy.sportsdataverse.org/
+      - text: --------------------------------
+      - text: "Node.js Packages"
+      - text: sportsdataverse.js
+        href: https://js.sportsdataverse.org/
+    twitter:
+      icon: "fab fa-x-twitter fa-lg"
+      aria-label: X (Twitter)
+      href: https://x.com/saiemgilani
+    github:
+      icon: "fab fa-github fa-lg"
+      aria-label: GitHub
+      href: https://github.com/sportsdataverse/cfbseedR/
+
+reference:
+- title: Standings & seeding
+  desc: Compute standings, conference ranks and champions, and CFP seeds.
+  contents:
+  - cfb_standings
+  - cfb_playoff_seeds
+- title: Season simulation
+  desc: Simulate seasons week by week with a pluggable results generator.
+  contents:
+  - cfb_simulations
+  - cfbseedR_compute_results
+  - simulations_verify_fct
+- title: Data preparation
+  desc: Map real schedules into the engine games schema.
+  contents:
+  - cfb_games_from_schedule
+
+articles:
+- title: Guides
+  navbar: ~
+  contents:
+  - getting-started
+  - articles/simulating-seasons

@@ -12,3 +12,5 @@
 ^\.claude$
 ^data-raw$
 ^vignettes$
+^_pkgdown\.yml$
+^pkgdown$

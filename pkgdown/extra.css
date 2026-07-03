@@ -1,0 +1,213 @@
+@import url("https://cdn.rawgit.com/tonsky/FiraCode/1.205/distr/fira_code.css");
+@import url('https://fonts.googleapis.com/css2?family=Chivo');
+@import url('https://fonts.googleapis.com/css2?family=Lato');
+
+@import url('https://fonts.googleapis.com/css2?family=Fira+Mono');
+@import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap');
+
+/* Theme-aware body text: the shared SDV css hardcoded #0f0f0f, which is
+   invisible on the BS5 dark theme. Light theme keeps the exact same color. */
+:root,
+[data-bs-theme="light"] {
+  --sdv-body-color: #0f0f0f;
+}
+[data-bs-theme="dark"] {
+  --sdv-body-color: #EAEBEC;
+}
+
+body {
+  font-family: "Lato";
+  color: var(--sdv-body-color);
+  font-size: 18px;
+}
+
+h1, h2, .h1, .h2 {
+  font-family: "Chivo";
+  letter-spacing: 1px;
+  line-height: 2.2rem; /* increases, so wrapping headers don't overlap */
+  color: var(--sdv-body-color);
+  font-weight: 500;
+  font-size: 22px;
+}
+
+h3, h4, h5, h6, .h3, .h4 {
+  font-family: "Chivo";
+  letter-spacing: 1px;
+  line-height: 1.8rem; /* increases, so wrapping headers don't overlap */
+  color: var(--sdv-body-color);
+  font-weight: 500;
+  font-size: 18px;
+}
+
+pre, code {
+  font-family: "Fira Mono", Consolas, Inconsolata, monospace;
+}
+.figure {
+   margin-top: 10px;
+   margin-bottom: 10px;
+}
+
+#tocnav ul ul {
+  font-family: "Fira Mono";
+  margin-left: 5px;
+  font-size: 11px;
+  line-height: 1.35rem;
+}
+
+#toc ul.nav li a {
+  font-family: "Fira Mono";
+  margin-left: 5px;
+  font-size: 14px;
+  line-height: 1.65rem;
+}
+#navbar ul ul {
+  font-family: "Fira Mono";
+  letter-spacing: 0.05px;
+  line-height: 1.25rem;
+  color: #fff;
+  font-weight: 400;
+  font-size: 12px;
+}
+.nav li a {
+  font-family: "Fira Mono";
+  letter-spacing: 0.05px;
+  line-height: 1.55rem;
+  color: #fff;
+  font-weight: 400;
+  font-size: 11px;
+}
+.pkgdown {
+  display: none;
+}
+
+@-webkit-keyframes glow {
+  from {
+    text-shadow: 0 0 8px #E7196B, 0 0 10px #FB0466;
+  }
+
+  to {
+    text-shadow: 0 0 10px #E7196B, 0 0 11px #FB0466;
+  }
+}
+
+@keyframes glow {
+    to {
+     text-shadow: 0 0 10px #E7196B, 0 0 11px #FB0466;
+    }
+  }
+
+.dropdown-header {
+  font-family: "Chivo";
+  letter-spacing: 0.1px;
+  line-height: 1.3rem;
+  color: #FDFDFD;
+  font-weight: 700;
+  font-size: 14px;
+  animation: glow 2.5s ease-in-out infinite alternate;
+}
+
+/* bootstrap 5 version changes  */
+
+.pkgdown-footer-right {
+  display: none;
+}
+
+.dropdown-menu {
+  box-shadow: 0 6px 12px rgba(5, 5, 5, 0.18);
+  background-color: #222;
+}
+small.nav-text {
+    --bs-text-opacity: 1;
+    border-color: #ecdddd;
+    display: inline;
+    padding: 0.2em 0.6em 0.3em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    color: #ffffff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25em;
+}
+.dropdown-item {
+    color: #F3F3F3;
+    font-family: "Fira Mono";
+    font-size: small;
+}
+
+.navbar-nav {
+    font-family: "Fira Mono";
+    font-size: small;
+}
+.nav-link:hover, .nav-link:focus {
+    color: #EC261C;
+}
+.navbar-nav .active>.nav-link, .navbar-nav .focus>.nav-link {
+    font-family: "Fira Mono";
+    font-size: small;
+    background: #574646;
+    color: #EC261C;
+}
+.navbar-nav .nav-item>.nav-link:hover {
+    background: rgba(34,26,77,0.1);
+    color: #EC261C;
+}
+.navbar-nav .show>.nav-link, .navbar-nav .nav-link.active, .navbar-nav .nav-link:hover, .navbar-nav .nav-link:focus {
+    font-family: "Fira Mono";
+    font-size: small;
+    color: #EC261C;
+}
+
+.bg-primary .navbar-nav .show>.nav-link, .bg-primary .navbar-nav .nav-link.active, .bg-primary .navbar-nav .nav-link:hover, .bg-primary .navbar-nav .nav-link:focus {
+    font-family: "Fira Mono";
+    font-size: small;
+    color: #EC261C;
+}
+
+.navbar-brand {
+    font-family: "Bungee";
+    font-size: 16px;
+    color: #FDFDFD;
+    animation: glow 3s ease-in-out infinite alternate;
+}
+
+.dropdown-divider {
+    height: 0;
+    margin: 0.5rem 0;
+    overflow: hidden;
+    border-top: 1px solid #ffffff;
+}
+
+input[type="search"] {
+    border-color: #EC261C;
+    background-color: #ffffff;
+    color: #3b3e3f;
+}
+
+[role="button"] {
+    color: #EC261C;
+}
+
+/* Restore the dark navbar (BS5 color-mix had regressed it to light, hiding the
+   white brand). The navbar is #222222 in BOTH color modes, so BS3-era
+   .navbar-dark selectors are unnecessary (and dead in BS5's data-bs-theme
+   markup) - style .navbar directly. */
+.navbar { background-color: #222222 !important; }
+/* Version badge legible on the dark navbar (BS5 .text-muted otherwise wins). */
+small.nav-text.text-muted { color: #EAEBEC !important; }
+
+/* Dark-mode link accent (body text is handled by --sdv-body-color above;
+   light theme, fonts, glow, and navbar are untouched). */
+[data-bs-theme="dark"] :is(#main, aside) a {
+  color: #2680E4;
+}
+
+/* Navbar menu text light gray; hover/active keep the red accent. The navbar
+   is #222222 in both modes, so this works in both. */
+.navbar-nav .nav-link {
+  font-family: "Fira Mono";
+  font-size: small;
+  color: #D3D3D3;
+  padding: 0.5rem 1rem;
+}
