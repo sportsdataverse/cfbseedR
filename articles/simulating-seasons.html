@@ -247,8 +247,7 @@ which is the easiest way to understand (and trust) a rank:</p>
 <span>                           tiebreaker_depth <span class="op">=</span> <span class="st">"POINTS"</span>, verbosity <span class="op">=</span> <span class="st">"MAX"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Initiate standings &amp; tiebreaking data</span></span>
 <span><span class="co">#&gt; Compute conference ranks</span></span>
-<span><span class="co">#&gt; Tie of <span style="color: #0000BB;">"A2"</span>, <span style="color: #0000BB;">"A1"</span>, and <span style="color: #0000BB;">"A3"</span> reduced to <span style="color: #0000BB;">"A1"</span> via point differential.</span></span>
-<span><span class="co">#&gt; Tie of <span style="color: #0000BB;">"A2"</span> and <span style="color: #0000BB;">"A3"</span> reduced to <span style="color: #0000BB;">"A2"</span> via head-to-head.</span></span>
+<span><span class="co">#&gt; Breaking tie of <span style="color: #0000BB;">"A1"</span>, <span style="color: #0000BB;">"A2"</span>, and <span style="color: #0000BB;">"A3"</span> in <span style="color: #0000BB;">"Alpha"</span> (sim 2024).</span></span>
 <span><span class="va">standings</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"team"</span>, <span class="st">"conference"</span>, <span class="st">"conf_pct"</span>, <span class="st">"sov"</span>, <span class="st">"sos"</span>, <span class="st">"conf_rank"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 9 × 6</span></span></span>
 <span><span class="co">#&gt;   team  conference       conf_pct   sov   sos conf_rank</span></span>
@@ -285,6 +284,51 @@ opponents</strong>),</li>
 conference-specific, and a full-schedule SOS would let non-conference
 results leak into conference seeding.</p>
 </div>
+<div class="section level3">
+<h3 id="official-per-conference-tiebreakers">Official per-conference tiebreakers<a class="anchor" aria-label="anchor" href="#official-per-conference-tiebreakers"></a>
+</h3>
+<p>The generic cascade above is the fallback used for conferences
+without a registered procedure. The <strong>SEC, Big Ten, Big 12, ACC,
+and MAC</strong> instead use their <strong>official 2024+ tiebreaker
+procedures</strong> (ported from the same registry as sdv-py’s
+<code>cfb_standings.py</code>, so both engines agree on a shared
+cross-language fixture). These add rungs the generic cascade doesn’t
+have - record vs. common opponents by order of finish, a pooled
+conference opponents’ win percentage, the SEC’s capped relative scoring
+margin (points scored capped at 42 / allowed at 48 per game), the Big
+12’s <code>total_wins</code> with its FCS-or-lower win cap, and an
+external analytics rating - and they always run to completion
+(<code>tiebreaker_depth</code> only gates the generic fallback). Two
+optional inputs feed these rungs when available:
+<code>home_points</code>/<code>away_points</code> on <code>games</code>
+(the SEC cap) and a <code>division</code> column on <code>teams</code>
+(the Big 12 FCS cap);
+<code>tiebreaker_data = list(analytics_ratings = ratings)</code>
+supplies the external rating rung. Any rung whose input is missing is
+skipped, and the skip is recorded in
+<code>attr(standings, "tiebreak_notes")</code>:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sec_teams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  team <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span><span class="op">)</span>, conference <span class="op">=</span> <span class="st">"SEC"</span>, division <span class="op">=</span> <span class="st">"FBS"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">sec_games</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  sim <span class="op">=</span> <span class="fl">2024</span>, week <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, game_type <span class="op">=</span> <span class="st">"REG"</span>,</span>
+<span>  home_team <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span><span class="op">)</span>, away_team <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"B"</span>, <span class="st">"C"</span>, <span class="st">"A"</span><span class="op">)</span>,</span>
+<span>  result <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span>, neutral <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  home_points <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">20</span>, <span class="fl">20</span><span class="op">)</span>, away_points <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">17</span>, <span class="fl">17</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">sec_standings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_standings.html">cfb_standings</a></span><span class="op">(</span><span class="va">sec_games</span>, <span class="va">sec_teams</span>,</span>
+<span>                               tiebreaker_depth <span class="op">=</span> <span class="st">"POINTS"</span>, verbosity <span class="op">=</span> <span class="st">"NONE"</span><span class="op">)</span></span>
+<span><span class="va">sec_standings</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"team"</span>, <span class="st">"conf_rank"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 2</span></span></span>
+<span><span class="co">#&gt;   team  conf_rank</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> A             1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> B             2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> C             3</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">sec_standings</span>, <span class="st">"tiebreak_notes"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; character(0)</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="cfp-12-straight-seeding">CFP-12 straight seeding<a class="anchor" aria-label="anchor" href="#cfp-12-straight-seeding"></a>
@@ -306,7 +350,7 @@ rule).</li>
 guarantee and the straight ordering; champion <code>F1</code> (ranked
 14th) displaces the lowest at-large team but keeps its rank-order
 seed:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">st</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  sim <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  team <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%s1"</span>, <span class="va">LETTERS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">16</span><span class="op">]</span><span class="op">)</span>,</span>
@@ -346,7 +390,7 @@ seed, later rounds neutral-site, no reseeding), and committee
 <h2 id="real-schedules">Real schedules<a class="anchor" aria-label="anchor" href="#real-schedules"></a>
 </h2>
 <p>With cfbfastR installed, a real season plugs straight in:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Not run: requires network access via cfbfastR</span></span>
 <span><span class="va">sched</span> <span class="op">&lt;-</span> <span class="fu">cfbfastR</span><span class="fu">::</span><span class="fu"><a href="https://cfbfastR.sportsdataverse.org/reference/load_cfb_schedules.html" class="external-link">load_cfb_schedules</a></span><span class="op">(</span><span class="fl">2024</span><span class="op">)</span></span>
 <span><span class="va">games_2024</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_games_from_schedule.html">cfb_games_from_schedule</a></span><span class="op">(</span><span class="va">sched</span><span class="op">)</span></span>

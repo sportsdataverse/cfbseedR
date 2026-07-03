@@ -103,6 +103,7 @@ conference record.</p>
 <span>  tiebreaker_depth <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SOS"</span>, <span class="st">"PRE-SOV"</span>, <span class="st">"POINTS"</span>, <span class="st">"RANDOM"</span><span class="op">)</span>,</span>
 <span>  playoff_seeds <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  rankings <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  tiebreaker_data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verbosity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MIN"</span>, <span class="st">"MAX"</span>, <span class="st">"NONE"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -129,13 +130,23 @@ conference record.</p>
 be <code>NA</code> (play or simulate the games first).</p></dd>
 
 
-</dl></dd>
+</dl><p>Optional <code>home_points</code>/<code>away_points</code> columns (per-game scores) feed the
+official SEC <code>capped_scoring_margin</code> tiebreaker rung (see "Official
+per-conference tiebreakers" below); <code><a href="cfb_games_from_schedule.html">cfb_games_from_schedule()</a></code> emits
+both. Absent -&gt; that rung is skipped, not an error.</p></dd>
 
 
 <dt id="arg-teams">teams<a class="anchor" aria-label="anchor" href="#arg-teams"></a></dt>
 <dd><p>A data frame with columns <code>team</code> and <code>conference</code>. Teams with
 conference <code>"FBS Independents"</code> or <code>NA</code> are treated as independents:
-they appear in overall standings but receive no conference rank.</p></dd>
+they appear in overall standings but receive no conference rank. An
+optional <code>division</code> column (e.g. <code>"FBS"</code>/<code>"FCS"</code>) feeds the Big 12
+<code>total_wins</code> FCS cap; absent -&gt; that cap degrades to uncapped win
+totals (noted, see <code>tiebreak_notes</code> below). <code>teams</code> need not list every
+team that appears in <code>games</code> - an unlisted opponent (e.g. an
+FCS-or-lower team) gets no standings row of its own, but its games
+still count toward its opponents' records and toward the Big 12
+<code>total_wins</code> FCS cap (an unknown opponent counts as FCS-or-lower).</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -149,7 +160,9 @@ falling back to a coin flip:</p><ul><li><p><code>"RANDOM"</code>: coin flip imme
 <li><p><code>"PRE-SOV"</code>: head-to-head and common opponents only.</p></li>
 <li><p><code>"SOS"</code>: adds strength of victory, then strength of schedule.</p></li>
 <li><p><code>"POINTS"</code>: adds conference point differential.</p></li>
-</ul></dd>
+</ul><p>This depth ladder gates ONLY the generic fallback cascade used by
+unregistered conferences; the SEC/Big Ten/Big 12/ACC/MAC official
+procedures below always run in full.</p></dd>
 
 
 <dt id="arg-playoff-seeds">playoff_seeds<a class="anchor" aria-label="anchor" href="#arg-playoff-seeds"></a></dt>
@@ -163,9 +176,17 @@ falling back to a coin flip:</p><ul><li><p><code>"RANDOM"</code>: coin flip imme
 <code>playoff_seeds</code> is <code>NULL</code>.</p></dd>
 
 
+<dt id="arg-tiebreaker-data">tiebreaker_data<a class="anchor" aria-label="anchor" href="#arg-tiebreaker-data"></a></dt>
+<dd><p>Optional named list of external inputs for the
+official registry rungs. Currently supported: <code>analytics_ratings</code>, a
+data frame with columns <code>team</code> and <code>rating</code> (feeds the SportSource
+Analytics-style rating rung used by Big Ten/Big 12/ACC/MAC). Missing
+-&gt; that rung is skipped for those conferences (noted).</p></dd>
+
+
 <dt id="arg-verbosity">verbosity<a class="anchor" aria-label="anchor" href="#arg-verbosity"></a></dt>
 <dd><p>One of <code>"MIN"</code> (default), <code>"MAX"</code>, or <code>"NONE"</code>.
-<code>"MAX"</code> logs every tiebreaker step.</p></dd>
+<code>"MAX"</code> logs every tied group as it's broken.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -175,17 +196,52 @@ is named <code>season</code> if the input used <code>season</code>), sorted by s
 conference, conference rank, and team. Note that <code>sov</code> and <code>sos</code> are
 <strong>conference-REG-scoped</strong>: they are computed over regular-season
 conference games only, <code>sov</code> over conference victories and <code>sos</code> over
-conference opponents; independents get <code>0.0</code> for both.</p><table class="table table"><tr><td>Column</td><td>Type</td><td>Description</td></tr><tr><td><code>sim</code> / <code>season</code></td><td>integer</td><td>Season or simulation ID (name follows the input).</td></tr><tr><td><code>team</code></td><td>character</td><td>Team name.</td></tr><tr><td><code>conference</code></td><td>character</td><td>Conference name (<code>"FBS Independents"</code> / <code>NA</code> = independent).</td></tr><tr><td><code>games</code></td><td>integer</td><td>Games played (<code>REG</code> + <code>CONF_CHAMP</code>).</td></tr><tr><td><code>wins</code></td><td>integer</td><td>True win count (ties not counted).</td></tr><tr><td><code>losses</code></td><td>integer</td><td>True loss count.</td></tr><tr><td><code>ties</code></td><td>integer</td><td>Tie count.</td></tr><tr><td><code>win_pct</code></td><td>numeric</td><td>Overall win percentage; a tie counts as half a win.</td></tr><tr><td><code>pd</code></td><td>integer</td><td>Overall point differential.</td></tr><tr><td><code>conf_games</code></td><td>numeric</td><td>Regular-season conference games played (0 for independents).</td></tr><tr><td><code>conf_wins</code></td><td>numeric</td><td>Wins over regular-season conference games.</td></tr><tr><td><code>conf_losses</code></td><td>numeric</td><td>Losses over regular-season conference games.</td></tr><tr><td><code>conf_ties</code></td><td>numeric</td><td>Ties over regular-season conference games.</td></tr><tr><td><code>conf_pct</code></td><td>numeric</td><td>Conference win percentage (<code>CONF_CHAMP</code> games excluded).</td></tr><tr><td><code>conf_pd</code></td><td>numeric</td><td>Point differential over regular-season conference games.</td></tr><tr><td><code>sov</code></td><td>numeric</td><td>Strength of victory, conference-REG-scoped: beaten conference opponents' conference wins divided by their conference games. Independents: <code>0.0</code>.</td></tr><tr><td><code>sos</code></td><td>numeric</td><td>Strength of schedule, conference-REG-scoped: all conference opponents' conference wins divided by their conference games. Independents: <code>0.0</code>.</td></tr><tr><td><code>conf_rank</code></td><td>integer</td><td>Rank within the conference via the tiebreaker cascade (<code>NA</code> for independents).</td></tr><tr><td><code>conf_champ</code></td><td>logical</td><td>Conference champion flag (decided by the <code>CONF_CHAMP</code> game).</td></tr><tr><td><code>seed</code></td><td>integer</td><td>CFP seed, only when <code>playoff_seeds</code> is not <code>NULL</code> (<code>NA</code> outside the field).</td></tr></table></div>
+conference opponents; independents get <code>0.0</code> for both. The result also
+carries a character vector <code>attr(result, "tiebreak_notes")</code> recording
+any registry rungs skipped for lack of their optional input (see
+"Official per-conference tiebreakers" above); empty when nothing was
+skipped.</p><table class="table table"><tr><td>Column</td><td>Type</td><td>Description</td></tr><tr><td><code>sim</code> / <code>season</code></td><td>integer</td><td>Season or simulation ID (name follows the input).</td></tr><tr><td><code>team</code></td><td>character</td><td>Team name.</td></tr><tr><td><code>conference</code></td><td>character</td><td>Conference name (<code>"FBS Independents"</code> / <code>NA</code> = independent).</td></tr><tr><td><code>games</code></td><td>integer</td><td>Games played (<code>REG</code> + <code>CONF_CHAMP</code>).</td></tr><tr><td><code>wins</code></td><td>integer</td><td>True win count (ties not counted).</td></tr><tr><td><code>losses</code></td><td>integer</td><td>True loss count.</td></tr><tr><td><code>ties</code></td><td>integer</td><td>Tie count.</td></tr><tr><td><code>win_pct</code></td><td>numeric</td><td>Overall win percentage; a tie counts as half a win.</td></tr><tr><td><code>pd</code></td><td>integer</td><td>Overall point differential.</td></tr><tr><td><code>conf_games</code></td><td>numeric</td><td>Regular-season conference games played (0 for independents).</td></tr><tr><td><code>conf_wins</code></td><td>numeric</td><td>Wins over regular-season conference games.</td></tr><tr><td><code>conf_losses</code></td><td>numeric</td><td>Losses over regular-season conference games.</td></tr><tr><td><code>conf_ties</code></td><td>numeric</td><td>Ties over regular-season conference games.</td></tr><tr><td><code>conf_pct</code></td><td>numeric</td><td>Conference win percentage (<code>CONF_CHAMP</code> games excluded).</td></tr><tr><td><code>conf_pd</code></td><td>numeric</td><td>Point differential over regular-season conference games.</td></tr><tr><td><code>sov</code></td><td>numeric</td><td>Strength of victory, conference-REG-scoped: beaten conference opponents' conference wins divided by their conference games. Independents: <code>0.0</code>.</td></tr><tr><td><code>sos</code></td><td>numeric</td><td>Strength of schedule, conference-REG-scoped: all conference opponents' conference wins divided by their conference games. Independents: <code>0.0</code>.</td></tr><tr><td><code>conf_rank</code></td><td>integer</td><td>Rank within the conference via the tiebreaker cascade (<code>NA</code> for independents).</td></tr><tr><td><code>conf_champ</code></td><td>logical</td><td>Conference champion flag (decided by the <code>CONF_CHAMP</code> game).</td></tr><tr><td><code>seed</code></td><td>integer</td><td>CFP seed, only when <code>playoff_seeds</code> is not <code>NULL</code> (<code>NA</code> outside the field).</td></tr></table></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The tiebreaker cascade is a documented simplification - real CFB
-tiebreakers are conference-specific. Conference ranks are seeded by
-conference win percentage; ties are broken by head-to-head record among
-the tied teams, record vs. common conference opponents (minimum one),
-conference-scoped strength of victory, conference-scoped strength of
-schedule, conference point differential, and finally a coin flip. All
-cascade quantities are computed over regular-season conference games so
-conference ranks depend only on conference play.</p>
+    <p>Conference ranks are seeded by conference win percentage; ties within a
+tier are broken by a documented cascade. <strong>Registered conferences</strong> (SEC,
+Big Ten, Big 12, ACC, MAC) use their <strong>official 2024+ procedures</strong> (see
+"Official per-conference tiebreakers" below); every other conference uses
+the <strong>generic fallback</strong>: head-to-head record among the tied teams,
+record vs. common conference opponents (minimum one), conference-scoped
+strength of victory, conference-scoped strength of schedule, conference
+point differential, and finally a coin flip, gated by <code>tiebreaker_depth</code>.
+All cascade quantities are computed over regular-season conference games
+so conference ranks depend only on conference play.</p><div class="section">
+<h3 id="official-per-conference-tiebreakers">Official per-conference tiebreakers<a class="anchor" aria-label="anchor" href="#official-per-conference-tiebreakers"></a></h3>
+
+
+<p><code>CONFERENCE_TIEBREAKERS</code> (internal) registers the SEC, Big Ten, Big 12,
+ACC, and MAC 2024+ procedures as rung lists, ported verbatim from sdv-py's
+<code>cfb_standings.py</code> so both engines produce identical output on the shared
+cross-language parity fixture. Rung primitives: <code>h2h</code> (multi-team combined
+head-to-head, applied only when every tied pair played; otherwise only
+"defeated-all" elimination - the symmetric "lost-to-all" elimination is
+intentionally not modeled, a documented simplification, see
+<code>R/tiebreakers.R</code>), <code>record_vs_common</code>, <code>record_vs_common_desc</code> (descend
+the standings from best to worst, comparing a tied GROUP of common
+opponents collectively - the Big 12 rule, adopted for every registry
+descent rung), <code>opp_conf_win_pct</code> (pooled opponents' conference win pct -
+this reuses the existing <code>sos</code> column, which already computes the pooled
+sum-of-wins/sum-of-games formula), <code>capped_scoring_margin</code> (SEC: points
+scored capped at 42 / allowed capped at 48, per game, summed over
+conference games; needs <code>home_points</code>/<code>away_points</code>), <code>total_wins</code> (Big
+12: overall wins with at most one win vs an FCS-or-lower opponent
+counted; needs <code>teams$division</code>), <code>analytics_rating</code> (external, via
+<code>tiebreaker_data$analytics_ratings</code>), and <code>coin_toss</code>. After each team is
+seeded/eliminated the procedure restarts from the first rung with the
+remaining tied set; when a rung's required input is unavailable it is
+skipped deterministically and the skip is recorded once (per conference)
+in <code>attr(result, "tiebreak_notes")</code>. Under registry conferences,
+<code>conf_rank</code> 1-2 are the two teams that reach the conference championship
+game (the cascade only orders them - see the design brief).</p>
+</div>
+
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -214,6 +270,15 @@ and <a href="https://cfbfastR.sportsdataverse.org" class="external-link">cfbfast
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span> B3    Beta                     3 FALSE     </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">8</span> B4    Beta                     4 FALSE     </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">9</span> I1    FBS Independents        <span style="color: #BB0000;">NA</span> FALSE     </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># An official-registry analytics rating input (used by Big Ten/Big</span></span></span>
+<span class="r-in"><span><span class="co"># 12/ACC/MAC when their cascade reaches the `analytics_rating` rung)</span></span></span>
+<span class="r-in"><span><span class="va">ratings</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>team <span class="op">=</span> <span class="va">teams</span><span class="op">$</span><span class="va">team</span>, rating <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">90</span>, <span class="fl">70</span>, length.out <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">teams</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">standings2</span> <span class="op">&lt;-</span> <span class="fu">cfb_standings</span><span class="op">(</span><span class="va">games</span>, <span class="va">teams</span>,</span></span>
+<span class="r-in"><span>                            tiebreaker_data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>analytics_ratings <span class="op">=</span> <span class="va">ratings</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                            verbosity <span class="op">=</span> <span class="st">"NONE"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">standings2</span>, <span class="st">"tiebreak_notes"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

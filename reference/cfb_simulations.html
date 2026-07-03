@@ -121,7 +121,14 @@ computed seeds.</p></dd>
 <dt id="arg-teams">teams<a class="anchor" aria-label="anchor" href="#arg-teams"></a></dt>
 <dd><p>A data frame with columns <code>team</code> and <code>conference</code>. Teams with
 conference <code>"FBS Independents"</code> or <code>NA</code> are treated as independents:
-they appear in overall standings but receive no conference rank.</p></dd>
+they appear in overall standings but receive no conference rank. An
+optional <code>division</code> column (e.g. <code>"FBS"</code>/<code>"FCS"</code>) feeds the Big 12
+<code>total_wins</code> FCS cap; absent -&gt; that cap degrades to uncapped win
+totals (noted, see <code>tiebreak_notes</code> below). <code>teams</code> need not list every
+team that appears in <code>games</code> - an unlisted opponent (e.g. an
+FCS-or-lower team) gets no standings row of its own, but its games
+still count toward its opponents' records and toward the Big 12
+<code>total_wins</code> FCS cap (an unknown opponent counts as FCS-or-lower).</p></dd>
 
 
 <dt id="arg-compute-results">compute_results<a class="anchor" aria-label="anchor" href="#arg-compute-results"></a></dt>
@@ -151,7 +158,9 @@ falling back to a coin flip:</p><ul><li><p><code>"RANDOM"</code>: coin flip imme
 <li><p><code>"PRE-SOV"</code>: head-to-head and common opponents only.</p></li>
 <li><p><code>"SOS"</code>: adds strength of victory, then strength of schedule.</p></li>
 <li><p><code>"POINTS"</code>: adds conference point differential.</p></li>
-</ul></dd>
+</ul><p>This depth ladder gates ONLY the generic fallback cascade used by
+unregistered conferences; the SEC/Big Ten/Big 12/ACC/MAC official
+procedures below always run in full.</p></dd>
 
 
 <dt id="arg-sim-include">sim_include<a class="anchor" aria-label="anchor" href="#arg-sim-include"></a></dt>
