@@ -4,11 +4,11 @@
 \name{cfbseedR-package}
 \alias{cfbseedR}
 \alias{cfbseedR-package}
-\title{cfbseedR: Functions to Efficiently Simulate and Evaluate College Football Seasons}
+\title{cfbseedR: Simulate and Evaluate College Football Seasons}
 \description{
 \if{html}{\figure{logo.svg}{options: style='float: right' alt='logo' width='120'}}
 
-A set of functions to simulate college football seasons and compute standings, conference ranks, conference champions, and College Football Playoff seeds. The package adapts the approach of the 'nflseedR' package by Sebastian Carl and Lee Sharpe (MIT licensed) to college football semantics: conferences instead of divisions, independents, conference championship games, and 12-team playoff straight seeding.
+Simulate college football seasons and compute standings, conference ranks, conference champions, and College Football Playoff (CFP) seeds. Implements the official season-scoped championship-game tiebreaker procedure of each Football Bowl Subdivision (FBS) conference and the CFP's season-keyed automatic-qualifier policies, including the 2026 formats. Seasons are simulated week by week with a pluggable results generator, and external tiebreaker inputs such as committee rankings or analytics composites can be supplied. Adapts the approach of the 'nflseedR' package by Sebastian Carl and Lee Sharpe to college football semantics.
 }
 \seealso{
 Useful links:
@@ -20,11 +20,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Saiem Gilani \email{saiem.gilani@gmail.com} (\href{https://orcid.org/0000-0002-7194-9067}{ORCID})
+\strong{Maintainer}: Saiem Gilani \email{saiem.gilani@gmail.com} (\href{https://orcid.org/0000-0002-7194-9067}{ORCID}) [copyright holder]
 
 Authors:
 \itemize{
-  \item Saiem Gilani \email{saiem.gilani@gmail.com} (\href{https://orcid.org/0000-0002-7194-9067}{ORCID})
+  \item Saiem Gilani \email{saiem.gilani@gmail.com} (\href{https://orcid.org/0000-0002-7194-9067}{ORCID}) [copyright holder]
   \item Sebastian Carl \email{mrcaseb@gmail.com} (Author of nflseedR, from which cfbseedR is adapted)
   \item Lee Sharpe (Author of nflseedR, from which cfbseedR is adapted)
 }

@@ -31,11 +31,16 @@
 #'   `total_wins` FCS cap; absent -> that cap degrades to uncapped win
 #'   totals (noted, see `tiebreak_notes` below). An optional `conf_division`
 #'   column (e.g. `"East"`/`"West"`) turns on division-format ranking for a
-#'   conference (the 2026 Sun Belt): each division is ranked separately and
-#'   the division champions take `conf_rank` 1-2. An optional logical
-#'   `postseason_eligible` column (explicit `FALSE` = ineligible) keeps a
-#'   team out of the championship-game ranks while its games still count in
-#'   every comparison (the ACC policy makes this explicit). `teams` need not
+#'   conference: each division is ranked separately (with that conference's
+#'   registered procedure) and the division champions take `conf_rank` 1-2.
+#'   Supplying divisions for a conference IS the opt-in - correct for the
+#'   2026 Sun Belt and equally for historical divisional seasons of any
+#'   conference. An optional logical `postseason_eligible` column (explicit
+#'   `FALSE` = ineligible) keeps a team out of the championship-game ranks
+#'   while its games still count in every comparison (the ACC policy makes
+#'   this explicit); with fewer than two eligible teams in a conference the
+#'   remaining `conf_rank` 1-2 slots are necessarily filled by ineligible
+#'   teams. `teams` need not
 #'   list every team that appears in `games` - an unlisted opponent (e.g. an
 #'   FCS-or-lower team) gets no standings row of its own, but its games
 #'   still count toward its opponents' records and toward the Big 12
@@ -65,7 +70,9 @@
 #'   composite of the conference's published metrics), and `cfp_rankings`,
 #'   a data frame with columns `team` and `rank` (feeds the
 #'   `cfp_ranked_final_week` clause used by the American, CUSA, and Sun
-#'   Belt). A missing input -> that rung is skipped (noted).
+#'   Belt), and `apr`, a data frame with columns `team` and `apr`
+#'   (multi-year Academic Progress Rate, the CUSA policy's late fallback).
+#'   A missing input -> that rung is skipped (noted).
 #' @param verbosity One of `"MIN"` (default), `"MAX"`, or `"NONE"`.
 #'   `"MAX"` logs every tied group as it's broken.
 #'
@@ -158,6 +165,7 @@
 #' | `seed` | integer | CFP seed, only when `playoff_seeds` is not `NULL` (`NA` outside the field). |
 #'
 #' @examples
+#' \donttest{
 #' games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
 #' teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
 #' standings <- cfb_standings(games, teams, tiebreaker_depth = "POINTS",
@@ -172,6 +180,7 @@
 #'                             verbosity = "NONE")
 #' attr(standings2, "tiebreak_notes")
 #'
+#' }
 #' @seealso [cfb_playoff_seeds()], [cfb_simulations()],
 #'   [cfb_games_from_schedule()],
 #'   the nflseedR original: <https://nflseedr.com>,
@@ -229,7 +238,7 @@ cfb_standings <- function(games,
 
   standings <- standings |>
     dplyr::select(-dplyr::any_of(c(
-      "capped_margin", "capped_wins", "analytics_rating", "cfp_rank", "div_pct"
+      "capped_margin", "capped_wins", "analytics_rating", "cfp_rank", "div_pct", "apr"
     ))) |>
     dplyr::arrange(.data$sim, .data$conference, .data$conf_rank, .data$team)
   if (uses_season) standings <- dplyr::rename(standings, season = "sim")
@@ -283,6 +292,7 @@ cfb_standings <- function(games,
 #' | `seed` | integer | CFP seed in straight-seeding order; `NA` for teams outside the playoff field. |
 #'
 #' @examples
+#' \donttest{
 #' games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
 #' teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
 #' standings <- cfb_standings(games, teams, tiebreaker_depth = "POINTS",
@@ -291,6 +301,7 @@ cfb_standings <- function(games,
 #' seeded <- cfb_playoff_seeds(standings, rankings = rankings, playoff_seeds = 4)
 #' seeded[!is.na(seeded$seed), c("team", "seed")]
 #'
+#' }
 #' @seealso [cfb_standings()], [cfb_simulations()],
 #'   the nflseedR original: <https://nflseedr.com>
 #' @export
@@ -339,10 +350,18 @@ cfb_playoff_seeds <- function(standings, rankings = NULL, playoff_seeds = 12L,
       # 2026 rule: P4 champions regardless of ranking + the highest-ranked
       # Group-of-6 team (champion or not) + Notre Dame if ranked inside
       # the field size.
-      p4 <- c("SEC", "Big Ten", "ACC", "Big 12")
+      p4 <- c(
+        "SEC", "Southeastern Conference",
+        "Big Ten", "Big Ten Conference",
+        "ACC", "Atlantic Coast Conference",
+        "Big 12", "Big 12 Conference"
+      )
       g6 <- c(
-        "American Athletic", "American", "Conference USA", "CUSA",
-        "MAC", "Mid-American", "Mountain West", "Pac-12", "Sun Belt"
+        "American Athletic", "American", "American Athletic Conference",
+        "American Conference", "Conference USA", "CUSA",
+        "MAC", "Mid-American", "Mid-American Conference",
+        "Mountain West", "Mountain West Conference",
+        "Pac-12", "Pac-12 Conference", "Sun Belt", "Sun Belt Conference"
       )
       conf_of <- setNames(st$conference, st$team)
       auto <- teams_ordered[teams_ordered %in% champs & conf_of[teams_ordered] %in% p4]

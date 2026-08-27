@@ -17,7 +17,7 @@ credit them in DESCRIPTION/README/vignettes when touching attribution.
 | Function | Role |
 |---|---|
 | `cfb_standings()` | Standings + conference ranks/champions (+ optional seeds) |
-| `cfb_playoff_seeds()` | CFP 12-team straight seeding (2025 rule) |
+| `cfb_playoff_seeds()` | CFP 12-team straight seeding, season-keyed `autobid` policy (2026 default) |
 | `cfb_simulations()` | Week-loop season simulator, returns `cfbseedR_simulation` list |
 | `cfbseedR_compute_results()` | Default ELO results generator (nflseedR port) |
 | `simulations_verify_fct()` | Contract checker for custom `compute_results` |
@@ -37,9 +37,22 @@ Internal engine helpers live in `R/standings_utils.R` (mirrors nflseedR's
   the overall record and decide `conf_champ`, but do NOT count toward the
   conference record/rank. CONF_CHAMP matchups are simulated as scheduled,
   never re-derived from simulated standings.
-- **Straight seeding (2025):** the 5 highest-ranked conference champions
-  are guaranteed inclusion; seeds are assigned strictly in ranking order —
-  champions are not bumped into the top 4.
+- **Straight seeding + season-keyed auto-bids:** seeds are assigned
+  strictly in ranking order — champions are never bumped into the top 4.
+  `autobid = "2026"` (default): ACC/Big 12/Big Ten/SEC champions in
+  regardless of ranking + the highest-ranked Group-of-6 team (champion not
+  required) + Notre Dame when ranked inside the field. `autobid = "2025"`:
+  the 5 highest-ranked conference champions.
+- **Season-scoped tiebreaker registry:** `CONFERENCE_TIEBREAKERS` entries
+  are lists of dated epochs resolved per season (`season` ids) or to the
+  CURRENT rules (plain `sim` ids). The ACC's 2026 policy (h2h → SportSource
+  SSR → draw, wins-or-losses candidate pool, eligibility filter) applies
+  from 2026. External metrics (composites, CFP ranks, APR) enter only via
+  `tiebreaker_data`; missing inputs skip their rungs with a
+  `tiebreak_notes` entry — never invent a metric.
+- **Division opt-in:** a `conf_division` column on `teams` is the opt-in
+  for division-format ranking (division champs take `conf_rank` 1-2);
+  never gate it to a hardcoded conference list.
 
 ## Cross-validation contract with sdv-py
 

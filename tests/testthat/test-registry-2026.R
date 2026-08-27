@@ -23,6 +23,7 @@ acc_epoch_games <- function(season) {
 }
 
 test_that("ACC registry epochs: 2025 uses the old cascade, 2026 the new one", {
+  testthat::skip_on_cran()
   teams <- data.frame(team = c("A", "B", "C", "D", "E"), conference = "ACC")
   # C is rated too: under the 2026 pool rule C (2 wins, alternate game
   # count) joins the {A, B} tie, and an unrated pool member would knock
@@ -46,6 +47,7 @@ test_that("ACC registry epochs: 2025 uses the old cascade, 2026 the new one", {
 })
 
 test_that("ACC 2026 pool rule admits alternate-game-count teams by wins or losses", {
+  testthat::skip_on_cran()
   teams <- data.frame(
     team = c("L", "X", "Y", "M", "F1", "F2", "F3", "F4"),
     conference = "ACC"
@@ -88,6 +90,7 @@ test_that("ACC 2026 pool rule admits alternate-game-count teams by wins or losse
 })
 
 test_that("Sun Belt divisions send the two division champions to ranks 1-2", {
+  testthat::skip_on_cran()
   teams <- data.frame(
     team = c("E1", "E2", "W1", "W2"),
     conference = "Sun Belt",
@@ -109,6 +112,7 @@ test_that("Sun Belt divisions send the two division champions to ranks 1-2", {
 })
 
 test_that("cfp_ranked_final_week advances a ranked winner and falls through on a loss", {
+  testthat::skip_on_cran()
   teams <- data.frame(team = c("A", "B", "C", "D"), conference = "American Athletic")
   base <- rbind(
     reg_game(2026, 1, "A", "C", 7),

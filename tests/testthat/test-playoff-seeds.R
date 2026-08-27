@@ -11,6 +11,7 @@ synthetic_standings <- function() {
 }
 
 test_that("2025 policy guarantees the 5 best-ranked conference champions", {
+  testthat::skip_on_cran()
   st <- synthetic_standings()
   rankings <- data.frame(team = sprintf("T%02d", 1:16), rank = 1:16)
   seeded <- cfb_playoff_seeds(st, rankings = rankings, playoff_seeds = 12,
@@ -29,6 +30,7 @@ test_that("2025 policy guarantees the 5 best-ranked conference champions", {
 })
 
 test_that("unranked teams sort behind ranked teams", {
+  testthat::skip_on_cran()
   st <- synthetic_standings()
   rankings <- data.frame(team = sprintf("T%02d", 1:10), rank = 1:10) # 11-16 unranked
   seeded <- cfb_playoff_seeds(st, rankings = rankings, playoff_seeds = 12,
@@ -43,6 +45,7 @@ test_that("unranked teams sort behind ranked teams", {
 })
 
 test_that("rankings = NULL falls back to the standings ordering", {
+  testthat::skip_on_cran()
   st <- toy_standings(tiebreaker_depth = "POINTS")
   seeded <- cfb_playoff_seeds(st, rankings = NULL, playoff_seeds = 4)
   seeds <- setNames(seeded$seed, seeded$team)
@@ -56,6 +59,7 @@ test_that("rankings = NULL falls back to the standings ordering", {
 })
 
 test_that("2026 policy: P4 champs regardless of rank, best G6 team, ND clause", {
+  testthat::skip_on_cran()
   # 16 teams: P4 champ ranked dead last still gets in; the best-ranked
   # Group-of-6 TEAM gets in without being champion; Notre Dame gets in
   # when ranked inside the field.
@@ -96,6 +100,7 @@ test_that("2026 policy: P4 champs regardless of rank, best G6 team, ND clause", 
 })
 
 test_that("cfb_playoff_seeds validates its inputs", {
+  testthat::skip_on_cran()
   st <- synthetic_standings()
   expect_error(
     cfb_playoff_seeds(st, playoff_seeds = 20),

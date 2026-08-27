@@ -112,13 +112,16 @@ B12_FCS_CAP <- 1L
 )
 
 # Conference USA (policy revised 2024): head-to-head; CFP-ranked final-week
-# clause; metric composite (Connelly SP+ / SportSource / ESPN SOR / KPI).
-# The official policy's later SportSource+KPI-only composite and APR steps
-# are not modeled (they have never been reached; a draw stands in).
+# clause; metric composite (Connelly SP+ / SportSource / ESPN SOR / KPI);
+# multi-year Academic Progress Rate (via `tiebreaker_data$apr`). The
+# official policy's intermediate SportSource+KPI-only composite is not
+# modeled separately (fold it into the composite you supply); the final
+# fallback is a draw, as published.
 .cusa_official <- list(
   list(kind = "h2h"),
   list(kind = "cfp_ranked_final_week"),
   list(kind = "analytics_rating"),
+  list(kind = "apr"),
   list(kind = "coin_toss")
 )
 
@@ -366,6 +369,17 @@ CONFERENCE_TIEBREAKERS <- list(
       ctx$conf_name
     ))
     return(cands)
+  }
+  if (kind == "apr") {
+    vals <- vapply(cands, function(c) metrics[[c]]$apr, numeric(1))
+    if (anyNA(vals)) {
+      .note_add(notes_env, sprintf(
+        "%s: apr skipped (no tiebreaker_data$apr supplied)",
+        ctx$conf_name
+      ))
+      return(cands)
+    }
+    return(.keep_max(cands, vals))
   }
   if (kind == "div_pct") {
     vals <- vapply(cands, function(c) metrics[[c]]$div_pct, numeric(1))

@@ -1,4 +1,5 @@
 test_that("cfb_games_from_schedule maps the cfbfastR schedule shape", {
+  testthat::skip_on_cran()
   schedule <- data.frame(
     season = 2024,
     week = c(1, 1, 15, 16),
@@ -23,6 +24,7 @@ test_that("cfb_games_from_schedule maps the cfbfastR schedule shape", {
 })
 
 test_that("cfb_games_from_schedule works without optional columns", {
+  testthat::skip_on_cran()
   schedule <- data.frame(
     season = 2024, week = 1, season_type = "regular",
     home_team = "A1", away_team = "A2"
@@ -34,6 +36,7 @@ test_that("cfb_games_from_schedule works without optional columns", {
 })
 
 test_that("cfb_games_from_schedule errors on missing required columns", {
+  testthat::skip_on_cran()
   expect_error(
     cfb_games_from_schedule(data.frame(season = 2024, week = 1)),
     regexp = "missing"
@@ -41,6 +44,7 @@ test_that("cfb_games_from_schedule errors on missing required columns", {
 })
 
 test_that("mapped schedule feeds cfb_standings end to end", {
+  testthat::skip_on_cran()
   schedule <- data.frame(
     season = 2024,
     week = c(1, 2, 3),

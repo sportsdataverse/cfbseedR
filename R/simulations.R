@@ -33,6 +33,9 @@
 #'   [cfb_playoff_seeds()]).
 #' @param autobid CFP automatic-qualifier policy passed to
 #'   [cfb_playoff_seeds()]: `"2026"` (default, current rule) or `"2025"`.
+#' @param tiebreaker_data Optional named list of external tiebreaker inputs
+#'   (`analytics_ratings`, `cfp_rankings`), held static across simulations -
+#'   see [cfb_standings()]. Missing inputs skip their rungs (noted).
 #'
 #' @details
 #' The playoff bracket is a standard single-elimination bracket of size
@@ -80,7 +83,8 @@ cfb_simulations <- function(games,
                             tiebreaker_depth = c("SOS", "PRE-SOV", "POINTS", "RANDOM"),
                             sim_include = c("POST", "REG"),
                             rankings = NULL,
-                            autobid = c("2026", "2025")) {
+                            autobid = c("2026", "2025"),
+                            tiebreaker_data = NULL) {
   tiebreaker_depth <- rlang::arg_match(tiebreaker_depth)
   sim_include <- rlang::arg_match(sim_include)
   autobid <- rlang::arg_match(autobid)
@@ -138,7 +142,7 @@ cfb_simulations <- function(games,
   # STANDINGS, CHAMPIONS, SEEDS ----------------------------------------------
   dg <- standings_double_games(sim_games, teams)
   standings <- standings_init(dg, teams)
-  standings <- standings_add_tiebreak_metrics(standings, dg, teams)
+  standings <- standings_add_tiebreak_metrics(standings, dg, teams, tiebreaker_data)
   division_absent <- !("division" %in% names(teams))
   notes_env <- new.env(parent = emptyenv())
   notes_env$notes <- character(0)
@@ -151,7 +155,7 @@ cfb_simulations <- function(games,
   )
   standings <- standings |>
     dplyr::select(-dplyr::any_of(c(
-      "capped_margin", "capped_wins", "analytics_rating", "cfp_rank", "div_pct"
+      "capped_margin", "capped_wins", "analytics_rating", "cfp_rank", "div_pct", "apr"
     )))
   standings <- standings_add_conf_champ(standings, dg)
   standings <- cfb_playoff_seeds(

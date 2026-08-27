@@ -4,6 +4,7 @@
 # I1 independent).
 
 test_that("toy standings records and ranks are correct at depth POINTS", {
+  testthat::skip_on_cran()
   st <- toy_standings(tiebreaker_depth = "POINTS")
 
   expect_s3_class(st, "tbl_df")
@@ -72,6 +73,7 @@ test_that("toy standings records and ranks are correct at depth POINTS", {
 })
 
 test_that("a conference without a CONF_CHAMP game crowns the conf_rank 1 team", {
+  testthat::skip_on_cran()
   games <- load_toy_games()
   games <- games[games$game_type != "CONF_CHAMP", ]
   st <- cfb_standings(games, load_toy_teams(), tiebreaker_depth = "POINTS",
@@ -84,6 +86,7 @@ test_that("a conference without a CONF_CHAMP game crowns the conf_rank 1 team", 
 })
 
 test_that("season id column is accepted and returned as season", {
+  testthat::skip_on_cran()
   games <- load_toy_games()
   names(games)[names(games) == "sim"] <- "season"
   st <- cfb_standings(games, load_toy_teams(), tiebreaker_depth = "POINTS",
@@ -94,6 +97,7 @@ test_that("season id column is accepted and returned as season", {
 })
 
 test_that("standings input validation errors are informative", {
+  testthat::skip_on_cran()
   games <- load_toy_games()
   teams <- load_toy_teams()
 
@@ -112,6 +116,7 @@ test_that("standings input validation errors are informative", {
 })
 
 test_that("a team missing from `teams` is excluded, not an error", {
+  testthat::skip_on_cran()
   # `teams` need not exhaustively list every team in `games` - an unlisted
   # opponent (e.g. an FCS-or-lower team, or here I1 with I1 removed) simply
   # gets no standings row of its own, while its games still count for its

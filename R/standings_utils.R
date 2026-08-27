@@ -279,6 +279,19 @@ standings_add_tiebreak_metrics <- function(standings, dg, teams, tiebreaker_data
     standings <- dplyr::mutate(standings, cfp_rank = NA_real_)
   }
 
+  # Multi-year Academic Progress Rate for the CUSA `apr` rung. Absent =
+  # NA = the rung is skipped with a note.
+  if (!is.null(tiebreaker_data) && !is.null(tiebreaker_data$apr)) {
+    ap <- tibble::as_tibble(tiebreaker_data$apr) |>
+      dplyr::transmute(
+        team = as.character(.data$team),
+        apr = as.double(.data$apr)
+      )
+    standings <- dplyr::left_join(standings, ap, by = "team")
+  } else {
+    standings <- dplyr::mutate(standings, apr = NA_real_)
+  }
+
   # Divisional win pct (conference REG games vs same-division opponents)
   # for the Sun Belt's `div_pct` rung. Requires a `conf_division` column
   # on `teams`; absent = NA = the rung is skipped with a note.
@@ -356,7 +369,8 @@ standings_add_conf_ranks <- function(standings, dg, depth, verbosity,
             capped_wins = grp$capped_wins[i],
             analytics_rating = grp$analytics_rating[i],
             cfp_rank = grp$cfp_rank[i],
-            div_pct = grp$div_pct[i]
+            div_pct = grp$div_pct[i],
+            apr = grp$apr[i]
           )
         }),
         grp$team

@@ -24,7 +24,9 @@ prefix; the two helpers mirror their nflseedR namesakes.
 - `CONF_CHAMP` games count toward the overall record and decide
   `conf_champ`, but NOT toward the conference record/rank; matchups are
   simulated as scheduled.
-- CFP straight seeding (2025): 5 highest-ranked conference champions
+- CFP straight seeding with season-keyed `autobid`: `"2026"` (default) =
+  P4 champions regardless of ranking + best Group-of-6 team + Notre Dame
+  top-12 clause; `"2025"` = 5 highest-ranked conference champions
   guaranteed; seeds strictly in ranking order (no champion bump).
 - These rulings are cross-validated against sportsdataverse-py's CFB
   standings implementation — keep the two reconcilable.

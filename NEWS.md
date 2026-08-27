@@ -26,6 +26,15 @@ sources, 2026-08-26).
   `tiebreaker_data$cfp_rankings`; the best-ranked tied team advances only
   if it won its final conference game) and `div_pct` (win pct vs
   same-division opponents).
+* `cfb_simulations()` gains `tiebreaker_data` (external tiebreaker
+  inputs, held static across simulations) so simulated standings use the
+  same official rungs as `cfb_standings()`.
+* The CUSA registry gains the policy's late `apr` rung (fed by
+  `tiebreaker_data$apr`); the CFP auto-bid policy matches both short and
+  full conference spellings (e.g. `"Southeastern Conference"`).
+* CRAN preparation: every test skips on CRAN, every example is wrapped in
+  `\donttest{}`, and the packaging metadata (LICENSE, cph, CITATION,
+  `.Rbuildignore`, `.gitattributes`) was reviewed.
 * `teams` gains two optional columns: `conf_division` (division-format
   ranking - the two division champions take `conf_rank` 1-2, as in the
   2026 Sun Belt) and `postseason_eligible` (an ineligible team cannot

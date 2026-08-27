@@ -39,6 +39,7 @@ CFBD marks conference championship games as regular-season games with a
 championship note.
 }
 \examples{
+\donttest{
 schedule <- data.frame(
   season = 2024, week = c(1, 1, 15, 16),
   season_type = c("regular", "regular", "regular", "postseason"),
@@ -50,6 +51,7 @@ schedule <- data.frame(
 )
 cfb_games_from_schedule(schedule)
 
+}
 }
 \seealso{
 \code{\link[=cfb_standings]{cfb_standings()}}, \code{\link[=cfb_simulations]{cfb_simulations()}},

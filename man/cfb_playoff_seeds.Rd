@@ -60,6 +60,7 @@ order within the field. Conference names are matched against both cfbd
 and short spellings (e.g. \code{"American Athletic"} / \code{"American"}).
 }
 \examples{
+\donttest{
 games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
 teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
 standings <- cfb_standings(games, teams, tiebreaker_depth = "POINTS",
@@ -68,6 +69,7 @@ rankings <- data.frame(team = c("B1", "I1", "A1", "A3"), rank = 1:4)
 seeded <- cfb_playoff_seeds(standings, rankings = rankings, playoff_seeds = 4)
 seeded[!is.na(seeded$seed), c("team", "seed")]
 
+}
 }
 \seealso{
 \code{\link[=cfb_standings]{cfb_standings()}}, \code{\link[=cfb_simulations]{cfb_simulations()}},

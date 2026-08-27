@@ -37,11 +37,16 @@ optional \code{division} column (e.g. \code{"FBS"}/\code{"FCS"}) feeds the Big 1
 \code{total_wins} FCS cap; absent -> that cap degrades to uncapped win
 totals (noted, see \code{tiebreak_notes} below). An optional \code{conf_division}
 column (e.g. \code{"East"}/\code{"West"}) turns on division-format ranking for a
-conference (the 2026 Sun Belt): each division is ranked separately and
-the division champions take \code{conf_rank} 1-2. An optional logical
-\code{postseason_eligible} column (explicit \code{FALSE} = ineligible) keeps a
-team out of the championship-game ranks while its games still count in
-every comparison (the ACC policy makes this explicit). \code{teams} need not
+conference: each division is ranked separately (with that conference's
+registered procedure) and the division champions take \code{conf_rank} 1-2.
+Supplying divisions for a conference IS the opt-in - correct for the
+2026 Sun Belt and equally for historical divisional seasons of any
+conference. An optional logical \code{postseason_eligible} column (explicit
+\code{FALSE} = ineligible) keeps a team out of the championship-game ranks
+while its games still count in every comparison (the ACC policy makes
+this explicit); with fewer than two eligible teams in a conference the
+remaining \code{conf_rank} 1-2 slots are necessarily filled by ineligible
+teams. \code{teams} need not
 list every team that appears in \code{games} - an unlisted opponent (e.g. an
 FCS-or-lower team) gets no standings row of its own, but its games
 still count toward its opponents' records and toward the Big 12
@@ -78,7 +83,9 @@ American, CUSA, Mountain West, and Sun Belt - supply your own
 composite of the conference's published metrics), and \code{cfp_rankings},
 a data frame with columns \code{team} and \code{rank} (feeds the
 \code{cfp_ranked_final_week} clause used by the American, CUSA, and Sun
-Belt). A missing input -> that rung is skipped (noted).}
+Belt), and \code{apr}, a data frame with columns \code{team} and \code{apr}
+(multi-year Academic Progress Rate, the CUSA policy's late fallback).
+A missing input -> that rung is skipped (noted).}
 
 \item{verbosity}{One of \code{"MIN"} (default), \code{"MAX"}, or \code{"NONE"}.
 \code{"MAX"} logs every tied group as it's broken.}
@@ -183,6 +190,7 @@ game (the cascade only orders them - see the design brief).
 }
 }
 \examples{
+\donttest{
 games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
 teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
 standings <- cfb_standings(games, teams, tiebreaker_depth = "POINTS",
@@ -197,6 +205,7 @@ standings2 <- cfb_standings(games, teams,
                             verbosity = "NONE")
 attr(standings2, "tiebreak_notes")
 
+}
 }
 \seealso{
 \code{\link[=cfb_playoff_seeds]{cfb_playoff_seeds()}}, \code{\link[=cfb_simulations]{cfb_simulations()}},
