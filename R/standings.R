@@ -46,6 +46,10 @@
 #'   still count toward its opponents' records and toward the Big 12
 #'   `total_wins` FCS cap (an unknown opponent counts as FCS-or-lower).
 #' @param ... Currently unused.
+#' @param ranks One of `"CONF"` (default) or `"NONE"`. `"NONE"` returns the
+#'   raw standings and skips the conference-rank tiebreaker walk entirely -
+#'   and therefore also `conf_champ` and `seed`, which are derived from it.
+#'   Useful when you only need records and the cascade would be wasted work.
 #' @param tiebreaker_depth One of `"SOS"` (default), `"PRE-SOV"`, `"POINTS"`,
 #'   or `"RANDOM"`. Controls how deep the tiebreaker cascade goes before
 #'   falling back to a coin flip:
@@ -189,11 +193,13 @@
 cfb_standings <- function(games,
                           teams,
                           ...,
+                          ranks = c("CONF", "NONE"),
                           tiebreaker_depth = c("SOS", "PRE-SOV", "POINTS", "RANDOM"),
                           playoff_seeds = NULL,
                           rankings = NULL,
                           tiebreaker_data = NULL,
                           verbosity = c("MIN", "MAX", "NONE")) {
+  ranks <- rlang::arg_match(ranks)
   tiebreaker_depth <- rlang::arg_match(tiebreaker_depth)
   depth <- switch(tiebreaker_depth,
     "RANDOM" = 0L, "PRE-SOV" = 1L, "SOS" = 2L, "POINTS" = 3L
@@ -212,6 +218,20 @@ cfb_standings <- function(games,
   division_absent <- !("division" %in% names(teams))
   notes_env <- new.env(parent = emptyenv())
   notes_env$notes <- character(0)
+
+  if (ranks == "NONE") {
+    # Skip the whole tiebreaker walk: no conf_rank, and therefore no
+    # rank-derived champion or seed either.
+    standings <- standings |>
+      dplyr::select(-dplyr::any_of(c(
+        "capped_margin", "capped_wins", "analytics_rating", "cfp_rank",
+        "div_pct", "apr"
+      ))) |>
+      dplyr::arrange(.data$sim, .data$conference, .data$team)
+    if (uses_season) standings <- dplyr::rename(standings, season = "sim")
+    attr(standings, "tiebreak_notes") <- notes_env$notes
+    return(standings)
+  }
 
   if (verbosity > 0L) cli::cli_inform("Compute conference ranks")
   # When the input identified rows by `season`, the sim ids ARE seasons -

@@ -166,6 +166,16 @@ reference:
   desc: Map real schedules into the engine games schema.
   contents:
   - cfb_games_from_schedule
+- title: Presentation
+  desc: Summarise and format simulation output.
+  contents:
+  - summary.cfbseedR_simulation
+  - fmt_pct_special
+- title: Example data
+  desc: A bundled toy season used throughout the examples.
+  contents:
+  - cfb_games_example
+  - cfb_teams_example
 
 articles:
 - title: Guides

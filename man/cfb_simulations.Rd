@@ -15,7 +15,9 @@ cfb_simulations(
   sim_include = c("POST", "REG"),
   rankings = NULL,
   autobid = c("2026", "2025"),
-  tiebreaker_data = NULL
+  tiebreaker_data = NULL,
+  chunks = 8L,
+  verbosity = c("MIN", "MAX", "NONE")
 )
 }
 \arguments{
@@ -89,8 +91,19 @@ back to the per-simulation standings ordering (see
 \code{\link[=cfb_playoff_seeds]{cfb_playoff_seeds()}}: \code{"2026"} (default, current rule) or \code{"2025"}.}
 
 \item{tiebreaker_data}{Optional named list of external tiebreaker inputs
-(\code{analytics_ratings}, \code{cfp_rankings}), held static across simulations -
-see \code{\link[=cfb_standings]{cfb_standings()}}. Missing inputs skip their rungs (noted).}
+(\code{analytics_ratings}, \code{cfp_rankings}, \code{apr}), held static across
+simulations - see \code{\link[=cfb_standings]{cfb_standings()}}. Missing inputs skip their rungs
+(noted).}
+
+\item{chunks}{The number of chunks the simulations are split into
+(default 8, capped at \code{simulations}). Chunks are dispatched with
+\code{\link[furrr:future_map]{furrr::future_map()}}, so they run in parallel as soon as you set a
+parallel plan, e.g. \code{future::plan("multisession")}; with the default
+sequential plan they simply run one after another. There is no
+universally best number - too many chunks can be as slow as too few.}
+
+\item{verbosity}{One of \code{"MIN"} (default), \code{"MAX"}, or \code{"NONE"}, as in
+\code{\link[=cfb_standings]{cfb_standings()}}. \code{"NONE"} silences the progress messages entirely.}
 }
 \value{
 A list of class \code{cfbseedR_simulation} with these elements:\tabular{lll}{
@@ -121,8 +134,15 @@ higher seed; later rounds are neutral-site. There is no reseeding
 (fixed bracket, per the CFP format). Conference championship matchups
 are simulated as scheduled, not re-derived from simulated standings.
 
-Simulations run sequentially (no chunk/parallel support). Set a seed
-with \code{set.seed()} for reproducibility.
+Simulations are split into \code{chunks} and dispatched with furrr, so a
+parallel \code{\link[future:plan]{future::plan()}} spreads them across cores. Progress can be
+reported by turning on \code{\link[progressr:handlers]{progressr::handlers()}} before the call, or by
+piping the call into \code{\link[progressr:with_progress]{progressr::with_progress()}}.
+
+Set a seed with \code{set.seed()} for reproducibility: furrr generates
+parallel-safe RNG streams per chunk, so a given seed reproduces exactly -
+but the stream differs from a single sequential pass, so results for the
+same seed change if you change \code{chunks}.
 }
 \examples{
 \donttest{

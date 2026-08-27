@@ -8,6 +8,7 @@ cfb_standings(
   games,
   teams,
   ...,
+  ranks = c("CONF", "NONE"),
   tiebreaker_depth = c("SOS", "PRE-SOV", "POINTS", "RANDOM"),
   playoff_seeds = NULL,
   rankings = NULL,
@@ -53,6 +54,11 @@ still count toward its opponents' records and toward the Big 12
 \code{total_wins} FCS cap (an unknown opponent counts as FCS-or-lower).}
 
 \item{...}{Currently unused.}
+
+\item{ranks}{One of \code{"CONF"} (default) or \code{"NONE"}. \code{"NONE"} returns the
+raw standings and skips the conference-rank tiebreaker walk entirely -
+and therefore also \code{conf_champ} and \code{seed}, which are derived from it.
+Useful when you only need records and the cascade would be wasted work.}
 
 \item{tiebreaker_depth}{One of \code{"SOS"} (default), \code{"PRE-SOV"}, \code{"POINTS"},
 or \code{"RANDOM"}. Controls how deep the tiebreaker cascade goes before
