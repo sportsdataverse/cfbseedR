@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">cfbseedR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -21,6 +21,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown--sdv" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true"><span class="fa fas fa-project-diagram"></span>  SDV</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown--sdv"><li><a class="external-link dropdown-item" href="https://sportsdataverse.org/">SportsDataverse</a></li>
+    <li><a class="external-link dropdown-item" href="https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf">Cheat Sheet (PDF)</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>R Packages</h6></li>
     <li><a class="external-link dropdown-item" href="https://r.sportsdataverse.org/">sportsdataverse-R</a></li>
@@ -69,6 +70,21 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.0" id="cfbseedr-020">cfbseedR 0.2.0<a class="anchor" aria-label="anchor" href="#cfbseedr-020"></a></h2>
+<p>2026-season rules refresh (researched against official conference and CFP sources, 2026-08-26).</p>
+<ul><li>
+<code><a href="../reference/cfb_playoff_seeds.html">cfb_playoff_seeds()</a></code> gains a season-keyed <code>autobid</code> policy. The new default <code>"2026"</code> implements the current CFP automatic-qualifier rule: the ACC / Big 12 / Big Ten / SEC champions are in regardless of ranking, the highest-ranked Group-of-6 team is in whether or not it won its conference, and Notre Dame is in when ranked inside the field. <code>autobid = "2025"</code> keeps the 2024-2025 rule (5 highest-ranked champions). <code><a href="../reference/cfb_simulations.html">cfb_simulations()</a></code> passes the policy through.</li>
+<li>The conference tiebreaker registry is now <strong>season-scoped</strong>: each conference registers dated epochs, resolved per season (current rules for plain <code>sim</code> ids). The ACC’s all-new 2026 policy (head-to-head, then SportSource Team Success Ranking, then a draw, with the alternate-game-count candidate-pool rule and the postseason-eligibility filter) applies from 2026; earlier ACC seasons keep the 2024 cascade.</li>
+<li>New official registry entries: <strong>American</strong>, <strong>Conference USA</strong>, and <strong>Mountain West</strong> (head-to-head / CFP-ranked-final-week clause / metric-composite procedures), and the <strong>Sun Belt</strong> (division format). The MAC entry now matches its published three-step procedure. The re-formed Pac-12 has not published a procedure and stays on the generic fallback.</li>
+<li>New rung primitives: <code>cfp_ranked_final_week</code> (fed by <code>tiebreaker_data$cfp_rankings</code>; the best-ranked tied team advances only if it won its final conference game) and <code>div_pct</code> (win pct vs same-division opponents).</li>
+<li>
+<code><a href="../reference/cfb_simulations.html">cfb_simulations()</a></code> gains <code>tiebreaker_data</code> (external tiebreaker inputs, held static across simulations) so simulated standings use the same official rungs as <code><a href="../reference/cfb_standings.html">cfb_standings()</a></code>.</li>
+<li>The CUSA registry gains the policy’s late <code>apr</code> rung (fed by <code>tiebreaker_data$apr</code>); the CFP auto-bid policy matches both short and full conference spellings (e.g. <code>"Southeastern Conference"</code>).</li>
+<li>CRAN preparation: every test skips on CRAN, every example is wrapped in <code>\donttest{}</code>, and the packaging metadata (LICENSE, cph, CITATION, <code>.Rbuildignore</code>, <code>.gitattributes</code>) was reviewed.</li>
+<li>
+<code>teams</code> gains two optional columns: <code>conf_division</code> (division-format ranking - the two division champions take <code>conf_rank</code> 1-2, as in the 2026 Sun Belt) and <code>postseason_eligible</code> (an ineligible team cannot occupy a championship-game berth while its games still count).</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="cfbseedr-010">cfbseedR 0.1.0<a class="anchor" aria-label="anchor" href="#cfbseedr-010"></a></h2>
 <p>Initial release.</p>
 <ul><li>
@@ -85,7 +101,8 @@
 <code><a href="../reference/simulations_verify_fct.html">simulations_verify_fct()</a></code> verifies custom <code>compute_results</code> functions.</li>
 </ul><p>Adapted from <a href="https://nflseedr.com" class="external-link">nflseedR</a> (MIT) by Sebastian Carl and Lee Sharpe.</p>
 </div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
@@ -93,7 +110,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

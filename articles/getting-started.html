@@ -34,7 +34,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">cfbseedR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,6 +50,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown--sdv" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true"><span class="fa fas fa-project-diagram"></span>  SDV</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown--sdv">
 <li><a class="external-link dropdown-item" href="https://sportsdataverse.org/">SportsDataverse</a></li>
+    <li><a class="external-link dropdown-item" href="https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf">Cheat Sheet (PDF)</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>R Packages</h6></li>
     <li><a class="external-link dropdown-item" href="https://r.sportsdataverse.org/">sportsdataverse-R</a></li>
@@ -231,15 +232,15 @@ adapted from nflseedR - then computes standings, champions, seeds, and
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 9 × 7</span></span></span>
 <span><span class="co">#&gt;   conference       team   wins conf_champ playoff seed1 won_natty</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Alpha            A1     3.26       0.88    0.9   0.02      0.34</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Alpha            A2     1.4        0.12    0.12  0.02      0.02</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Alpha            A3     2.72       0       0.88  0.7       0.06</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Alpha            A1     3.26       0.88    0.76  0.02      0.32</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Alpha            A2     1.4        0.12    0.08  0.02      0.02</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Alpha            A3     2.72       0       1     0.7       0.06</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Alpha            A4     0.6        0       0     0         0   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Beta             B1     3.24       0.68    0.7   0.06      0.14</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Beta             B2     1.8        0.32    0.34  0         0.04</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> Beta             B3     1.66       0       0.34  0         0.06</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Beta             B1     3.24       0.68    0.56  0.06      0.12</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Beta             B2     1.8        0.32    0.24  0         0.02</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> Beta             B3     1.66       0       0.64  0         0.14</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> Beta             B4     0.68       0       0.04  0         0   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">9</span> FBS Independents I1     1.64       0       0.68  0.2       0.34</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">9</span> FBS Independents I1     1.64       0       0.68  0.2       0.32</span></span></code></pre></div>
 <p>The returned <code>cfbseedR_simulation</code> list also carries
 per-simulation <code>standings</code>, all simulated <code>games</code>,
 <code>team_wins</code> win-total probabilities, per-matchup
@@ -272,7 +273,7 @@ work this package builds on.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

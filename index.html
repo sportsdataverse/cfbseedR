@@ -36,7 +36,7 @@
 
     <a class="navbar-brand me-2" href="index.html">cfbseedR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,6 +52,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown--sdv" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true"><span class="fa fas fa-project-diagram"></span>  SDV</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown--sdv">
 <li><a class="external-link dropdown-item" href="https://sportsdataverse.org/">SportsDataverse</a></li>
+    <li><a class="external-link dropdown-item" href="https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf">Cheat Sheet (PDF)</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>R Packages</h6></li>
     <li><a class="external-link dropdown-item" href="https://r.sportsdataverse.org/">sportsdataverse-R</a></li>
@@ -115,8 +116,11 @@
 <h2 id="installation">
 <strong>Installation</strong><a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of cfbseedR from <a href="https://github.com/sportsdataverse/cfbseedR" class="external-link">GitHub</a> with:</p>
+<p>Install the released version of cfbseedR from CRAN with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"cfbseedR"</span><span class="op">)</span></span></code></pre></div>
+<p>Or install the development version from <a href="https://github.com/sportsdataverse/cfbseedR" class="external-link">GitHub</a> with:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"sportsdataverse/cfbseedR"</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -124,7 +128,7 @@
 <h2 id="quickstart">
 <strong>Quickstart</strong><a class="anchor" aria-label="anchor" href="#quickstart"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://cfbseedR.sportsdataverse.org">cfbseedR</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Bundled toy season (9 teams, 2 conferences + 1 independent)</span></span>
@@ -157,11 +161,13 @@
 </h2>
 <ul>
 <li>
-<strong>Conferences, not divisions.</strong> Standings group by conference; independents (<code>"FBS Independents"</code> or <code>NA</code> conference) appear in overall standings but get no conference rank.</li>
+<strong>Conferences first, divisions on demand.</strong> Standings group by conference; independents (<code>"FBS Independents"</code> or <code>NA</code> conference) appear in overall standings but get no conference rank. Supplying a <code>conf_division</code> column on <code>teams</code> opts a conference into division-format ranking (division champions take <code>conf_rank</code> 1-2 — the 2026 Sun Belt, or any historical divisional season).</li>
 <li>
 <strong>Conference championship games</strong> (<code>game_type == "CONF_CHAMP"</code>) count toward the overall record and decide the conference champion, but do <strong>not</strong> count toward the conference record/rank.</li>
 <li>
-<strong>CFP 12-team straight seeding</strong> (2025 rule) via <code><a href="reference/cfb_playoff_seeds.html">cfb_playoff_seeds()</a></code>: the 5 highest-ranked conference champions are guaranteed inclusion; the field is seeded strictly by committee rank (<code>rankings</code>).</li>
+<strong>Official per-conference tiebreakers, season-scoped.</strong> The SEC, Big Ten, Big 12, ACC (including its all-new 2026 policy with the alternate-game-count candidate-pool rule), MAC, American, Conference USA, Mountain West, and Sun Belt procedures are registered as dated epochs; unregistered conferences (e.g. the re-formed Pac-12, which has not published a procedure) use a documented generic cascade.</li>
+<li>
+<strong>CFP 12-team straight seeding</strong> via <code><a href="reference/cfb_playoff_seeds.html">cfb_playoff_seeds()</a></code>, with a season-keyed <code>autobid</code> policy: <code>"2026"</code> (default) puts the ACC / Big 12 / Big Ten / SEC champions in regardless of ranking, plus the highest-ranked Group-of-6 team (champion or not) and Notre Dame when ranked inside the field; <code>"2025"</code> keeps the five-best-champions rule. The field is seeded strictly by committee rank (<code>rankings</code>).</li>
 </ul>
 </div>
 <div class="section level2">
@@ -169,7 +175,7 @@
 <strong>Documented simplifications vs. real CFB / nflseedR</strong><a class="anchor" aria-label="anchor" href="#documented-simplifications-vs-real-cfb--nflseedr"></a>
 </h2>
 <ul>
-<li>The tiebreaker cascade is <strong>generic</strong> (win pct → head-to-head → common opponents → SOV → SOS → point differential → coin flip), not the per-conference official tiebreak rules. All cascade quantities are computed over regular-season conference games so conference ranks depend only on conference play.</li>
+<li>External metric composites (SportSource, Connelly SP+, ESPN SOR, KPI, APR, CFP rankings) enter the official tiebreakers only through <code>tiebreaker_data</code> — the package computes none of them; absent inputs skip their rungs deterministically and are recorded in <code>tiebreak_notes</code>. All cascade quantities the package does compute are regular-season-conference-scoped, so conference ranks depend only on conference play.</li>
 <li>
 <code>sov</code>/<code>sos</code> in the standings output are <strong>conference-scoped</strong> (opponents’ conference records over regular-season conference games; <code>sov</code> over conference victories, <code>sos</code> over conference opponents); independents get 0.</li>
 <li>When <code>rankings = NULL</code>, <code><a href="reference/cfb_playoff_seeds.html">cfb_playoff_seeds()</a></code> falls back to ordering teams by win pct, SOV, SOS, and point differential instead of a committee ranking.</li>
@@ -202,19 +208,20 @@
 </h2>
 <p>To cite the <a href="https://cfbseedR.sportsdataverse.org/"><strong><code>cfbseedR</code></strong></a> R package in publications, use:</p>
 <p>BibTex Citation</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="va">@misc</span>{<span class="ot">gilani_cfbseedR</span>,</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  <span class="dt">author</span> = {Saiem Gilani},</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="dt">title</span> = {cfbseedR: The SportsDataverse's R Package to Simulate and Evaluate College Football Seasons.},</span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="dt">url</span> = {https://cfbseedR.sportsdataverse.org/},</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  <span class="dt">year</span> = {2026}</span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="va">@misc</span>{<span class="ot">gilani_cfbseedR</span>,</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="dt">author</span> = {Saiem Gilani},</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="dt">title</span> = {cfbseedR: The SportsDataverse's R Package to Simulate and Evaluate College Football Seasons.},</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="dt">url</span> = {https://cfbseedR.sportsdataverse.org/},</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="dt">year</span> = {2026}</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>}</span></code></pre></div>
 <p>If you use the season-simulation methodology, please also cite <a href="https://nflseedr.com" class="external-link">nflseedR</a> by Sebastian Carl and Lee Sharpe.</p>
 </div>
 <div class="section level2">
 <h2 id="follow-the-sportsdataverse">
 <strong>Follow the SportsDataverse</strong><a class="anchor" aria-label="anchor" href="#follow-the-sportsdataverse"></a>
 </h2>
-<p>cfbseedR is part of the <a href="https://sportsdataverse.org" class="external-link">SportsDataverse</a>. Related packages:</p>
+<p>cfbseedR is part of the <a href="https://sportsdataverse.org" class="external-link">SportsDataverse</a>. A printable cheat sheet covering cfbplotR, cfb4th, and cfbseedR is available: <a href="https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf" class="external-link">cheat sheet (PDF)</a>.</p>
+<p>Related packages:</p>
 <ul>
 <li>
 <a href="https://cfbfastR.sportsdataverse.org/" class="external-link">cfbfastR</a> — College football play-by-play, schedules, rosters (feeds <code><a href="reference/cfb_games_from_schedule.html">cfb_games_from_schedule()</a></code>)</li>
@@ -222,6 +229,8 @@
 <a href="https://cfb4th.sportsdataverse.org/" class="external-link">cfb4th</a> — College football 4th down decision modeling</li>
 <li>
 <a href="https://cfbplotR.sportsdataverse.org/" class="external-link">cfbplotR</a> — College football plotting helpers</li>
+<li>
+<a href="https://recruitr.sportsdataverse.org/" class="external-link">recruitR</a> — College football recruiting data</li>
 <li>
 <a href="https://nflseedr.com" class="external-link">nflseedR</a> — The NFL original this package adapts</li>
 <li>
@@ -257,7 +266,7 @@
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
 <li>
-<a href="https://x.com/saiemgilani" class="external-link">Saiem Gilani</a> <br><small class="roles"> Maintainer, author </small> <a href="https://orcid.org/0000-0002-7194-9067" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
+<a href="https://x.com/saiemgilani" class="external-link">Saiem Gilani</a> <br><small class="roles"> Maintainer, author, copyright holder </small> <a href="https://orcid.org/0000-0002-7194-9067" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 <li>
 <a href="https://x.com/mrcaseb" class="external-link">Sebastian Carl</a> <br><small class="roles"> Author </small>   </li>
 <li>
@@ -286,7 +295,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

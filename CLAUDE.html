@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">cfbseedR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -21,6 +21,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown--sdv" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true"><span class="fa fas fa-project-diagram"></span>  SDV</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown--sdv"><li><a class="external-link dropdown-item" href="https://sportsdataverse.org/">SportsDataverse</a></li>
+    <li><a class="external-link dropdown-item" href="https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf">Cheat Sheet (PDF)</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>R Packages</h6></li>
     <li><a class="external-link dropdown-item" href="https://r.sportsdataverse.org/">sportsdataverse-R</a></li>
@@ -86,7 +87,7 @@
 </tr></thead><tbody><tr><td><code><a href="reference/cfb_standings.html">cfb_standings()</a></code></td>
 <td>Standings + conference ranks/champions (+ optional seeds)</td>
 </tr><tr><td><code><a href="reference/cfb_playoff_seeds.html">cfb_playoff_seeds()</a></code></td>
-<td>CFP 12-team straight seeding (2025 rule)</td>
+<td>CFP 12-team straight seeding, season-keyed <code>autobid</code> policy (2026 default)</td>
 </tr><tr><td><code><a href="reference/cfb_simulations.html">cfb_simulations()</a></code></td>
 <td>Week-loop season simulator, returns <code>cfbseedR_simulation</code> list</td>
 </tr><tr><td><code><a href="reference/cfbseedR_compute_results.html">cfbseedR_compute_results()</a></code></td>
@@ -106,7 +107,11 @@
 <li>
 <strong><code>CONF_CHAMP</code> semantics:</strong> conference championship games count toward the overall record and decide <code>conf_champ</code>, but do NOT count toward the conference record/rank. CONF_CHAMP matchups are simulated as scheduled, never re-derived from simulated standings.</li>
 <li>
-<strong>Straight seeding (2025):</strong> the 5 highest-ranked conference champions are guaranteed inclusion; seeds are assigned strictly in ranking order — champions are not bumped into the top 4.</li>
+<strong>Straight seeding + season-keyed auto-bids:</strong> seeds are assigned strictly in ranking order — champions are never bumped into the top 4. <code>autobid = "2026"</code> (default): ACC/Big 12/Big Ten/SEC champions in regardless of ranking + the highest-ranked Group-of-6 team (champion not required) + Notre Dame when ranked inside the field. <code>autobid = "2025"</code>: the 5 highest-ranked conference champions.</li>
+<li>
+<strong>Season-scoped tiebreaker registry:</strong> <code>CONFERENCE_TIEBREAKERS</code> entries are lists of dated epochs resolved per season (<code>season</code> ids) or to the CURRENT rules (plain <code>sim</code> ids). The ACC’s 2026 policy (h2h → SportSource SSR → draw, wins-or-losses candidate pool, eligibility filter) applies from 2026. External metrics (composites, CFP ranks, APR) enter only via <code>tiebreaker_data</code>; missing inputs skip their rungs with a <code>tiebreak_notes</code> entry — never invent a metric.</li>
+<li>
+<strong>Division opt-in:</strong> a <code>conf_division</code> column on <code>teams</code> is the opt-in for division-format ranking (division champs take <code>conf_rank</code> 1-2); never gate it to a hardcoded conference list.</li>
 </ul></div>
 <div class="section level2">
 <h2 id="cross-validation-contract-with-sdv-py">Cross-validation contract with sdv-py<a class="anchor" aria-label="anchor" href="#cross-validation-contract-with-sdv-py"></a></h2>
@@ -139,7 +144,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

@@ -19,7 +19,7 @@ playoff bracket is simulated round by round.'><meta property="og:image" content=
 
     <a class="navbar-brand me-2" href="../index.html">cfbseedR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,7 @@ playoff bracket is simulated round by round.'><meta property="og:image" content=
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown--sdv" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true"><span class="fa fas fa-project-diagram"></span>  SDV</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown--sdv"><li><a class="external-link dropdown-item" href="https://sportsdataverse.org/">SportsDataverse</a></li>
+    <li><a class="external-link dropdown-item" href="https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf">Cheat Sheet (PDF)</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>R Packages</h6></li>
     <li><a class="external-link dropdown-item" href="https://r.sportsdataverse.org/">sportsdataverse-R</a></li>
@@ -102,7 +103,9 @@ playoff bracket is simulated round by round.</p>
 <span>  playoff_seeds <span class="op">=</span> <span class="fl">12L</span>,</span>
 <span>  tiebreaker_depth <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SOS"</span>, <span class="st">"PRE-SOV"</span>, <span class="st">"POINTS"</span>, <span class="st">"RANDOM"</span><span class="op">)</span>,</span>
 <span>  sim_include <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"POST"</span>, <span class="st">"REG"</span><span class="op">)</span>,</span>
-<span>  rankings <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  rankings <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  autobid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2026"</span>, <span class="st">"2025"</span><span class="op">)</span>,</span>
+<span>  tiebreaker_data <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -124,8 +127,19 @@ conference <code>"FBS Independents"</code> or <code>NA</code> are treated as ind
 they appear in overall standings but receive no conference rank. An
 optional <code>division</code> column (e.g. <code>"FBS"</code>/<code>"FCS"</code>) feeds the Big 12
 <code>total_wins</code> FCS cap; absent -&gt; that cap degrades to uncapped win
-totals (noted, see <code>tiebreak_notes</code> below). <code>teams</code> need not list every
-team that appears in <code>games</code> - an unlisted opponent (e.g. an
+totals (noted, see <code>tiebreak_notes</code> below). An optional <code>conf_division</code>
+column (e.g. <code>"East"</code>/<code>"West"</code>) turns on division-format ranking for a
+conference: each division is ranked separately (with that conference's
+registered procedure) and the division champions take <code>conf_rank</code> 1-2.
+Supplying divisions for a conference IS the opt-in - correct for the
+2026 Sun Belt and equally for historical divisional seasons of any
+conference. An optional logical <code>postseason_eligible</code> column (explicit
+<code>FALSE</code> = ineligible) keeps a team out of the championship-game ranks
+while its games still count in every comparison (the ACC policy makes
+this explicit); with fewer than two eligible teams in a conference the
+remaining <code>conf_rank</code> 1-2 slots are necessarily filled by ineligible
+teams. <code>teams</code> need not
+list every team that appears in <code>games</code> - an unlisted opponent (e.g. an
 FCS-or-lower team) gets no standings row of its own, but its games
 still count toward its opponents' records and toward the Big 12
 <code>total_wins</code> FCS cap (an unknown opponent counts as FCS-or-lower).</p></dd>
@@ -159,8 +173,8 @@ falling back to a coin flip:</p><ul><li><p><code>"RANDOM"</code>: coin flip imme
 <li><p><code>"SOS"</code>: adds strength of victory, then strength of schedule.</p></li>
 <li><p><code>"POINTS"</code>: adds conference point differential.</p></li>
 </ul><p>This depth ladder gates ONLY the generic fallback cascade used by
-unregistered conferences; the SEC/Big Ten/Big 12/ACC/MAC official
-procedures below always run in full.</p></dd>
+unregistered conferences; the registered official procedures below
+always run in full.</p></dd>
 
 
 <dt id="arg-sim-include">sim_include<a class="anchor" aria-label="anchor" href="#arg-sim-include"></a></dt>
@@ -175,6 +189,17 @@ conference champions, and playoff seeds.</p></li>
 seeding, held static across simulations. When <code>NULL</code>, seeding falls
 back to the per-simulation standings ordering (see
 <code><a href="cfb_playoff_seeds.html">cfb_playoff_seeds()</a></code>).</p></dd>
+
+
+<dt id="arg-autobid">autobid<a class="anchor" aria-label="anchor" href="#arg-autobid"></a></dt>
+<dd><p>CFP automatic-qualifier policy passed to
+<code><a href="cfb_playoff_seeds.html">cfb_playoff_seeds()</a></code>: <code>"2026"</code> (default, current rule) or <code>"2025"</code>.</p></dd>
+
+
+<dt id="arg-tiebreaker-data">tiebreaker_data<a class="anchor" aria-label="anchor" href="#arg-tiebreaker-data"></a></dt>
+<dd><p>Optional named list of external tiebreaker inputs
+(<code>analytics_ratings</code>, <code>cfp_rankings</code>), held static across simulations -
+see <code><a href="cfb_standings.html">cfb_standings()</a></code>. Missing inputs skip their rungs (noted).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -235,7 +260,7 @@ the nflseedR original: <a href="https://nflseedr.com" class="external-link">http
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

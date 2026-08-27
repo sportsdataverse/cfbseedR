@@ -21,7 +21,7 @@ conference record."><meta property="og:image" content="https://raw.githubusercon
 
     <a class="navbar-brand me-2" href="../index.html">cfbseedR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,6 +35,7 @@ conference record."><meta property="og:image" content="https://raw.githubusercon
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown--sdv" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true"><span class="fa fas fa-project-diagram"></span>  SDV</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown--sdv"><li><a class="external-link dropdown-item" href="https://sportsdataverse.org/">SportsDataverse</a></li>
+    <li><a class="external-link dropdown-item" href="https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf">Cheat Sheet (PDF)</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>R Packages</h6></li>
     <li><a class="external-link dropdown-item" href="https://r.sportsdataverse.org/">sportsdataverse-R</a></li>
@@ -142,8 +143,19 @@ conference <code>"FBS Independents"</code> or <code>NA</code> are treated as ind
 they appear in overall standings but receive no conference rank. An
 optional <code>division</code> column (e.g. <code>"FBS"</code>/<code>"FCS"</code>) feeds the Big 12
 <code>total_wins</code> FCS cap; absent -&gt; that cap degrades to uncapped win
-totals (noted, see <code>tiebreak_notes</code> below). <code>teams</code> need not list every
-team that appears in <code>games</code> - an unlisted opponent (e.g. an
+totals (noted, see <code>tiebreak_notes</code> below). An optional <code>conf_division</code>
+column (e.g. <code>"East"</code>/<code>"West"</code>) turns on division-format ranking for a
+conference: each division is ranked separately (with that conference's
+registered procedure) and the division champions take <code>conf_rank</code> 1-2.
+Supplying divisions for a conference IS the opt-in - correct for the
+2026 Sun Belt and equally for historical divisional seasons of any
+conference. An optional logical <code>postseason_eligible</code> column (explicit
+<code>FALSE</code> = ineligible) keeps a team out of the championship-game ranks
+while its games still count in every comparison (the ACC policy makes
+this explicit); with fewer than two eligible teams in a conference the
+remaining <code>conf_rank</code> 1-2 slots are necessarily filled by ineligible
+teams. <code>teams</code> need not
+list every team that appears in <code>games</code> - an unlisted opponent (e.g. an
 FCS-or-lower team) gets no standings row of its own, but its games
 still count toward its opponents' records and toward the Big 12
 <code>total_wins</code> FCS cap (an unknown opponent counts as FCS-or-lower).</p></dd>
@@ -161,8 +173,8 @@ falling back to a coin flip:</p><ul><li><p><code>"RANDOM"</code>: coin flip imme
 <li><p><code>"SOS"</code>: adds strength of victory, then strength of schedule.</p></li>
 <li><p><code>"POINTS"</code>: adds conference point differential.</p></li>
 </ul><p>This depth ladder gates ONLY the generic fallback cascade used by
-unregistered conferences; the SEC/Big Ten/Big 12/ACC/MAC official
-procedures below always run in full.</p></dd>
+unregistered conferences; the registered official procedures below
+always run in full.</p></dd>
 
 
 <dt id="arg-playoff-seeds">playoff_seeds<a class="anchor" aria-label="anchor" href="#arg-playoff-seeds"></a></dt>
@@ -178,10 +190,16 @@ procedures below always run in full.</p></dd>
 
 <dt id="arg-tiebreaker-data">tiebreaker_data<a class="anchor" aria-label="anchor" href="#arg-tiebreaker-data"></a></dt>
 <dd><p>Optional named list of external inputs for the
-official registry rungs. Currently supported: <code>analytics_ratings</code>, a
-data frame with columns <code>team</code> and <code>rating</code> (feeds the SportSource
-Analytics-style rating rung used by Big Ten/Big 12/ACC/MAC). Missing
--&gt; that rung is skipped for those conferences (noted).</p></dd>
+official registry rungs. Supported: <code>analytics_ratings</code>, a data frame
+with columns <code>team</code> and <code>rating</code> (feeds the SportSource-style rating /
+metric-composite rungs used by the Big Ten, Big 12, ACC, MAC,
+American, CUSA, Mountain West, and Sun Belt - supply your own
+composite of the conference's published metrics), and <code>cfp_rankings</code>,
+a data frame with columns <code>team</code> and <code>rank</code> (feeds the
+<code>cfp_ranked_final_week</code> clause used by the American, CUSA, and Sun
+Belt), and <code>apr</code>, a data frame with columns <code>team</code> and <code>apr</code>
+(multi-year Academic Progress Rate, the CUSA policy's late fallback).
+A missing input -&gt; that rung is skipped (noted).</p></dd>
 
 
 <dt id="arg-verbosity">verbosity<a class="anchor" aria-label="anchor" href="#arg-verbosity"></a></dt>
@@ -205,21 +223,29 @@ skipped.</p><table class="table table"><tr><td>Column</td><td>Type</td><td>Descr
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Conference ranks are seeded by conference win percentage; ties within a
 tier are broken by a documented cascade. <strong>Registered conferences</strong> (SEC,
-Big Ten, Big 12, ACC, MAC) use their <strong>official 2024+ procedures</strong> (see
-"Official per-conference tiebreakers" below); every other conference uses
-the <strong>generic fallback</strong>: head-to-head record among the tied teams,
-record vs. common conference opponents (minimum one), conference-scoped
-strength of victory, conference-scoped strength of schedule, conference
-point differential, and finally a coin flip, gated by <code>tiebreaker_depth</code>.
+Big Ten, Big 12, ACC, MAC, American, Conference USA, Mountain West, Sun
+Belt) use their <strong>official procedures</strong> (see "Official per-conference
+tiebreakers" below); every other conference - including the re-formed
+Pac-12, which has not published a procedure - uses the <strong>generic
+fallback</strong>: head-to-head record among the tied teams, record vs. common
+conference opponents (minimum one), conference-scoped strength of
+victory, conference-scoped strength of schedule, conference point
+differential, and finally a coin flip, gated by <code>tiebreaker_depth</code>.
 All cascade quantities are computed over regular-season conference games
 so conference ranks depend only on conference play.</p><div class="section">
 <h3 id="official-per-conference-tiebreakers">Official per-conference tiebreakers<a class="anchor" aria-label="anchor" href="#official-per-conference-tiebreakers"></a></h3>
 
 
-<p><code>CONFERENCE_TIEBREAKERS</code> (internal) registers the SEC, Big Ten, Big 12,
-ACC, and MAC 2024+ procedures as rung lists, ported verbatim from sdv-py's
-<code>cfb_standings.py</code> so both engines produce identical output on the shared
-cross-language parity fixture. Rung primitives: <code>h2h</code> (multi-team combined
+<p><code>CONFERENCE_TIEBREAKERS</code> (internal) registers each conference's official
+procedure as a list of season-scoped <strong>epochs</strong>, so a policy change
+applies from its first season: with a <code>season</code> id column, the ACC's
+all-new 2026 policy (head-to-head, then SportSource Team Success
+Ranking, then a draw, with the alternate-game-count candidate-pool rule)
+applies from 2026 while earlier seasons keep the 2024 cascade; plain
+<code>sim</code> ids resolve to the current rules. The SEC/Big Ten/Big 12 2024
+procedures are ported verbatim from sdv-py's <code>cfb_standings.py</code> so both
+engines produce identical output on the shared cross-language parity
+fixture. Rung primitives: <code>h2h</code> (multi-team combined
 head-to-head, applied only when every tied pair played; otherwise only
 "defeated-all" elimination - the symmetric "lost-to-all" elimination is
 intentionally not modeled, a documented simplification, see
@@ -233,7 +259,14 @@ scored capped at 42 / allowed capped at 48, per game, summed over
 conference games; needs <code>home_points</code>/<code>away_points</code>), <code>total_wins</code> (Big
 12: overall wins with at most one win vs an FCS-or-lower opponent
 counted; needs <code>teams$division</code>), <code>analytics_rating</code> (external, via
-<code>tiebreaker_data$analytics_ratings</code>), and <code>coin_toss</code>. After each team is
+<code>tiebreaker_data$analytics_ratings</code> - stands in for each conference's
+published metric composite, e.g. Connelly SP+ / ESPN SOR / KPI /
+SportSource for the American, CUSA, and Mountain West),
+<code>cfp_ranked_final_week</code> (American/CUSA/Sun Belt: the best-ranked tied
+team advances if it won its final conference game, else the clause falls
+through; needs <code>tiebreaker_data$cfp_rankings</code>), <code>div_pct</code> (Sun Belt:
+win pct vs same-division opponents; needs <code>teams$conf_division</code>), and
+<code>coin_toss</code>. After each team is
 seeded/eliminated the procedure restarts from the first rung with the
 remaining tied set; when a rung's required input is unavailable it is
 skipped deterministically and the skip is recorded once (per conference)
@@ -253,7 +286,8 @@ and <a href="https://cfbfastR.sportsdataverse.org" class="external-link">cfbfast
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">games</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"toy_games.csv"</span>, package <span class="op">=</span> <span class="st">"cfbseedR"</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="va">games</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"toy_games.csv"</span>, package <span class="op">=</span> <span class="st">"cfbseedR"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">teams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"toy_teams.csv"</span>, package <span class="op">=</span> <span class="st">"cfbseedR"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">standings</span> <span class="op">&lt;-</span> <span class="fu">cfb_standings</span><span class="op">(</span><span class="va">games</span>, <span class="va">teams</span>, tiebreaker_depth <span class="op">=</span> <span class="st">"POINTS"</span>,</span></span>
 <span class="r-in"><span>                           verbosity <span class="op">=</span> <span class="st">"NONE"</span><span class="op">)</span></span></span>
@@ -280,6 +314,7 @@ and <a href="https://cfbfastR.sportsdataverse.org" class="external-link">cfbfast
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">standings2</span>, <span class="st">"tiebreak_notes"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -291,7 +326,7 @@ and <a href="https://cfbfastR.sportsdataverse.org" class="external-link">cfbfast
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>
