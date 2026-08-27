@@ -5,8 +5,8 @@ First CRAN submission.
 ## Test environments
 
 * local Windows 10, R 4.6.1
-* win-builder (R-devel, 2026-08-27; re-run after the nflseedR-parity work)
-* R-hub v2: linux, windows, macos, macos-arm64 (all R-devel) — Status: OK
+* win-builder (R-devel 2026-08-25 r90448, checked 2026-08-27): 1 NOTE, quoted below
+* R-hub v2: linux, windows, macos, macos-arm64 (all R-devel): Status OK, no notes
 * GitHub Actions (R-CMD-check): windows-latest (release),
   macOS-latest (release), ubuntu-latest (devel, release, oldrel-1)
 
