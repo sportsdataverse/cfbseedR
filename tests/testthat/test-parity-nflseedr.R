@@ -33,6 +33,19 @@ test_that("chunking splits every simulation exactly once", {
   expect_equal(nrow(s$standings), 8L * nrow(i$teams))
 })
 
+test_that("an uneven split still yields exactly the requested chunk count", {
+  testthat::skip_on_cran()
+  i <- sim_inputs()
+  # 10 simulations over 6 chunks: slicing by a rounded-up chunk size would
+  # quietly produce 5 chunks of 2. Sizes must differ by at most one.
+  set.seed(4)
+  s <- cfb_simulations(i$games, i$teams, simulations = 10, playoff_seeds = 4,
+                       chunks = 6, verbosity = "NONE")
+  expect_equal(s$sim_params$chunks, 6L)
+  expect_equal(sort(unique(s$standings$sim)), 1:10)
+  expect_equal(nrow(s$standings), 10L * nrow(i$teams))
+})
+
 test_that("chunks are capped at the simulation count", {
   testthat::skip_on_cran()
   i <- sim_inputs()

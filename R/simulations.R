@@ -149,12 +149,13 @@ cfb_simulations <- function(games,
     "RANDOM" = 0L, "PRE-SOV" = 1L, "SOS" = 2L, "POINTS" = 3L
   )
 
-  # Contiguous blocks of simulation ids, one per chunk (the last block may be
-  # shorter when `simulations` is not a multiple of `chunks`).
-  chunk_size <- ceiling(simulations / chunks)
+  # Contiguous blocks of simulation ids, exactly one per chunk. Sizes differ
+  # by at most one when `simulations` is not a multiple of `chunks`; naively
+  # slicing by a rounded-up chunk size would silently produce FEWER chunks
+  # than asked for (10 simulations over 6 chunks would give 5).
   sim_id_chunks <- split(
     seq_len(simulations),
-    ceiling(seq_len(simulations) / chunk_size)
+    sort(rep_len(seq_len(chunks), simulations))
   )
 
   if (verbosity > 0L) {

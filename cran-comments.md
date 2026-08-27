@@ -5,7 +5,7 @@ First CRAN submission.
 ## Test environments
 
 * local Windows 10, R 4.6.1
-* win-builder (R-devel, 2026-08-27)
+* win-builder (R-devel, 2026-08-27; re-run after the nflseedR-parity work)
 * R-hub v2: linux, windows, macos, macos-arm64 (all R-devel) — Status: OK
 * GitHub Actions (R-CMD-check): windows-latest (release),
   macOS-latest (release), ubuntu-latest (devel, release, oldrel-1)
@@ -39,11 +39,18 @@ R-hub reports Status: OK on all four platforms with no notes.
 
 ## Comments
 
-* All examples and tests run offline against bundled toy fixtures
-  (`inst/extdata/`); no network access is required or attempted.
+* All examples and tests run offline against the bundled toy season
+  (exported as `cfb_games_example` / `cfb_teams_example`, also in
+  `inst/extdata/`); no network access is required or attempted.
 * Every example is wrapped in `\donttest{}` and every test calls
   `testthat::skip_on_cran()`, matching the conventions of the
   SportsDataverse packages already on CRAN (cfbfastR, hoopR, wehoop,
   baseballr).
 * The package adapts nflseedR (MIT, Lee Sharpe & Sebastian Carl) to
   college football; both nflseedR authors are credited in Authors@R.
+* gt and scales are used only by `summary.cfbseedR_simulation()` and
+  `fmt_pct_special()`, are in Suggests, and are reached through
+  `rlang::check_installed()`, so the package works fully without them.
+* furrr/future/progressr back the optional chunked simulation. The default
+  future plan is sequential, so nothing runs in parallel unless the user
+  opts in, and no example or test sets a parallel plan.

@@ -6,12 +6,15 @@
 #
 # Run after changing inst/extdata: Rscript data-raw/example_data.R
 
+# Read from the SOURCE tree, not system.file(): the latter resolves against
+# an *installed* cfbseedR and returns "" when none is installed, so this
+# script would fail outright or silently regenerate from a stale install.
 cfb_games_example <- utils::read.csv(
-  system.file("extdata", "toy_games.csv", package = "cfbseedR"),
+  file.path("inst", "extdata", "toy_games.csv"),
   stringsAsFactors = FALSE
 )
 cfb_teams_example <- utils::read.csv(
-  system.file("extdata", "toy_teams.csv", package = "cfbseedR"),
+  file.path("inst", "extdata", "toy_teams.csv"),
   stringsAsFactors = FALSE
 )
 

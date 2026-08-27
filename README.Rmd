@@ -65,7 +65,10 @@ games$result[games$week >= 3] <- NA
 set.seed(42)
 sim <- cfb_simulations(games, teams, simulations = 100, playoff_seeds = 4)
 sim$overall
-summary(sim)   # pretty gt table, grouped by conference
+
+# Pretty gt summary, grouped by conference.
+# Needs the optional presentation packages: install.packages(c("gt", "scales"))
+summary(sim)
 
 # Spread the simulations across cores
 # future::plan("multisession")

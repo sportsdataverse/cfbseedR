@@ -1,6 +1,6 @@
 Package: cfbseedR
 Title: Simulate and Evaluate College Football Seasons
-Version: 0.3.0
+Version: 0.2.0
 Authors@R: c(
     person("Saiem", "Gilani", , "saiem.gilani@gmail.com", role = c("cre", "aut", "cph"),
            comment = c(ORCID = "0000-0002-7194-9067")),

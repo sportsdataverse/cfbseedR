@@ -22,6 +22,11 @@ credit them in DESCRIPTION/README/vignettes when touching attribution.
 | `cfbseedR_compute_results()` | Default ELO results generator (nflseedR port) |
 | `simulations_verify_fct()` | Contract checker for custom `compute_results` |
 | `cfb_games_from_schedule()` | `cfbfastR::load_cfb_schedules()` → engine games schema |
+| `summary.cfbseedR_simulation()` | S3 gt summary of a simulation (Suggests: gt, scales) |
+| `fmt_pct_special()` | Probability formatter (`<1%` / `>99.9%`) |
+
+Exported data: `cfb_games_example`, `cfb_teams_example` (the toy season;
+prefer these over `read.csv(system.file(...))` in examples and docs).
 
 Internal engine helpers live in `R/standings_utils.R` (mirrors nflseedR's
 `standings_utils.R`/`standings_init.R` architecture).
@@ -53,6 +58,16 @@ Internal engine helpers live in `R/standings_utils.R` (mirrors nflseedR's
 - **Division opt-in:** a `conf_division` column on `teams` is the opt-in
   for division-format ranking (division champs take `conf_rank` 1-2);
   never gate it to a hardcoded conference list.
+
+- **Chunked simulation:** `cfb_simulations()` splits sims into `chunks`
+  dispatched via `furrr::future_map()` with `furrr_options(seed = TRUE)`.
+  `sims_run_chunk()` must stay SELF-CONTAINED - everything it needs is an
+  argument, it touches no shared state - or parallel workers break. A
+  parallel plan must stay bit-identical to sequential for a fixed seed and
+  `chunks`; there is a test for this, do not weaken it.
+- **nflseedR parity:** cfbseedR deliberately omits draft order, the v1
+  legacy API (`simulate_nfl`, `compute_*`), and `load_sharpe_games`. Do not
+  add them. Everything else in nflseedR's surface has a CFB counterpart.
 
 ## Cross-validation contract with sdv-py
 
