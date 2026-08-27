@@ -9,9 +9,9 @@
     and 3.5px at the sides so the gold border renders complete instead of
     being clipped flat at the points.
 
-    Border thickness is 11px at this 518px width (2.1% of width), matching the
-    sportsdataverse-R meta-package exactly and sitting between wehoop (9px)
-    and fastRhockey (17px). It was 18px, the thickest in the family.
+    Border thickness is 9px at this 518px width (1.7% of width), matching
+    wehoop, the thinnest ring in the SportsDataverse family (the others:
+    sportsdataverse-R 11px, fastRhockey 17px). It was 18px, the thickest.
 
     The bracket is a SIXTEEN-slot skeleton - four first-round games per side,
     then quarterfinals, semifinals, and the final - carrying TWELVE filled
@@ -28,13 +28,13 @@
   -->
   <defs>
     <clipPath id="hexclip">
-      <polygon points="259,20 501.49,159 501.49,441 259,580 16.51,441 16.51,159"/>
+      <polygon points="259,19 502.35,159.5 502.35,440.5 259,581 15.65,440.5 15.65,159.5"/>
     </clipPath>
   </defs>
   <!-- gold border (outer hex, R = 295) -->
   <polygon points="259,5 514.48,152.5 514.48,447.5 259,595 3.52,447.5 3.52,152.5" fill="#FFB612"/>
-  <!-- navy field (inner hex, R = 282.3 -> an 11px border, see comment) -->
-  <polygon points="259,17.7 503.48,158.85 503.48,441.15 259,582.3 14.52,441.15 14.52,158.85" fill="#0D1B2A"/>
+  <!-- navy field (inner hex, R = 283.45 -> a 9px border, see comment) -->
+  <polygon points="259,16.55 504.48,158.275 504.48,441.725 259,583.45 13.52,441.725 13.52,158.275" fill="#0D1B2A"/>
   <g clip-path="url(#hexclip)">
     <!-- wordmark -->
     <text x="259" y="198" font-family="'DejaVu Sans','Segoe UI',Verdana,sans-serif" font-size="76" font-weight="600" fill="#FFFFFF" text-anchor="middle">cfbseedR</text>
