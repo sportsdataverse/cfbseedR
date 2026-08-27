@@ -1,9 +1,13 @@
 ---
 title: "Cookbook: tiebreakers & the CFP, past / present / future"
-description: >
-  Worked scenarios for the official per-conference tiebreakers and the CFP
-  automatic-qualifier policies: re-examining a settled season under new
-  rules, building today's 12-team field, and stress-testing a 16-team one.
+description: "Worked scenarios for the official per-conference tiebreakers and the CFP automatic-qualifier policies: re-examining a settled season under new rules, building today's 12-team field, and stress-testing a 16-team one."
+author: "Saiem Gilani <br><a href='https://x.com/saiemgilani' target='blank'><img src='https://img.shields.io/twitter/follow/saiemgilani?color=blue&amp;label=%40saiemgilani&amp;logo=x&amp;style=for-the-badge' alt='@saiemgilani'/></a> <a href='https://github.com/saiemgilani' target='blank'><img src='https://img.shields.io/github/followers/saiemgilani?color=eee&amp;logo=Github&amp;style=for-the-badge' alt='@saiemgilani'/></a>"
+opengraph:
+  image:
+    src: "https://github.com/sportsdataverse/cfbfastR-data/blob/main/themes/social_card_cfbseedR.png?raw=true"
+  twitter:
+    card: summary_large_image
+    creator: "@saiemgilani"
 output: html_document
 ---
 
@@ -362,3 +366,58 @@ and the published American / CUSA / MAC / Mountain West / Sun Belt
 procedures) and the CFP's published formats. The [cheat sheet
 (PDF)](https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf)
 condenses this package alongside cfbplotR and cfb4th.
+
+
+# **Our Authors**
+
+-   [Saiem Gilani](https://x.com/saiemgilani)
+<a href="https://x.com/saiemgilani" target="blank"><img src="https://img.shields.io/twitter/follow/saiemgilani?color=blue&label=%40saiemgilani&logo=x&style=for-the-badge" alt="@saiemgilani" /></a>
+<a href="https://github.com/saiemgilani" target="blank"><img src="https://img.shields.io/github/followers/saiemgilani?color=eee&logo=Github&style=for-the-badge" alt="@saiemgilani" /></a>
+
+## **Adapted from nflseedR (they're awesome)**
+
+cfbseedR is a college-football adaptation of
+[nflseedR](https://nflseedr.com) (MIT). The standings-to-seeds architecture,
+the week-loop simulator with a pluggable `compute_results`, and the ELO
+default generator are all theirs.
+
+-   [Sebastian Carl](https://x.com/mrcaseb)
+<a href="https://x.com/mrcaseb" target="blank"><img src="https://img.shields.io/twitter/follow/mrcaseb?color=blue&label=%40mrcaseb&logo=x&style=for-the-badge" alt="@mrcaseb" /></a>
+<a href="https://github.com/mrcaseb" target="blank"><img src="https://img.shields.io/github/followers/mrcaseb?color=eee&logo=Github&style=for-the-badge" alt="@mrcaseb" /></a>
+
+-   [Lee Sharpe](https://x.com/LeeSharpeNFL)
+<a href="https://x.com/LeeSharpeNFL" target="blank"><img src="https://img.shields.io/twitter/follow/LeeSharpeNFL?color=blue&label=%40LeeSharpeNFL&logo=x&style=for-the-badge" alt="@LeeSharpeNFL" /></a>
+
+## **Citation**
+
+To cite cfbseedR in publications, use:
+
+```
+Saiem Gilani (2026). cfbseedR: The SportsDataverse's R Package to Simulate
+and Evaluate College Football Seasons.
+https://cfbseedR.sportsdataverse.org/
+```
+
+```r
+citation("cfbseedR")
+```
+
+If you use the season-simulation methodology, please also cite
+[nflseedR](https://nflseedr.com).
+
+## **Related SportsDataverse packages**
+
+-   [**cfbfastR**](https://cfbfastR.sportsdataverse.org/) — college football
+    play-by-play, schedules and rosters; feeds `cfb_games_from_schedule()`
+-   [**cfb4th**](https://cfb4th.sportsdataverse.org/) — fourth-down decision
+    modeling
+-   [**cfbplotR**](https://cfbplotR.sportsdataverse.org/) — team logos and
+    plotting helpers for ggplot2
+-   [**recruitR**](https://github.com/sportsdataverse/recruitR) — recruiting data
+-   [**sportsdataverse-R**](https://r.sportsdataverse.org/) — the meta-package
+-   [**sportsdataverse-py**](https://py.sportsdataverse.org/) — the Python
+    mirror, whose `cfb_standings` shares this package's tiebreaker rulings
+
+A printable [cheat sheet
+(PDF)](https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf)
+covers cfbplotR, cfb4th and cfbseedR together.
