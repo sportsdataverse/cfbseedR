@@ -19,9 +19,9 @@
 <meta property="og:title" content="Simulating seasons">
 <meta name="description" content="Custom compute_results functions, the tiebreaker ladder, and CFP-12 seeding.">
 <meta property="og:description" content="Custom compute_results functions, the tiebreaker ladder, and CFP-12 seeding.">
-<meta property="og:image" content="https://raw.githubusercontent.com/sportsdataverse/cfbseedR/main/man/figures/logo.png">
+<meta property="og:image" content="https://github.com/sportsdataverse/cfbfastR-data/blob/main/themes/social_card_cfbseedR.png?raw=true">
 <meta property="og:image:alt" content="cfbseedR social preview card">
-<meta name="twitter:card" content="summary">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:creator" content="@saiemgilani">
 <meta name="twitter:site" content="@cfbfastR">
 <script defer data-domain="cfbseedr.sportsdataverse.org" src="https://plausible.io/js/plausible.js"></script>
@@ -106,6 +106,10 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Simulating seasons</h1>
+                        <h4 data-toc-skip class="author">Saiem Gilani
+<br><a href="https://x.com/saiemgilani" target="blank" class="external-link"><img src="https://img.shields.io/twitter/follow/saiemgilani?color=blue&amp;label=%40saiemgilani&amp;logo=x&amp;style=for-the-badge" alt="@saiemgilani"></a>
+<a href="https://github.com/saiemgilani" target="blank" class="external-link"><img src="https://img.shields.io/github/followers/saiemgilani?color=eee&amp;logo=Github&amp;style=for-the-badge" alt="@saiemgilani"></a>
+</h4>
             
       
       <small class="dont-index">Source: <a href="https://github.com/sportsdataverse/cfbseedR/blob/main/vignettes/simulating-seasons.Rmd" class="external-link"><code>vignettes/simulating-seasons.Rmd</code></a></small>
@@ -126,9 +130,9 @@ season.</p>
 <span><span class="va">games</span> <span class="op">&lt;-</span> <span class="va">cfb_games_example</span></span>
 <span><span class="va">teams</span> <span class="op">&lt;-</span> <span class="va">cfb_teams_example</span></span>
 <span><span class="va">games</span><span class="op">$</span><span class="va">result</span><span class="op">[</span><span class="va">games</span><span class="op">$</span><span class="va">week</span> <span class="op">&gt;=</span> <span class="fl">3</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA</span></span></code></pre></div>
-<div class="section level2">
-<h2 id="custom-compute_results-functions">Custom <code>compute_results</code> functions<a class="anchor" aria-label="anchor" href="#custom-compute_results-functions"></a>
-</h2>
+<div class="section level3">
+<h3 id="custom-compute_results-functions">Custom <code>compute_results</code> functions<a class="anchor" aria-label="anchor" href="#custom-compute_results-functions"></a>
+</h3>
 <p><code><a href="../reference/cfb_simulations.html">cfb_simulations()</a></code> calls
 <code>compute_results(teams, games, week_num, ...)</code> once per
 remaining week. The contract (identical to nflseedR’s):</p>
@@ -207,9 +211,9 @@ ELO ratings that way:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> B4      1.3     0.3</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">9</span> I1      0.7     0.2</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="the-tiebreaker_depth-ladder">The <code>tiebreaker_depth</code> ladder<a class="anchor" aria-label="anchor" href="#the-tiebreaker_depth-ladder"></a>
-</h2>
+<div class="section level3">
+<h3 id="the-tiebreaker_depth-ladder">The <code>tiebreaker_depth</code> ladder<a class="anchor" aria-label="anchor" href="#the-tiebreaker_depth-ladder"></a>
+</h3>
 <p>Conference ranks are seeded by conference win percentage; ties are
 broken by a cascade whose depth you control:</p>
 <table class="table">
@@ -266,9 +270,9 @@ which is the easiest way to understand (and trust) a rank:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> B3    Beta                0.333 0     0.556         3</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> B4    Beta                0     0     0.667         4</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">9</span> I1    FBS Independents    0     0     0            <span style="color: #BB0000;">NA</span></span></span></code></pre></div>
-<div class="section level3">
-<h3 id="the-conference-scoped-sovsos-ruling">The conference-scoped <code>sov</code>/<code>sos</code> ruling<a class="anchor" aria-label="anchor" href="#the-conference-scoped-sovsos-ruling"></a>
-</h3>
+<div class="section level4">
+<h4 id="the-conference-scoped-sovsos-ruling">The conference-scoped <code>sov</code>/<code>sos</code> ruling<a class="anchor" aria-label="anchor" href="#the-conference-scoped-sovsos-ruling"></a>
+</h4>
 <p>All cascade quantities - head-to-head, common opponents,
 <code>sov</code>, <code>sos</code>, and point differential - are
 computed <strong>over regular-season conference games only</strong>, so
@@ -289,9 +293,9 @@ opponents</strong>),</li>
 conference-specific, and a full-schedule SOS would let non-conference
 results leak into conference seeding.</p>
 </div>
-<div class="section level3">
-<h3 id="official-per-conference-tiebreakers">Official per-conference tiebreakers<a class="anchor" aria-label="anchor" href="#official-per-conference-tiebreakers"></a>
-</h3>
+<div class="section level4">
+<h4 id="official-per-conference-tiebreakers">Official per-conference tiebreakers<a class="anchor" aria-label="anchor" href="#official-per-conference-tiebreakers"></a>
+</h4>
 <p>The generic cascade above is the fallback used for conferences
 without a registered procedure. The <strong>SEC, Big Ten, Big 12, ACC,
 and MAC</strong> instead use their <strong>official 2024+ tiebreaker
@@ -335,9 +339,9 @@ skipped, and the skip is recorded in
 <span><span class="co">#&gt; character(0)</span></span></code></pre></div>
 </div>
 </div>
-<div class="section level2">
-<h2 id="cfp-12-seeding-and-the-autobid-policy">CFP-12 seeding and the <code>autobid</code> policy<a class="anchor" aria-label="anchor" href="#cfp-12-seeding-and-the-autobid-policy"></a>
-</h2>
+<div class="section level3">
+<h3 id="cfp-12-seeding-and-the-autobid-policy">CFP-12 seeding and the <code>autobid</code> policy<a class="anchor" aria-label="anchor" href="#cfp-12-seeding-and-the-autobid-policy"></a>
+</h3>
 <p><code><a href="../reference/cfb_playoff_seeds.html">cfb_playoff_seeds()</a></code> always uses <strong>straight
 seeding</strong> - the field is ordered strictly by committee rank, and
 champions are never bumped up to the top-4 seeds (that was the pre-2025
@@ -397,9 +401,9 @@ seeds is the fixed CFP-12 bracket (first round hosted by the higher
 seed, later rounds neutral-site, no reseeding), and committee
 <code>rankings</code> are held static across simulations.</p>
 </div>
-<div class="section level2">
-<h2 id="running-simulations-in-parallel">Running simulations in parallel<a class="anchor" aria-label="anchor" href="#running-simulations-in-parallel"></a>
-</h2>
+<div class="section level3">
+<h3 id="running-simulations-in-parallel">Running simulations in parallel<a class="anchor" aria-label="anchor" href="#running-simulations-in-parallel"></a>
+</h3>
 <p>Simulations are split into <code>chunks</code> (default 8) and
 dispatched with furrr, so a parallel plan spreads them across cores:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
@@ -416,9 +420,9 @@ stream does depend on the chunking, though, so the same seed with a
 different <code>chunks</code> gives different (equally valid)
 simulations.</p>
 </div>
-<div class="section level2">
-<h2 id="summarising-a-simulation-and-checking-it">Summarising a simulation, and checking it<a class="anchor" aria-label="anchor" href="#summarising-a-simulation-and-checking-it"></a>
-</h2>
+<div class="section level3">
+<h3 id="summarising-a-simulation-and-checking-it">Summarising a simulation, and checking it<a class="anchor" aria-label="anchor" href="#summarising-a-simulation-and-checking-it"></a>
+</h3>
 <p><code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> renders the <code>overall</code> table as a gt
 table grouped by conference, with probabilities formatted by
 <code><a href="../reference/fmt_pct_special.html">fmt_pct_special()</a></code> so a long-shot reads <code>&lt;1%</code>
@@ -1024,9 +1028,9 @@ since it exposes the shape of a season rather than just its mean:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> B1        3     0.452</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> B1        4     0.152</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="real-schedules">Real schedules<a class="anchor" aria-label="anchor" href="#real-schedules"></a>
-</h2>
+<div class="section level3">
+<h3 id="real-schedules">Real schedules<a class="anchor" aria-label="anchor" href="#real-schedules"></a>
+</h3>
 <p>With cfbfastR installed, a real season plugs straight in:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Not run: requires network access via cfbfastR</span></span>
@@ -1053,6 +1057,76 @@ rules that were in force at the time, while
 <code>autobid = "2025"</code> / <code>"2026"</code> selects the CFP era
 independently. The <a href="https://cfbseedR.sportsdataverse.org/articles/tiebreakers-and-cfp.html">tiebreakers
 cookbook</a> works through what changes when you flip each of them.</p>
+</div>
+<div class="section level2">
+<h2 id="our-authors">
+<strong>Our Authors</strong><a class="anchor" aria-label="anchor" href="#our-authors"></a>
+</h2>
+<ul>
+<li>
+<a href="https://x.com/saiemgilani" class="external-link">Saiem Gilani</a>
+<a href="https://x.com/saiemgilani" target="blank" class="external-link"><img src="https://img.shields.io/twitter/follow/saiemgilani?color=blue&amp;label=%40saiemgilani&amp;logo=x&amp;style=for-the-badge" alt="@saiemgilani"></a>
+<a href="https://github.com/saiemgilani" target="blank" class="external-link"><img src="https://img.shields.io/github/followers/saiemgilani?color=eee&amp;logo=Github&amp;style=for-the-badge" alt="@saiemgilani"></a>
+</li>
+</ul>
+<div class="section level3">
+<h3 id="adapted-from-nflseedr-theyre-awesome">
+<strong>Adapted from nflseedR (they’re awesome)</strong><a class="anchor" aria-label="anchor" href="#adapted-from-nflseedr-theyre-awesome"></a>
+</h3>
+<p>cfbseedR is a college-football adaptation of <a href="https://nflseedr.com" class="external-link">nflseedR</a> (MIT). The standings-to-seeds
+architecture, the week-loop simulator with a pluggable
+<code>compute_results</code>, and the ELO default generator are all
+theirs.</p>
+<ul>
+<li><p><a href="https://x.com/mrcaseb" class="external-link">Sebastian Carl</a>
+<a href="https://x.com/mrcaseb" target="blank" class="external-link"><img src="https://img.shields.io/twitter/follow/mrcaseb?color=blue&amp;label=%40mrcaseb&amp;logo=x&amp;style=for-the-badge" alt="@mrcaseb"></a>
+<a href="https://github.com/mrcaseb" target="blank" class="external-link"><img src="https://img.shields.io/github/followers/mrcaseb?color=eee&amp;logo=Github&amp;style=for-the-badge" alt="@mrcaseb"></a></p></li>
+<li><p><a href="https://x.com/LeeSharpeNFL" class="external-link">Lee Sharpe</a>
+<a href="https://x.com/LeeSharpeNFL" target="blank" class="external-link"><img src="https://img.shields.io/twitter/follow/LeeSharpeNFL?color=blue&amp;label=%40LeeSharpeNFL&amp;logo=x&amp;style=for-the-badge" alt="@LeeSharpeNFL"></a></p></li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="citation">
+<strong>Citation</strong><a class="anchor" aria-label="anchor" href="#citation"></a>
+</h3>
+<p>To cite cfbseedR in publications, use:</p>
+<pre><code>Saiem Gilani (2026). cfbseedR: The SportsDataverse's R Package to Simulate
+and Evaluate College Football Seasons.
+https://cfbseedR.sportsdataverse.org/</code></pre>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"cfbseedR"</span><span class="op">)</span></span></code></pre></div>
+<p>If you use the season-simulation methodology, please also cite <a href="https://nflseedr.com" class="external-link">nflseedR</a>.</p>
+</div>
+<div class="section level3">
+<h3 id="related-sportsdataverse-packages">
+<strong>Related SportsDataverse packages</strong><a class="anchor" aria-label="anchor" href="#related-sportsdataverse-packages"></a>
+</h3>
+<ul>
+<li>
+<a href="https://cfbfastR.sportsdataverse.org/" class="external-link"><strong>cfbfastR</strong></a>
+— college football play-by-play, schedules and rosters; feeds
+<code><a href="../reference/cfb_games_from_schedule.html">cfb_games_from_schedule()</a></code>
+</li>
+<li>
+<a href="https://cfb4th.sportsdataverse.org/" class="external-link"><strong>cfb4th</strong></a> —
+fourth-down decision modeling</li>
+<li>
+<a href="https://cfbplotR.sportsdataverse.org/" class="external-link"><strong>cfbplotR</strong></a>
+— team logos and plotting helpers for ggplot2</li>
+<li>
+<a href="https://github.com/sportsdataverse/recruitR" class="external-link"><strong>recruitR</strong></a>
+— recruiting data</li>
+<li>
+<a href="https://r.sportsdataverse.org/" class="external-link"><strong>sportsdataverse-R</strong></a>
+— the meta-package</li>
+<li>
+<a href="https://py.sportsdataverse.org/" class="external-link"><strong>sportsdataverse-py</strong></a>
+— the Python mirror, whose <code>cfb_standings</code> shares this
+package’s tiebreaker rulings</li>
+</ul>
+<p>A printable <a href="https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf" class="external-link">cheat
+sheet (PDF)</a> covers cfbplotR, cfb4th and cfbseedR together.</p>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

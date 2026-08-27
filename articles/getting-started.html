@@ -19,9 +19,9 @@
 <meta property="og:title" content="Getting started with cfbseedR">
 <meta name="description" content="Compute standings, playoff seeds, and run a small season simulation.">
 <meta property="og:description" content="Compute standings, playoff seeds, and run a small season simulation.">
-<meta property="og:image" content="https://raw.githubusercontent.com/sportsdataverse/cfbseedR/main/man/figures/logo.png">
+<meta property="og:image" content="https://github.com/sportsdataverse/cfbfastR-data/blob/main/themes/social_card_cfbseedR.png?raw=true">
 <meta property="og:image:alt" content="cfbseedR social preview card">
-<meta name="twitter:card" content="summary">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:creator" content="@saiemgilani">
 <meta name="twitter:site" content="@cfbfastR">
 <script defer data-domain="cfbseedr.sportsdataverse.org" src="https://plausible.io/js/plausible.js"></script>
@@ -106,6 +106,10 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Getting started with cfbseedR</h1>
+                        <h4 data-toc-skip class="author">Saiem Gilani
+<br><a href="https://x.com/saiemgilani" target="blank" class="external-link"><img src="https://img.shields.io/twitter/follow/saiemgilani?color=blue&amp;label=%40saiemgilani&amp;logo=x&amp;style=for-the-badge" alt="@saiemgilani"></a>
+<a href="https://github.com/saiemgilani" target="blank" class="external-link"><img src="https://img.shields.io/github/followers/saiemgilani?color=eee&amp;logo=Github&amp;style=for-the-badge" alt="@saiemgilani"></a>
+</h4>
             
       
       <small class="dont-index">Source: <a href="https://github.com/sportsdataverse/cfbseedR/blob/main/vignettes/getting-started.Rmd" class="external-link"><code>vignettes/getting-started.Rmd</code></a></small>
@@ -146,9 +150,9 @@ plus one independent).</p>
 <span><span class="co">#&gt; 7   B3             Beta</span></span>
 <span><span class="co">#&gt; 8   B4             Beta</span></span>
 <span><span class="co">#&gt; 9   I1 FBS Independents</span></span></code></pre></div>
-<div class="section level2">
-<h2 id="standings-from-a-games-frame">Standings from a games frame<a class="anchor" aria-label="anchor" href="#standings-from-a-games-frame"></a>
-</h2>
+<div class="section level3">
+<h3 id="standings-from-a-games-frame">Standings from a games frame<a class="anchor" aria-label="anchor" href="#standings-from-a-games-frame"></a>
+</h3>
 <p><code><a href="../reference/cfb_standings.html">cfb_standings()</a></code> needs a games frame
 (<code>sim</code>/<code>season</code>, <code>game_type</code>,
 <code>week</code>, <code>home_team</code>, <code>away_team</code>,
@@ -193,9 +197,9 @@ independents get <code>0.0</code>.</li>
 <span><span class="va">sched</span> <span class="op">&lt;-</span> <span class="fu">cfbfastR</span><span class="fu">::</span><span class="fu"><a href="https://cfbfastR.sportsdataverse.org/reference/load_cfb_schedules.html" class="external-link">load_cfb_schedules</a></span><span class="op">(</span><span class="fl">2024</span><span class="op">)</span></span>
 <span><span class="va">games_2024</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_games_from_schedule.html">cfb_games_from_schedule</a></span><span class="op">(</span><span class="va">sched</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="playoff-seeds-with-a-rankings-frame">Playoff seeds with a rankings frame<a class="anchor" aria-label="anchor" href="#playoff-seeds-with-a-rankings-frame"></a>
-</h2>
+<div class="section level3">
+<h3 id="playoff-seeds-with-a-rankings-frame">Playoff seeds with a rankings frame<a class="anchor" aria-label="anchor" href="#playoff-seeds-with-a-rankings-frame"></a>
+</h3>
 <p><code><a href="../reference/cfb_playoff_seeds.html">cfb_playoff_seeds()</a></code> implements CFP <strong>straight
 seeding</strong> (2025 rule): the field is the best-ranked teams with
 the 5 highest-ranked conference champions guaranteed inclusion, seeded
@@ -214,9 +218,9 @@ fallback ordering (win pct, SOV, SOS, point differential) is used.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> B1    Beta             TRUE           1</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> I1    FBS Independents FALSE          2</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="a-small-simulation">A small simulation<a class="anchor" aria-label="anchor" href="#a-small-simulation"></a>
-</h2>
+<div class="section level3">
+<h3 id="a-small-simulation">A small simulation<a class="anchor" aria-label="anchor" href="#a-small-simulation"></a>
+</h3>
 <p><code><a href="../reference/cfb_simulations.html">cfb_simulations()</a></code> fills in the missing (<code>NA</code>)
 results week by week using a <code>compute_results</code> function - by
 default <code><a href="../reference/cfbseedR_compute_results.html">cfbseedR_compute_results()</a></code>, an ELO-based generator
@@ -252,9 +256,9 @@ the <code>tiebreaker_depth</code> ladder, and the CFP-12 seeding rules -
 see the <a href="https://cfbseedR.sportsdataverse.org/articles/simulating-seasons.html">Simulating
 seasons</a> article.</p>
 </div>
-<div class="section level2">
-<h2 id="acknowledgments">Acknowledgments<a class="anchor" aria-label="anchor" href="#acknowledgments"></a>
-</h2>
+<div class="section level3">
+<h3 id="acknowledgments">Acknowledgments<a class="anchor" aria-label="anchor" href="#acknowledgments"></a>
+</h3>
 <p>cfbseedR is an adaptation of <a href="https://nflseedr.com" class="external-link">nflseedR</a> (MIT) by <strong>Lee
 Sharpe</strong> and <strong>Sebastian Carl</strong>. The entire
 architecture - the standings engine, the tiebreaking cascade design, the
@@ -263,6 +267,76 @@ contract, and the ELO-based default generator - is their design,
 re-derived here with college football semantics. Thank you to Lee,
 Sebastian, and the broader <a href="https://nflverse.nflverse.com" class="external-link">nflverse</a> team whose open-source
 work this package builds on.</p>
+</div>
+<div class="section level2">
+<h2 id="our-authors">
+<strong>Our Authors</strong><a class="anchor" aria-label="anchor" href="#our-authors"></a>
+</h2>
+<ul>
+<li>
+<a href="https://x.com/saiemgilani" class="external-link">Saiem Gilani</a>
+<a href="https://x.com/saiemgilani" target="blank" class="external-link"><img src="https://img.shields.io/twitter/follow/saiemgilani?color=blue&amp;label=%40saiemgilani&amp;logo=x&amp;style=for-the-badge" alt="@saiemgilani"></a>
+<a href="https://github.com/saiemgilani" target="blank" class="external-link"><img src="https://img.shields.io/github/followers/saiemgilani?color=eee&amp;logo=Github&amp;style=for-the-badge" alt="@saiemgilani"></a>
+</li>
+</ul>
+<div class="section level3">
+<h3 id="adapted-from-nflseedr-theyre-awesome">
+<strong>Adapted from nflseedR (they’re awesome)</strong><a class="anchor" aria-label="anchor" href="#adapted-from-nflseedr-theyre-awesome"></a>
+</h3>
+<p>cfbseedR is a college-football adaptation of <a href="https://nflseedr.com" class="external-link">nflseedR</a> (MIT). The standings-to-seeds
+architecture, the week-loop simulator with a pluggable
+<code>compute_results</code>, and the ELO default generator are all
+theirs.</p>
+<ul>
+<li><p><a href="https://x.com/mrcaseb" class="external-link">Sebastian Carl</a>
+<a href="https://x.com/mrcaseb" target="blank" class="external-link"><img src="https://img.shields.io/twitter/follow/mrcaseb?color=blue&amp;label=%40mrcaseb&amp;logo=x&amp;style=for-the-badge" alt="@mrcaseb"></a>
+<a href="https://github.com/mrcaseb" target="blank" class="external-link"><img src="https://img.shields.io/github/followers/mrcaseb?color=eee&amp;logo=Github&amp;style=for-the-badge" alt="@mrcaseb"></a></p></li>
+<li><p><a href="https://x.com/LeeSharpeNFL" class="external-link">Lee Sharpe</a>
+<a href="https://x.com/LeeSharpeNFL" target="blank" class="external-link"><img src="https://img.shields.io/twitter/follow/LeeSharpeNFL?color=blue&amp;label=%40LeeSharpeNFL&amp;logo=x&amp;style=for-the-badge" alt="@LeeSharpeNFL"></a></p></li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="citation">
+<strong>Citation</strong><a class="anchor" aria-label="anchor" href="#citation"></a>
+</h3>
+<p>To cite cfbseedR in publications, use:</p>
+<pre><code>Saiem Gilani (2026). cfbseedR: The SportsDataverse's R Package to Simulate
+and Evaluate College Football Seasons.
+https://cfbseedR.sportsdataverse.org/</code></pre>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"cfbseedR"</span><span class="op">)</span></span></code></pre></div>
+<p>If you use the season-simulation methodology, please also cite <a href="https://nflseedr.com" class="external-link">nflseedR</a>.</p>
+</div>
+<div class="section level3">
+<h3 id="related-sportsdataverse-packages">
+<strong>Related SportsDataverse packages</strong><a class="anchor" aria-label="anchor" href="#related-sportsdataverse-packages"></a>
+</h3>
+<ul>
+<li>
+<a href="https://cfbfastR.sportsdataverse.org/" class="external-link"><strong>cfbfastR</strong></a>
+— college football play-by-play, schedules and rosters; feeds
+<code><a href="../reference/cfb_games_from_schedule.html">cfb_games_from_schedule()</a></code>
+</li>
+<li>
+<a href="https://cfb4th.sportsdataverse.org/" class="external-link"><strong>cfb4th</strong></a> —
+fourth-down decision modeling</li>
+<li>
+<a href="https://cfbplotR.sportsdataverse.org/" class="external-link"><strong>cfbplotR</strong></a>
+— team logos and plotting helpers for ggplot2</li>
+<li>
+<a href="https://github.com/sportsdataverse/recruitR" class="external-link"><strong>recruitR</strong></a>
+— recruiting data</li>
+<li>
+<a href="https://r.sportsdataverse.org/" class="external-link"><strong>sportsdataverse-R</strong></a>
+— the meta-package</li>
+<li>
+<a href="https://py.sportsdataverse.org/" class="external-link"><strong>sportsdataverse-py</strong></a>
+— the Python mirror, whose <code>cfb_standings</code> shares this
+package’s tiebreaker rulings</li>
+</ul>
+<p>A printable <a href="https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf" class="external-link">cheat
+sheet (PDF)</a> covers cfbplotR, cfb4th and cfbseedR together.</p>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
