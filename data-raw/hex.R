@@ -1,3 +1,18 @@
+# hexSticker prototype for the cfbseedR logo.
+#
+# NOTE: `man/figures/logo.svg` is the SOURCE OF TRUTH for the shipped logo,
+# and `data-raw/logo-assets.R` renders every raster from it (logo.png,
+# logo-2x.png, the favicon set). This script is the original hexSticker
+# exploration and is kept for reference only -- it is NOT what produces the
+# shipped artwork, so do not expect its output to match. Keep the palette and
+# `h_size` here in step with the SVG if you change either.
+#
+# Border thickness: hexSticker's `h_size` maps to roughly
+# `border_px = 10 * h_size - 3` at the default 518px width (measured on this
+# machine, R 4.6.1 / ragg). `h_size = 1.4` therefore gives the ~11px border
+# the SVG now draws, matching the sportsdataverse-R meta-package and sitting
+# between wehoop (9px) and fastRhockey (17px).
+#
 # Ensure required packages are installed
 # install.packages(c("ggplot2", "hexSticker", "showtext"))
 
@@ -166,7 +181,7 @@ sticker(
   # Frame layout configuration
   h_fill = palette$bg_id,
   h_color = palette$border_id,
-  h_size = 1.8,
+  h_size = 1.4,
 
   filename = "man/figures/logo.png"
 )
