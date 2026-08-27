@@ -124,8 +124,8 @@ plus one independent).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://cfbseedR.sportsdataverse.org">cfbseedR</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">games</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"toy_games.csv"</span>, package <span class="op">=</span> <span class="st">"cfbseedR"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">teams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"toy_teams.csv"</span>, package <span class="op">=</span> <span class="st">"cfbseedR"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">games</span> <span class="op">&lt;-</span> <span class="va">cfb_games_example</span></span>
+<span><span class="va">teams</span> <span class="op">&lt;-</span> <span class="va">cfb_teams_example</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">games</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    sim week game_type home_team away_team result neutral</span></span>
@@ -226,21 +226,23 @@ adapted from nflseedR - then computes standings, champions, seeds, and
 <code class="sourceCode R"><span><span class="va">games</span><span class="op">$</span><span class="va">result</span><span class="op">[</span><span class="va">games</span><span class="op">$</span><span class="va">week</span> <span class="op">&gt;=</span> <span class="fl">3</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_simulations.html">cfb_simulations</a></span><span class="op">(</span><span class="va">games</span>, <span class="va">teams</span>, simulations <span class="op">=</span> <span class="fl">50</span>, playoff_seeds <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Start simulation of 50 seasons (4 weeks to simulate).</span></span>
+<span><span class="co">#&gt; Start simulation of 50 seasons (4 weeks to simulate) in 8 chunks.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Chunks run sequentially. Set a parallel `future::plan()`, e.g.</span></span>
+<span><span class="co">#&gt;   `future::plan("multisession")`, to use more cores.</span></span>
 <span><span class="co">#&gt; DONE!</span></span>
 <span><span class="va">sim</span><span class="op">$</span><span class="va">overall</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 9 × 7</span></span></span>
 <span><span class="co">#&gt;   conference       team   wins conf_champ playoff seed1 won_natty</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Alpha            A1     3.26       0.88    0.76  0.02      0.32</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Alpha            A2     1.4        0.12    0.08  0.02      0.02</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Alpha            A3     2.72       0       1     0.7       0.06</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Alpha            A4     0.6        0       0     0         0   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Beta             B1     3.24       0.68    0.56  0.06      0.12</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Beta             B2     1.8        0.32    0.24  0         0.02</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> Beta             B3     1.66       0       0.64  0         0.14</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> Beta             B4     0.68       0       0.04  0         0   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">9</span> FBS Independents I1     1.64       0       0.68  0.2       0.32</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Alpha            A1     2.6        0.42    0.48  0.04      0.2 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Alpha            A2     2.06       0.58    0.36  0.14      0.14</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Alpha            A3     2.52       0       0.98  0.4       0.16</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Alpha            A4     0.86       0       0.12  0         0.02</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Beta             B1     3.54       0.5     0.74  0.24      0.14</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Beta             B2     2.06       0.5     0.44  0.02      0.08</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> Beta             B3     1.38       0       0.38  0.02      0.1 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> Beta             B4     0.76       0       0.06  0         0.02</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">9</span> FBS Independents I1     1.22       0       0.44  0.14      0.14</span></span></code></pre></div>
 <p>The returned <code>cfbseedR_simulation</code> list also carries
 per-simulation <code>standings</code>, all simulated <code>games</code>,
 <code>team_wins</code> win-total probabilities, per-matchup

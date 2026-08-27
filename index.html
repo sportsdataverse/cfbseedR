@@ -132,8 +132,8 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://cfbseedR.sportsdataverse.org">cfbseedR</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Bundled toy season (9 teams, 2 conferences + 1 independent)</span></span>
-<span><span class="va">games</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"toy_games.csv"</span>, package <span class="op">=</span> <span class="st">"cfbseedR"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">teams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"toy_teams.csv"</span>, package <span class="op">=</span> <span class="st">"cfbseedR"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">games</span> <span class="op">&lt;-</span> <span class="va">cfb_games_example</span></span>
+<span><span class="va">teams</span> <span class="op">&lt;-</span> <span class="va">cfb_teams_example</span></span>
 <span></span>
 <span><span class="co"># Standings with conference ranks and champions</span></span>
 <span><span class="va">standings</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cfb_standings.html">cfb_standings</a></span><span class="op">(</span><span class="va">games</span>, <span class="va">teams</span>, tiebreaker_depth <span class="op">=</span> <span class="st">"POINTS"</span><span class="op">)</span></span>
@@ -143,6 +143,14 @@
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cfb_simulations.html">cfb_simulations</a></span><span class="op">(</span><span class="va">games</span>, <span class="va">teams</span>, simulations <span class="op">=</span> <span class="fl">100</span>, playoff_seeds <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="va">sim</span><span class="op">$</span><span class="va">overall</span></span>
+<span></span>
+<span><span class="co"># Pretty gt summary, grouped by conference.</span></span>
+<span><span class="co"># Needs the optional presentation packages: install.packages(c("gt", "scales"))</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">sim</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Spread the simulations across cores</span></span>
+<span><span class="co"># future::plan("multisession")</span></span>
+<span><span class="co"># sim &lt;- cfb_simulations(games, teams, simulations = 10000, chunks = 8)</span></span>
 <span></span>
 <span><span class="co"># Real data via cfbfastR (Suggests; the engine itself needs no cfbfastR)</span></span>
 <span><span class="co"># sched &lt;- cfbfastR::load_cfb_schedules(2024)</span></span>
@@ -182,8 +190,7 @@
 <li>Committee <code>rankings</code> are static across simulations.</li>
 <li>Conference championship matchups are simulated <strong>as scheduled</strong> — the engine does not re-derive participants from simulated standings.</li>
 <li>Playoff games are generated only when the input <code>games</code> has no <code>game_type == "POST"</code> rows; the first round is hosted by the higher seed, later rounds are neutral-site.</li>
-<li>No draft order (not a CFB concept).</li>
-<li>No chunked/parallel simulation (nflseedR’s <code>chunks</code>/future support); simulations run sequentially.</li>
+<li>No draft order and no <code>simulate_nfl()</code>-style legacy v1 API — the former is not a CFB concept, the latter would be new-package cruft.</li>
 </ul>
 </div>
 <div class="section level2">

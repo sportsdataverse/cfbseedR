@@ -83,7 +83,23 @@
 <li>CRAN preparation: every test skips on CRAN, every example is wrapped in <code>\donttest{}</code>, and the packaging metadata (LICENSE, cph, CITATION, <code>.Rbuildignore</code>, <code>.gitattributes</code>) was reviewed.</li>
 <li>
 <code>teams</code> gains two optional columns: <code>conf_division</code> (division-format ranking - the two division champions take <code>conf_rank</code> 1-2, as in the 2026 Sun Belt) and <code>postseason_eligible</code> (an ineligible team cannot occupy a championship-game berth while its games still count).</li>
+</ul><div class="section level3">
+<h3 id="nflseedr-surface-parity-0-2-0">nflseedR surface parity<a class="anchor" aria-label="anchor" href="#nflseedr-surface-parity-0-2-0"></a></h3>
+<ul><li>
+<strong>Parallel simulation.</strong> <code><a href="../reference/cfb_simulations.html">cfb_simulations()</a></code> gains <code>chunks</code> (default 8): simulations are split into contiguous blocks and dispatched with <code><a href="https://furrr.futureverse.org/reference/future_map.html" class="external-link">furrr::future_map()</a></code>, so setting a parallel plan (<code>future::plan("multisession")</code>) spreads them across cores. Progress is reported through <code>progressr</code>. A given seed reproduces exactly for a fixed <code>chunks</code>, and a parallel plan gives bit-identical results to a sequential one – but the RNG stream differs from a single unchunked pass, so output for the same seed changes if you change <code>chunks</code>.</li>
+<li>
+<strong><code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> for simulations.</strong> <code>cfbseedR_simulation</code> objects were classed but had no methods, so <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> fell back to R’s generic list summary. There is now a <code><a href="../reference/summary.cfbseedR_simulation.html">summary.cfbseedR_simulation()</a></code> gt method rendering the <code>overall</code> table grouped by conference, the counterpart of nflseedR’s <code>summary.nflseedR_simulation()</code>.</li>
+<li>
+<strong><code><a href="../reference/fmt_pct_special.html">fmt_pct_special()</a></code></strong> formats probabilities the way simulation summaries want them: <code>&lt;1%</code> instead of a flat <code>0%</code>, <code>&gt;99.9%</code> instead of a false <code>100%</code>. Ported from nflseedR.</li>
+<li>
+<strong>Exported example data.</strong> <code>cfb_games_example</code> and <code>cfb_teams_example</code> replace the <code>read.csv(system.file(...))</code> dance in examples, mirroring nflseedR’s <code>sims_games_example</code> / <code>sims_teams_example</code>.</li>
+<li>
+<strong><code>verbosity</code> on <code><a href="../reference/cfb_simulations.html">cfb_simulations()</a></code></strong>, matching <code><a href="../reference/cfb_standings.html">cfb_standings()</a></code> and <code>nfl_simulations()</code>; <code>"NONE"</code> silences it completely. The simulation’s tiebreak notes are now attached to the returned standings as well – they were previously computed and discarded.</li>
+<li>
+<strong><code>ranks = "NONE"</code></strong> on <code><a href="../reference/cfb_standings.html">cfb_standings()</a></code> skips the conference-rank cascade entirely when you only need records, after nflseedR’s <code>ranks</code> argument.</li>
+<li>New Imports: furrr, future, progressr. New Suggests: gt, scales (both only needed for <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> and <code><a href="../reference/fmt_pct_special.html">fmt_pct_special()</a></code>).</li>
 </ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="cfbseedr-010">cfbseedR 0.1.0<a class="anchor" aria-label="anchor" href="#cfbseedr-010"></a></h2>
 <p>Initial release.</p>

@@ -123,8 +123,8 @@ season.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://cfbseedR.sportsdataverse.org">cfbseedR</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">games</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"toy_games.csv"</span>, package <span class="op">=</span> <span class="st">"cfbseedR"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">teams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"toy_teams.csv"</span>, package <span class="op">=</span> <span class="st">"cfbseedR"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">games</span> <span class="op">&lt;-</span> <span class="va">cfb_games_example</span></span>
+<span><span class="va">teams</span> <span class="op">&lt;-</span> <span class="va">cfb_teams_example</span></span>
 <span><span class="va">games</span><span class="op">$</span><span class="va">result</span><span class="op">[</span><span class="va">games</span><span class="op">$</span><span class="va">week</span> <span class="op">&gt;=</span> <span class="fl">3</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="custom-compute_results-functions">Custom <code>compute_results</code> functions<a class="anchor" aria-label="anchor" href="#custom-compute_results-functions"></a>
@@ -160,7 +160,9 @@ against the full contract before you burn simulation time on it:</p>
 <span>  compute_results <span class="op">=</span> <span class="va">home_field_rules</span>,</span>
 <span>  simulations <span class="op">=</span> <span class="fl">10</span>, playoff_seeds <span class="op">=</span> <span class="fl">4</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Start simulation of 10 seasons (4 weeks to simulate).</span></span>
+<span><span class="co">#&gt; Start simulation of 10 seasons (4 weeks to simulate) in 8 chunks.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Chunks run sequentially. Set a parallel `future::plan()`, e.g.</span></span>
+<span><span class="co">#&gt;   `future::plan("multisession")`, to use more cores.</span></span>
 <span><span class="co">#&gt; DONE!</span></span>
 <span><span class="va">sim</span><span class="op">$</span><span class="va">overall</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"team"</span>, <span class="st">"wins"</span>, <span class="st">"conf_champ"</span>, <span class="st">"playoff"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 9 × 4</span></span></span>
@@ -187,21 +189,23 @@ ELO ratings that way:</p>
 <span>  simulations <span class="op">=</span> <span class="fl">10</span>, playoff_seeds <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>  elo <span class="op">=</span> <span class="va">elo</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Start simulation of 10 seasons (4 weeks to simulate).</span></span>
+<span><span class="co">#&gt; Start simulation of 10 seasons (4 weeks to simulate) in 8 chunks.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Chunks run sequentially. Set a parallel `future::plan()`, e.g.</span></span>
+<span><span class="co">#&gt;   `future::plan("multisession")`, to use more cores.</span></span>
 <span><span class="co">#&gt; DONE!</span></span>
 <span><span class="va">sim_elo</span><span class="op">$</span><span class="va">overall</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"team"</span>, <span class="st">"wins"</span>, <span class="st">"playoff"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 9 × 3</span></span></span>
 <span><span class="co">#&gt;   team   wins playoff</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> A1      2.9     0.5</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> A2      2.1     0.3</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> A3      2.5     1  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> A4      0.6     0.1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> B1      3.6     0.8</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> B2      2.1     0.6</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> B3      1.2     0.2</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> B4      0.8     0.1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">9</span> I1      1.2     0.4</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> A1      3.3     0.9</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> A2      2       0.4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> A3      2.4     1  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> A4      0.9     0  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> B1      3.5     0.9</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> B2      1.8     0.2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> B3      1.1     0.1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> B4      1.3     0.3</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">9</span> I1      0.7     0.2</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="the-tiebreaker_depth-ladder">The <code>tiebreaker_depth</code> ladder<a class="anchor" aria-label="anchor" href="#the-tiebreaker_depth-ladder"></a>
@@ -243,7 +247,7 @@ schedule.</td>
 <p><code>verbosity = "MAX"</code> logs every step the cascade takes,
 which is the easiest way to understand (and trust) a rank:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">played</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"toy_games.csv"</span>, package <span class="op">=</span> <span class="st">"cfbseedR"</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">played</span> <span class="op">&lt;-</span> <span class="va">cfb_games_example</span></span>
 <span><span class="va">standings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_standings.html">cfb_standings</a></span><span class="op">(</span><span class="va">played</span>, <span class="va">teams</span>,</span>
 <span>                           tiebreaker_depth <span class="op">=</span> <span class="st">"POINTS"</span>, verbosity <span class="op">=</span> <span class="st">"MAX"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Initiate standings &amp; tiebreaking data</span></span>
@@ -332,21 +336,27 @@ skipped, and the skip is recorded in
 </div>
 </div>
 <div class="section level2">
-<h2 id="cfp-12-straight-seeding">CFP-12 straight seeding<a class="anchor" aria-label="anchor" href="#cfp-12-straight-seeding"></a>
+<h2 id="cfp-12-seeding-and-the-autobid-policy">CFP-12 seeding and the <code>autobid</code> policy<a class="anchor" aria-label="anchor" href="#cfp-12-seeding-and-the-autobid-policy"></a>
 </h2>
-<p><code><a href="../reference/cfb_playoff_seeds.html">cfb_playoff_seeds()</a></code> implements the 2025 <strong>straight
-seeding</strong> rule:</p>
-<ol style="list-style-type: decimal">
-<li>Order all teams by committee rank (<code>rankings</code>); unranked
-teams fall back behind ranked ones (and to win pct, SOV, SOS, and point
-differential when <code>rankings = NULL</code>).</li>
-<li>The 5 highest-ranked <strong>conference champions</strong> are
-guaranteed a spot (fewer if fewer champions exist).</li>
-<li>Fill the remaining spots with the best-ranked at-large teams.</li>
-<li>Seed the field strictly in ranking order - champions are
-<strong>not</strong> bumped up to the top-4 seeds (that was the pre-2025
-rule).</li>
-</ol>
+<p><code><a href="../reference/cfb_playoff_seeds.html">cfb_playoff_seeds()</a></code> always uses <strong>straight
+seeding</strong> - the field is ordered strictly by committee rank, and
+champions are never bumped up to the top-4 seeds (that was the pre-2025
+rule). What changes between seasons is <em>who is guaranteed a
+place</em>, which is the <code>autobid</code> argument:</p>
+<ul>
+<li>
+<code>autobid = "2026"</code> (the default, today’s rule): the
+<strong>ACC, Big 12, Big Ten and SEC champions are in regardless of
+their ranking</strong>, the <strong>highest-ranked Group-of-6
+team</strong> is in whether or not it won its conference, and
+<strong>Notre Dame</strong> is in when ranked inside the field.</li>
+<li>
+<code>autobid = "2025"</code>: the 5 highest-ranked
+<strong>conference champions</strong> are guaranteed (fewer if fewer
+champions exist) - the 2024-2025 rule.</li>
+</ul>
+<p>Under either policy the remaining places go to the best-ranked
+at-large teams, and the whole field is then seeded in rank order.</p>
 <p>A synthetic 16-team example with 6 conference champions shows the
 guarantee and the straight ordering; champion <code>F1</code> (ranked
 14th) displaces the lowest at-large team but keeps its rank-order
@@ -388,10 +398,39 @@ seed, later rounds neutral-site, no reseeding), and committee
 <code>rankings</code> are held static across simulations.</p>
 </div>
 <div class="section level2">
+<h2 id="running-simulations-in-parallel">Running simulations in parallel<a class="anchor" aria-label="anchor" href="#running-simulations-in-parallel"></a>
+</h2>
+<p>Simulations are split into <code>chunks</code> (default 8) and
+dispatched with furrr, so a parallel plan spreads them across cores:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="st">"multisession"</span><span class="op">)</span></span>
+<span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_simulations.html">cfb_simulations</a></span><span class="op">(</span><span class="va">games</span>, <span class="va">teams</span>, simulations <span class="op">=</span> <span class="fl">10000</span>, chunks <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
+<span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="st">"sequential"</span><span class="op">)</span></span></code></pre></div>
+<p>Progress reporting comes from progressr - switch it on once and every
+call reports:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">progressr</span><span class="fu">::</span><span class="fu"><a href="https://progressr.futureverse.org/reference/handlers.html" class="external-link">handlers</a></span><span class="op">(</span>global <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>A given seed reproduces exactly for a fixed <code>chunks</code>, and
+a parallel plan gives identical results to a sequential one. The RNG
+stream does depend on the chunking, though, so the same seed with a
+different <code>chunks</code> gives different (equally valid)
+simulations.</p>
+</div>
+<div class="section level2">
+<h2 id="summarising-a-simulation">Summarising a simulation<a class="anchor" aria-label="anchor" href="#summarising-a-simulation"></a>
+</h2>
+<p><code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> renders the <code>overall</code> table as a gt
+table grouped by conference, with probabilities formatted by
+<code><a href="../reference/fmt_pct_special.html">fmt_pct_special()</a></code> so a long-shot reads <code>&lt;1%</code>
+rather than a flat <code>0%</code>:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">sim</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="real-schedules">Real schedules<a class="anchor" aria-label="anchor" href="#real-schedules"></a>
 </h2>
 <p>With cfbfastR installed, a real season plugs straight in:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Not run: requires network access via cfbfastR</span></span>
 <span><span class="va">sched</span> <span class="op">&lt;-</span> <span class="fu">cfbfastR</span><span class="fu">::</span><span class="fu"><a href="https://cfbfastR.sportsdataverse.org/reference/load_cfb_schedules.html" class="external-link">load_cfb_schedules</a></span><span class="op">(</span><span class="fl">2024</span><span class="op">)</span></span>
 <span><span class="va">games_2024</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_games_from_schedule.html">cfb_games_from_schedule</a></span><span class="op">(</span><span class="va">sched</span><span class="op">)</span></span>

@@ -101,6 +101,7 @@ conference record.</p>
 <span>  <span class="va">games</span>,</span>
 <span>  <span class="va">teams</span>,</span>
 <span>  <span class="va">...</span>,</span>
+<span>  ranks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CONF"</span>, <span class="st">"NONE"</span><span class="op">)</span>,</span>
 <span>  tiebreaker_depth <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SOS"</span>, <span class="st">"PRE-SOV"</span>, <span class="st">"POINTS"</span>, <span class="st">"RANDOM"</span><span class="op">)</span>,</span>
 <span>  playoff_seeds <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  rankings <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -163,6 +164,13 @@ still count toward its opponents' records and toward the Big 12
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Currently unused.</p></dd>
+
+
+<dt id="arg-ranks">ranks<a class="anchor" aria-label="anchor" href="#arg-ranks"></a></dt>
+<dd><p>One of <code>"CONF"</code> (default) or <code>"NONE"</code>. <code>"NONE"</code> returns the
+raw standings and skips the conference-rank tiebreaker walk entirely -
+and therefore also <code>conf_champ</code> and <code>seed</code>, which are derived from it.
+Useful when you only need records and the cascade would be wasted work.</p></dd>
 
 
 <dt id="arg-tiebreaker-depth">tiebreaker_depth<a class="anchor" aria-label="anchor" href="#arg-tiebreaker-depth"></a></dt>

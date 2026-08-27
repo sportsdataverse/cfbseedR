@@ -98,20 +98,22 @@
 </tr><tr><td><code><a href="reference/cfb_games_from_schedule.html">cfb_games_from_schedule()</a></code></td>
 <td>
 <code><a href="https://cfbfastR.sportsdataverse.org/reference/load_cfb_schedules.html" class="external-link">cfbfastR::load_cfb_schedules()</a></code> → engine games schema</td>
-</tr></tbody></table><p>Internal engine helpers live in <code>R/standings_utils.R</code> (mirrors nflseedR’s <code>standings_utils.R</code>/<code>standings_init.R</code> architecture).</p>
+</tr><tr><td><code><a href="reference/summary.cfbseedR_simulation.html">summary.cfbseedR_simulation()</a></code></td>
+<td>S3 gt summary of a simulation (Suggests: gt, scales)</td>
+</tr><tr><td><code><a href="reference/fmt_pct_special.html">fmt_pct_special()</a></code></td>
+<td>Probability formatter (<code>&lt;1%</code> / <code>&gt;99.9%</code>)</td>
+</tr></tbody></table><p>Exported data: <code>cfb_games_example</code>, <code>cfb_teams_example</code> (the toy season; prefer these over <code>read.csv(system.file(...))</code> in examples and docs).</p>
+<p>Internal engine helpers live in <code>R/standings_utils.R</code> (mirrors nflseedR’s <code>standings_utils.R</code>/<code>standings_init.R</code> architecture).</p>
 </div>
 <div class="section level2">
 <h2 id="binding-semantics-rulings">Binding semantics rulings<a class="anchor" aria-label="anchor" href="#binding-semantics-rulings"></a></h2>
-<ul><li>
-<strong>Conference-REG-scoped <code>sov</code>/<code>sos</code>:</strong> all tiebreaker cascade quantities (head-to-head, common opponents, SOV, SOS, point differential) are computed over regular-season conference games only. <code>sov</code> is over conference victories, <code>sos</code> over conference opponents; independents get <code>0.0</code>. Do not widen to full-schedule scope.</li>
-<li>
-<strong><code>CONF_CHAMP</code> semantics:</strong> conference championship games count toward the overall record and decide <code>conf_champ</code>, but do NOT count toward the conference record/rank. CONF_CHAMP matchups are simulated as scheduled, never re-derived from simulated standings.</li>
-<li>
-<strong>Straight seeding + season-keyed auto-bids:</strong> seeds are assigned strictly in ranking order — champions are never bumped into the top 4. <code>autobid = "2026"</code> (default): ACC/Big 12/Big Ten/SEC champions in regardless of ranking + the highest-ranked Group-of-6 team (champion not required) + Notre Dame when ranked inside the field. <code>autobid = "2025"</code>: the 5 highest-ranked conference champions.</li>
-<li>
-<strong>Season-scoped tiebreaker registry:</strong> <code>CONFERENCE_TIEBREAKERS</code> entries are lists of dated epochs resolved per season (<code>season</code> ids) or to the CURRENT rules (plain <code>sim</code> ids). The ACC’s 2026 policy (h2h → SportSource SSR → draw, wins-or-losses candidate pool, eligibility filter) applies from 2026. External metrics (composites, CFP ranks, APR) enter only via <code>tiebreaker_data</code>; missing inputs skip their rungs with a <code>tiebreak_notes</code> entry — never invent a metric.</li>
-<li>
-<strong>Division opt-in:</strong> a <code>conf_division</code> column on <code>teams</code> is the opt-in for division-format ranking (division champs take <code>conf_rank</code> 1-2); never gate it to a hardcoded conference list.</li>
+<ul><li><p><strong>Conference-REG-scoped <code>sov</code>/<code>sos</code>:</strong> all tiebreaker cascade quantities (head-to-head, common opponents, SOV, SOS, point differential) are computed over regular-season conference games only. <code>sov</code> is over conference victories, <code>sos</code> over conference opponents; independents get <code>0.0</code>. Do not widen to full-schedule scope.</p></li>
+<li><p><strong><code>CONF_CHAMP</code> semantics:</strong> conference championship games count toward the overall record and decide <code>conf_champ</code>, but do NOT count toward the conference record/rank. CONF_CHAMP matchups are simulated as scheduled, never re-derived from simulated standings.</p></li>
+<li><p><strong>Straight seeding + season-keyed auto-bids:</strong> seeds are assigned strictly in ranking order — champions are never bumped into the top 4. <code>autobid = "2026"</code> (default): ACC/Big 12/Big Ten/SEC champions in regardless of ranking + the highest-ranked Group-of-6 team (champion not required) + Notre Dame when ranked inside the field. <code>autobid = "2025"</code>: the 5 highest-ranked conference champions.</p></li>
+<li><p><strong>Season-scoped tiebreaker registry:</strong> <code>CONFERENCE_TIEBREAKERS</code> entries are lists of dated epochs resolved per season (<code>season</code> ids) or to the CURRENT rules (plain <code>sim</code> ids). The ACC’s 2026 policy (h2h → SportSource SSR → draw, wins-or-losses candidate pool, eligibility filter) applies from 2026. External metrics (composites, CFP ranks, APR) enter only via <code>tiebreaker_data</code>; missing inputs skip their rungs with a <code>tiebreak_notes</code> entry — never invent a metric.</p></li>
+<li><p><strong>Division opt-in:</strong> a <code>conf_division</code> column on <code>teams</code> is the opt-in for division-format ranking (division champs take <code>conf_rank</code> 1-2); never gate it to a hardcoded conference list.</p></li>
+<li><p><strong>Chunked simulation:</strong> <code><a href="reference/cfb_simulations.html">cfb_simulations()</a></code> splits sims into <code>chunks</code> dispatched via <code><a href="https://furrr.futureverse.org/reference/future_map.html" class="external-link">furrr::future_map()</a></code> with <code>furrr_options(seed = TRUE)</code>. <code>sims_run_chunk()</code> must stay SELF-CONTAINED - everything it needs is an argument, it touches no shared state - or parallel workers break. A parallel plan must stay bit-identical to sequential for a fixed seed and <code>chunks</code>; there is a test for this, do not weaken it.</p></li>
+<li><p><strong>nflseedR parity:</strong> cfbseedR deliberately omits draft order, the v1 legacy API (<code>simulate_nfl</code>, <code>compute_*</code>), and <code>load_sharpe_games</code>. Do not add them. Everything else in nflseedR’s surface has a CFB counterpart.</p></li>
 </ul></div>
 <div class="section level2">
 <h2 id="cross-validation-contract-with-sdv-py">Cross-validation contract with sdv-py<a class="anchor" aria-label="anchor" href="#cross-validation-contract-with-sdv-py"></a></h2>

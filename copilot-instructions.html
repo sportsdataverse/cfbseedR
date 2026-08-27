@@ -76,8 +76,8 @@
 <p>cfbseedR is an R package that simulates and evaluates college football seasons: standings with a documented tiebreaker cascade, conference champions, College Football Playoff (CFP) straight seeding, and week-by-week season simulation with a pluggable results generator. It adapts <a href="https://nflseedr.com" class="external-link">nflseedR</a> (MIT, Lee Sharpe &amp; Sebastian Carl) to college football semantics. Docs: <a href="https://cfbseedR.sportsdataverse.org" class="uri">https://cfbseedR.sportsdataverse.org</a></p>
 </div>
 <div class="section level2">
-<h2 id="exports-6">Exports (6)<a class="anchor" aria-label="anchor" href="#exports-6"></a></h2>
-<p><code><a href="reference/cfb_standings.html">cfb_standings()</a></code>, <code><a href="reference/cfb_playoff_seeds.html">cfb_playoff_seeds()</a></code>, <code><a href="reference/cfb_simulations.html">cfb_simulations()</a></code>, <code><a href="reference/cfbseedR_compute_results.html">cfbseedR_compute_results()</a></code>, <code><a href="reference/simulations_verify_fct.html">simulations_verify_fct()</a></code>, <code><a href="reference/cfb_games_from_schedule.html">cfb_games_from_schedule()</a></code>. User-facing engine functions use the <code>cfb_</code> prefix; the two helpers mirror their nflseedR namesakes.</p>
+<h2 id="exports-8--2-datasets">Exports (8 + 2 datasets)<a class="anchor" aria-label="anchor" href="#exports-8--2-datasets"></a></h2>
+<p><code><a href="reference/cfb_standings.html">cfb_standings()</a></code>, <code><a href="reference/cfb_playoff_seeds.html">cfb_playoff_seeds()</a></code>, <code><a href="reference/cfb_simulations.html">cfb_simulations()</a></code>, <code><a href="reference/cfbseedR_compute_results.html">cfbseedR_compute_results()</a></code>, <code><a href="reference/simulations_verify_fct.html">simulations_verify_fct()</a></code>, <code><a href="reference/cfb_games_from_schedule.html">cfb_games_from_schedule()</a></code>, <code><a href="reference/fmt_pct_special.html">fmt_pct_special()</a></code>, plus the S3 <code><a href="reference/summary.cfbseedR_simulation.html">summary.cfbseedR_simulation()</a></code>. Exported data: <code>cfb_games_example</code>, <code>cfb_teams_example</code> — use these in examples, not <code>read.csv(system.file())</code>. User-facing engine functions use the <code>cfb_</code> prefix; the two helpers mirror their nflseedR namesakes.</p>
 </div>
 <div class="section level2">
 <h2 id="semantics-rulings-do-not-change-casually">Semantics rulings (do not change casually)<a class="anchor" aria-label="anchor" href="#semantics-rulings-do-not-change-casually"></a></h2>
@@ -86,6 +86,8 @@
 <li>
 <code>CONF_CHAMP</code> games count toward the overall record and decide <code>conf_champ</code>, but NOT toward the conference record/rank; matchups are simulated as scheduled.</li>
 <li>CFP straight seeding with season-keyed <code>autobid</code>: <code>"2026"</code> (default) = P4 champions regardless of ranking + best Group-of-6 team + Notre Dame top-12 clause; <code>"2025"</code> = 5 highest-ranked conference champions guaranteed; seeds strictly in ranking order (no champion bump).</li>
+<li>Simulations are chunked and run through <code><a href="https://furrr.futureverse.org/reference/future_map.html" class="external-link">furrr::future_map()</a></code>; <code>sims_run_chunk()</code> must stay self-contained (no shared state) or parallel workers break, and a parallel plan must match sequential bit-for-bit for a fixed seed and <code>chunks</code>.</li>
+<li>gt and scales are Suggests, reached only via <code><a href="https://rlang.r-lib.org/reference/is_installed.html" class="external-link">rlang::check_installed()</a></code>.</li>
 <li>These rulings are cross-validated against sportsdataverse-py’s CFB standings implementation — keep the two reconcilable.</li>
 </ul></div>
 <div class="section level2">

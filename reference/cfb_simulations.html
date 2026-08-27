@@ -105,7 +105,9 @@ playoff bracket is simulated round by round.</p>
 <span>  sim_include <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"POST"</span>, <span class="st">"REG"</span><span class="op">)</span>,</span>
 <span>  rankings <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  autobid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2026"</span>, <span class="st">"2025"</span><span class="op">)</span>,</span>
-<span>  tiebreaker_data <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  tiebreaker_data <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  chunks <span class="op">=</span> <span class="fl">8L</span>,</span>
+<span>  verbosity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MIN"</span>, <span class="st">"MAX"</span>, <span class="st">"NONE"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -198,8 +200,23 @@ back to the per-simulation standings ordering (see
 
 <dt id="arg-tiebreaker-data">tiebreaker_data<a class="anchor" aria-label="anchor" href="#arg-tiebreaker-data"></a></dt>
 <dd><p>Optional named list of external tiebreaker inputs
-(<code>analytics_ratings</code>, <code>cfp_rankings</code>), held static across simulations -
-see <code><a href="cfb_standings.html">cfb_standings()</a></code>. Missing inputs skip their rungs (noted).</p></dd>
+(<code>analytics_ratings</code>, <code>cfp_rankings</code>, <code>apr</code>), held static across
+simulations - see <code><a href="cfb_standings.html">cfb_standings()</a></code>. Missing inputs skip their rungs
+(noted).</p></dd>
+
+
+<dt id="arg-chunks">chunks<a class="anchor" aria-label="anchor" href="#arg-chunks"></a></dt>
+<dd><p>The number of chunks the simulations are split into
+(default 8, capped at <code>simulations</code>). Chunks are dispatched with
+<code><a href="https://furrr.futureverse.org/reference/future_map.html" class="external-link">furrr::future_map()</a></code>, so they run in parallel as soon as you set a
+parallel plan, e.g. <code>future::plan("multisession")</code>; with the default
+sequential plan they simply run one after another. There is no
+universally best number - too many chunks can be as slow as too few.</p></dd>
+
+
+<dt id="arg-verbosity">verbosity<a class="anchor" aria-label="anchor" href="#arg-verbosity"></a></dt>
+<dd><p>One of <code>"MIN"</code> (default), <code>"MAX"</code>, or <code>"NONE"</code>, as in
+<code><a href="cfb_standings.html">cfb_standings()</a></code>. <code>"NONE"</code> silences the progress messages entirely.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -214,8 +231,14 @@ seeds this reproduces the CFP bracket (quarterfinals 1 vs 8/9 winner,
 higher seed; later rounds are neutral-site. There is no reseeding
 (fixed bracket, per the CFP format). Conference championship matchups
 are simulated as scheduled, not re-derived from simulated standings.</p>
-<p>Simulations run sequentially (no chunk/parallel support). Set a seed
-with <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> for reproducibility.</p>
+<p>Simulations are split into <code>chunks</code> and dispatched with furrr, so a
+parallel <code><a href="https://future.futureverse.org/reference/plan.html" class="external-link">future::plan()</a></code> spreads them across cores. Progress can be
+reported by turning on <code><a href="https://progressr.futureverse.org/reference/handlers.html" class="external-link">progressr::handlers()</a></code> before the call, or by
+piping the call into <code><a href="https://progressr.futureverse.org/reference/with_progress.html" class="external-link">progressr::with_progress()</a></code>.</p>
+<p>Set a seed with <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> for reproducibility: furrr generates
+parallel-safe RNG streams per chunk, so a given seed reproduces exactly -
+but the stream differs from a single sequential pass, so results for the
+same seed change if you change <code>chunks</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -232,21 +255,23 @@ the nflseedR original: <a href="https://nflseedr.com" class="external-link">http
 <span class="r-in"><span><span class="va">games</span><span class="op">$</span><span class="va">result</span><span class="op">[</span><span class="va">games</span><span class="op">$</span><span class="va">week</span> <span class="op">&gt;=</span> <span class="fl">3</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu">cfb_simulations</span><span class="op">(</span><span class="va">games</span>, <span class="va">teams</span>, simulations <span class="op">=</span> <span class="fl">4</span>, playoff_seeds <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Start simulation of 4 seasons (4 weeks to simulate).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Start simulation of 4 seasons (4 weeks to simulate) in 4 chunks.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Chunks run sequentially. Set a parallel `future::plan()`, e.g.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   `future::plan("multisession")`, to use more cores.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> DONE!</span>
 <span class="r-in"><span><span class="va">sim</span><span class="op">$</span><span class="va">overall</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 9 × 7</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   conference       team   wins conf_champ playoff seed1 won_natty</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> Alpha            A1     2.75       0.5     0.75  0         0   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> Alpha            A2     1.75       0.5     0.5   0.25      0   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> Alpha            A3     2.75       0       1     0.5       0.25</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> Alpha            A4     1          0       0.25  0         0   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> Beta             B1     4          0.75    0.75  0.25      0.5 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> Beta             B2     2.25       0.25    0.25  0         0   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span> Beta             B3     1          0       0     0         0   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">8</span> Beta             B4     0          0       0     0         0   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">9</span> FBS Independents I1     1.5        0       0.5   0         0.25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> Alpha            A1     2.5        0.5     0.5    0        0.25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> Alpha            A2     2          0.5     0.5    0        0   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> Alpha            A3     2.5        0       1      0.5      0.5 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> Alpha            A4     1.25       0       0.25   0        0   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> Beta             B1     3.5        0.75    0.75   0.5      0   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> Beta             B2     1.5        0.25    0.25   0        0   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span> Beta             B3     1.75       0       0.75   0        0.25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">8</span> Beta             B4     1.5        0       0      0        0   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">9</span> FBS Independents I1     0.5        0       0      0        0   </span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

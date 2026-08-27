@@ -337,6 +337,31 @@ bumped up: seeds follow the committee order exactly, with the top four
 seeds earning first-round byes in <code><a href="../reference/cfb_simulations.html">cfb_simulations()</a></code>.</p>
 </div>
 <div class="section level2">
+<h2 id="recipe-5-scaling-up">Recipe 5: scaling up<a class="anchor" aria-label="anchor" href="#recipe-5-scaling-up"></a>
+</h2>
+<p>Ten thousand seasons is a <code>chunks</code> argument away.
+Simulations are split into contiguous blocks and dispatched with furrr,
+so a parallel plan uses every core; <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> renders the
+result as a gt table grouped by conference.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="st">"multisession"</span><span class="op">)</span></span>
+<span><span class="fu">progressr</span><span class="fu">::</span><span class="fu"><a href="https://progressr.futureverse.org/reference/handlers.html" class="external-link">handlers</a></span><span class="op">(</span>global <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_simulations.html">cfb_simulations</a></span><span class="op">(</span></span>
+<span>  <span class="va">games</span>, <span class="va">teams</span>,</span>
+<span>  simulations <span class="op">=</span> <span class="fl">10000</span>,</span>
+<span>  chunks <span class="op">=</span> <span class="fl">8</span>,</span>
+<span>  autobid <span class="op">=</span> <span class="st">"2026"</span>,</span>
+<span>  tiebreaker_data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>analytics_ratings <span class="op">=</span> <span class="va">my_composite</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">sim</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="st">"sequential"</span><span class="op">)</span></span></code></pre></div>
+<p>A seed reproduces exactly for a fixed <code>chunks</code>, and
+parallel matches sequential – but the stream depends on the chunking, so
+changing <code>chunks</code> changes which seasons you get.</p>
+</div>
+<div class="section level2">
 <h2 id="where-the-rules-come-from">Where the rules come from<a class="anchor" aria-label="anchor" href="#where-the-rules-come-from"></a>
 </h2>
 <p>Every registered procedure was transcribed from the conference’s
