@@ -10,3 +10,4 @@ docs/
 *.tar.gz
 .DS_Store
 data-raw/DATASET.R
+data-raw/hexsticker-prototype.png

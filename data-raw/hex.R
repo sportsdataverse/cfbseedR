@@ -9,9 +9,9 @@
 #
 # Border thickness: hexSticker's `h_size` maps to roughly
 # `border_px = 10 * h_size - 3` at the default 518px width (measured on this
-# machine, R 4.6.1 / ragg). `h_size = 1.4` therefore gives the ~11px border
-# the SVG now draws, matching the sportsdataverse-R meta-package and sitting
-# between wehoop (9px) and fastRhockey (17px).
+# machine, R 4.6.1 / ragg). `h_size = 1.2` therefore gives the 9px border the
+# SVG now draws, matching wehoop -- the thinnest ring in the family
+# (sportsdataverse-R 11px, fastRhockey 17px).
 #
 # Ensure required packages are installed
 # install.packages(c("ggplot2", "hexSticker", "showtext"))
@@ -181,9 +181,11 @@ sticker(
   # Frame layout configuration
   h_fill = palette$bg_id,
   h_color = palette$border_id,
-  h_size = 1.4,
+  h_size = 1.2,
 
-  filename = "man/figures/logo.png"
+  # Writes beside this script, NOT to man/figures/logo.png -- running the
+  # prototype must never clobber the shipped logo rendered from logo.svg.
+  filename = "data-raw/hexsticker-prototype.png"
 )
 
 showtext_auto(FALSE)
