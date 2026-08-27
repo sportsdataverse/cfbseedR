@@ -10,10 +10,12 @@ synthetic_standings <- function() {
   )
 }
 
-test_that("straight seeding guarantees the 5 best-ranked conference champions", {
+test_that("2025 policy guarantees the 5 best-ranked conference champions", {
+  testthat::skip_on_cran()
   st <- synthetic_standings()
   rankings <- data.frame(team = sprintf("T%02d", 1:16), rank = 1:16)
-  seeded <- cfb_playoff_seeds(st, rankings = rankings, playoff_seeds = 12)
+  seeded <- cfb_playoff_seeds(st, rankings = rankings, playoff_seeds = 12,
+                              autobid = "2025")
   seeds <- setNames(seeded$seed, seeded$team)
 
   # Field: ranks 1-10 (at-large + champs) plus champs ranked 13 and 16,
@@ -28,9 +30,11 @@ test_that("straight seeding guarantees the 5 best-ranked conference champions", 
 })
 
 test_that("unranked teams sort behind ranked teams", {
+  testthat::skip_on_cran()
   st <- synthetic_standings()
   rankings <- data.frame(team = sprintf("T%02d", 1:10), rank = 1:10) # 11-16 unranked
-  seeded <- cfb_playoff_seeds(st, rankings = rankings, playoff_seeds = 12)
+  seeded <- cfb_playoff_seeds(st, rankings = rankings, playoff_seeds = 12,
+                              autobid = "2025")
   seeds <- setNames(seeded$seed, seeded$team)
   expect_equal(unname(seeds[sprintf("T%02d", 1:10)]), 1:10)
   # Unranked champs T13/T16 still guaranteed; unranked order falls back to
@@ -41,6 +45,7 @@ test_that("unranked teams sort behind ranked teams", {
 })
 
 test_that("rankings = NULL falls back to the standings ordering", {
+  testthat::skip_on_cran()
   st <- toy_standings(tiebreaker_depth = "POINTS")
   seeded <- cfb_playoff_seeds(st, rankings = NULL, playoff_seeds = 4)
   seeds <- setNames(seeded$seed, seeded$team)
@@ -53,7 +58,49 @@ test_that("rankings = NULL falls back to the standings ordering", {
   expect_equal(sum(!is.na(seeded$seed)), 4L)
 })
 
+test_that("2026 policy: P4 champs regardless of rank, best G6 team, ND clause", {
+  testthat::skip_on_cran()
+  # 16 teams: P4 champ ranked dead last still gets in; the best-ranked
+  # Group-of-6 TEAM gets in without being champion; Notre Dame gets in
+  # when ranked inside the field.
+  st <- tibble::tibble(
+    sim = 1L,
+    team = c(sprintf("T%02d", 1:13), "SecChamp", "MwTeam", "Notre Dame"),
+    conference = c(
+      rep("Big Ten", 6), rep("ACC", 4), rep("Big 12", 3),
+      "SEC", "Mountain West", "FBS Independents"
+    ),
+    conf_champ = c(
+      TRUE, rep(FALSE, 5), # T01 Big Ten champ
+      TRUE, rep(FALSE, 3), # T07 ACC champ
+      TRUE, FALSE, FALSE,  # T11 Big 12 champ
+      TRUE,                # SecChamp SEC champ
+      FALSE,               # MwTeam: NOT its conference champion
+      FALSE
+    ),
+    win_pct = seq(1, 0.25, length.out = 16),
+    sov = 0, sos = 0, pd = 0
+  )
+  # SecChamp unranked (P4 champ must still get in); MwTeam ranked 14;
+  # Notre Dame ranked 12.
+  rankings <- data.frame(
+    team = c(sprintf("T%02d", 1:11), "Notre Dame", "T12", "MwTeam", "T13"),
+    rank = 1:15
+  )
+  seeded <- cfb_playoff_seeds(st, rankings = rankings, playoff_seeds = 12)
+  seeds <- setNames(seeded$seed, seeded$team)
+
+  expect_false(is.na(seeds[["SecChamp"]])) # unranked P4 champ is in
+  expect_false(is.na(seeds[["MwTeam"]]))   # best G6 team, no title needed
+  expect_false(is.na(seeds[["Notre Dame"]])) # ND ranked 12 -> in
+  expect_equal(sum(!is.na(seeded$seed)), 12L)
+  # Straight seeding: ranked field members keep committee order
+  expect_equal(seeds[["T01"]], 1L)
+  expect_equal(seeds[["Notre Dame"]], 10L) # ranks 1-9 ahead of it in field
+})
+
 test_that("cfb_playoff_seeds validates its inputs", {
+  testthat::skip_on_cran()
   st <- synthetic_standings()
   expect_error(
     cfb_playoff_seeds(st, playoff_seeds = 20),

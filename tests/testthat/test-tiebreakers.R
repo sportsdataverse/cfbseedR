@@ -15,6 +15,7 @@ gamma_teams <- function() {
 }
 
 test_that("pairwise ties resolve via head-to-head at depth PRE-SOV", {
+  testthat::skip_on_cran()
   st <- cfb_standings(gamma_games(), gamma_teams(),
                       tiebreaker_depth = "PRE-SOV", verbosity = "NONE")
   ranks <- setNames(st$conf_rank, st$team)
@@ -25,6 +26,7 @@ test_that("pairwise ties resolve via head-to-head at depth PRE-SOV", {
 })
 
 test_that("ties without head-to-head resolve via common opponents", {
+  testthat::skip_on_cran()
   # E1: W E3, L E4, W E5 (2-1); E2: W E3, L E3, W E4 (2-1). No E1-E2 game.
   # Common conference opponents {E3, E4}: E1 is 1-1 (.5), E2 is 2-1 (.667).
   games <- data.frame(
@@ -46,6 +48,7 @@ test_that("ties without head-to-head resolve via common opponents", {
 })
 
 test_that("tiebreaker_depth RANDOM breaks ties by coin flip, deterministically under a seed", {
+  testthat::skip_on_cran()
   run <- function() {
     set.seed(123)
     st <- toy_standings(tiebreaker_depth = "RANDOM")
@@ -60,6 +63,7 @@ test_that("tiebreaker_depth RANDOM breaks ties by coin flip, deterministically u
 })
 
 test_that("depth gating stops the cascade before deeper tiebreakers", {
+  testthat::skip_on_cran()
   # At depth SOS the Alpha trio is still tied after h2h, common opponents,
   # SOV, and SOS (all tied by construction) -> coin flip, so with different
   # seeds the winner can differ. At POINTS it is always A1.
@@ -77,6 +81,7 @@ test_that("depth gating stops the cascade before deeper tiebreakers", {
 })
 
 test_that("independents never receive a conference rank or championship", {
+  testthat::skip_on_cran()
   st <- toy_standings(tiebreaker_depth = "POINTS")
   expect_true(is.na(st$conf_rank[st$team == "I1"]))
   expect_false(st$conf_champ[st$team == "I1"])
@@ -87,6 +92,7 @@ test_that("independents never receive a conference rank or championship", {
 # output exactly (see tests/testthat/fixtures/cfb_toy_tiebreakers/README.md).
 # If this diverges, the bug is in the R engine - never edit the expected CSV.
 test_that("official registry cascades match the sdv-py cross-language oracle", {
+  testthat::skip_on_cran()
   games <- load_registry_games()
   teams <- load_registry_teams()
   expected <- load_registry_expected()
@@ -101,6 +107,7 @@ test_that("official registry cascades match the sdv-py cross-language oracle", {
 })
 
 test_that("registry rungs record skip notes when optional inputs are absent", {
+  testthat::skip_on_cran()
   teams <- load_registry_teams()
   teams$division <- NULL
   games <- load_registry_games()

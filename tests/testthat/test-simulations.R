@@ -5,6 +5,7 @@ sim_input <- function() {
 }
 
 test_that("simulation smoke: 50 sims, valid probabilities, deterministic", {
+  testthat::skip_on_cran()
   run <- function() {
     set.seed(37)
     suppressMessages(cfb_simulations(
@@ -59,6 +60,7 @@ test_that("simulation smoke: 50 sims, valid probabilities, deterministic", {
 })
 
 test_that("sim_include = 'REG' skips the playoff simulation", {
+  testthat::skip_on_cran()
   set.seed(1)
   sim <- suppressMessages(cfb_simulations(
     sim_input(), load_toy_teams(),
@@ -71,6 +73,7 @@ test_that("sim_include = 'REG' skips the playoff simulation", {
 })
 
 test_that("static rankings drive the CFP seeding inside simulations", {
+  testthat::skip_on_cran()
   rankings <- data.frame(
     team = c("B1", "A1", "I1", "A3", "A2", "B2", "B3", "A4", "B4"),
     rank = 1:9
@@ -85,6 +88,7 @@ test_that("static rankings drive the CFP seeding inside simulations", {
 })
 
 test_that("cfb_simulations validates its input", {
+  testthat::skip_on_cran()
   games <- load_toy_games()
   teams <- load_toy_teams()
   # nothing to simulate
@@ -107,6 +111,7 @@ test_that("cfb_simulations validates its input", {
 })
 
 test_that("simulations_verify_fct accepts the default and rejects broken functions", {
+  testthat::skip_on_cran()
   expect_true(simulations_verify_fct(cfbseedR_compute_results))
 
   # fills every week at once -> must fail
@@ -134,6 +139,7 @@ test_that("simulations_verify_fct accepts the default and rejects broken functio
 })
 
 test_that("cfbseedR_compute_results honors the elo argument and week gating", {
+  testthat::skip_on_cran()
   games <- sim_input()
   games$sim <- 1
   teams <- load_toy_teams()

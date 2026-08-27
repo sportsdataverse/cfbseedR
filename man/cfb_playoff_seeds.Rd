@@ -4,7 +4,12 @@
 \alias{cfb_playoff_seeds}
 \title{Compute College Football Playoff Seeds}
 \usage{
-cfb_playoff_seeds(standings, rankings = NULL, playoff_seeds = 12L)
+cfb_playoff_seeds(
+  standings,
+  rankings = NULL,
+  playoff_seeds = 12L,
+  autobid = c("2026", "2025")
+)
 }
 \arguments{
 \item{standings}{A standings table as returned by \code{\link[=cfb_standings]{cfb_standings()}}
@@ -19,6 +24,9 @@ ordered by win percentage, then strength of victory, strength of
 schedule, point differential, and team name.}
 
 \item{playoff_seeds}{Number of playoff spots (default 12).}
+
+\item{autobid}{Automatic-qualifier policy, \code{"2026"} (default) or
+\code{"2025"} - see Description.}
 }
 \value{
 The \code{standings} input (all its columns unchanged; see
@@ -28,19 +36,31 @@ The \code{standings} input (all its columns unchanged; see
 }
 }
 \description{
-Implements 12-team CFP \strong{straight seeding} (2025 rule): the field is the
-\code{playoff_seeds} best-ranked teams with the 5 highest-ranked conference
-champions guaranteed inclusion, and seeds are assigned strictly in ranking
-order (champions are not bumped up).
+Implements 12-team CFP \strong{straight seeding} with a season-keyed
+automatic-qualifier policy:
+\itemize{
+\item \code{autobid = "2026"} (default, current rule): the ACC, Big 12, Big Ten
+and SEC champions are in \strong{regardless of ranking}; the highest-ranked
+team from the Group of 6 (American, Conference USA, MAC, Mountain
+West, Pac-12, Sun Belt) is in whether or not it won its conference;
+and Notre Dame is in if ranked inside the top \code{playoff_seeds}.
+\item \code{autobid = "2025"}: the 5 highest-ranked conference champions are
+guaranteed inclusion (the 2024-2025 rule).
+}
+
+Under both policies seeds are assigned strictly in ranking order
+(champions are not bumped up; straight seeding, 2025+).
 }
 \details{
-If there are fewer than 5 conference champions, all champions are
-guaranteed (capped at \code{playoff_seeds}). A guaranteed champion ranked
-outside the top \code{playoff_seeds} displaces the lowest-ranked at-large team
-and is seeded by its rank order within the field (i.e. it takes the last
-seed).
+Under \code{autobid = "2025"}, if there are fewer than 5 conference champions
+all champions are guaranteed (capped at \code{playoff_seeds}). Under either
+policy a guaranteed team ranked outside the top \code{playoff_seeds}
+displaces the lowest-ranked at-large team and is seeded by its rank
+order within the field. Conference names are matched against both cfbd
+and short spellings (e.g. \code{"American Athletic"} / \code{"American"}).
 }
 \examples{
+\donttest{
 games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
 teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
 standings <- cfb_standings(games, teams, tiebreaker_depth = "POINTS",
@@ -49,6 +69,7 @@ rankings <- data.frame(team = c("B1", "I1", "A1", "A3"), rank = 1:4)
 seeded <- cfb_playoff_seeds(standings, rankings = rankings, playoff_seeds = 4)
 seeded[!is.na(seeded$seed), c("team", "seed")]
 
+}
 }
 \seealso{
 \code{\link[=cfb_standings]{cfb_standings()}}, \code{\link[=cfb_simulations]{cfb_simulations()}},

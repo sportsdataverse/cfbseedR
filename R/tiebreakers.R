@@ -75,27 +75,108 @@ B12_FCS_CAP <- 1L
   list(kind = "coin_toss")
 )
 
-#' Official 2024+ conference tiebreaker procedures (internal registry)
+# ACC policy effective 2026 (announced 2026-07-15, first 9-game-schedule
+# season): head-to-head, then SportSource Analytics Team Success Ranking,
+# then a draw. The candidate-pool expansion for teams that played an
+# alternate number of conference games (same wins OR same losses as the
+# leaders) is carried by the epoch's `pool = "wins_or_losses"` flag and
+# applied when the top win-pct tier is formed (`standings_add_conf_ranks()`).
+.acc_2026 <- list(
+  list(kind = "h2h"),
+  list(kind = "analytics_rating"),
+  list(kind = "coin_toss")
+)
+
+# MAC official procedure (confirmed by the conference's published 2025
+# scenarios): head-to-head / defeated-all, record vs common conference
+# opponents, then the SportSource Analytics Team Rating Score.
+.mac_official <- list(
+  list(kind = "h2h"),
+  list(kind = "record_vs_common"),
+  list(kind = "analytics_rating"),
+  list(kind = "coin_toss")
+)
+
+# American (policy last revised 2024): head-to-head; then the CFP-ranked
+# final-week clause (a ranked tied team that wins its final conference game
+# advances; a ranked team that loses falls through); then the conference's
+# metric composite (Connelly SP+ / SportSource TR116 SOR / ESPN SOR / KPI -
+# supply your own composite via `tiebreaker_data$analytics_ratings`);
+# then record vs common opponents.
+.american_official <- list(
+  list(kind = "h2h"),
+  list(kind = "cfp_ranked_final_week"),
+  list(kind = "analytics_rating"),
+  list(kind = "record_vs_common"),
+  list(kind = "coin_toss")
+)
+
+# Conference USA (policy revised 2024): head-to-head; CFP-ranked final-week
+# clause; metric composite (Connelly SP+ / SportSource / ESPN SOR / KPI);
+# multi-year Academic Progress Rate (via `tiebreaker_data$apr`). The
+# official policy's intermediate SportSource+KPI-only composite is not
+# modeled separately (fold it into the composite you supply); the final
+# fallback is a draw, as published.
+.cusa_official <- list(
+  list(kind = "h2h"),
+  list(kind = "cfp_ranked_final_week"),
+  list(kind = "analytics_rating"),
+  list(kind = "apr"),
+  list(kind = "coin_toss")
+)
+
+# Mountain West: berth ties go straight to the conference's metric
+# composite (Connelly SP+ / ESPN SOR / KPI / SportSource - this is what
+# separated Boise State and UNLV in 2025); head-to-head then settles
+# hosting, and serves as the fallback when no composite is supplied.
+.mw_official <- list(
+  list(kind = "analytics_rating"),
+  list(kind = "h2h"),
+  list(kind = "coin_toss")
+)
+
+# Sun Belt (division format; official published procedure): head-to-head,
+# divisional win pct, descent through the division standings with grouped
+# ties, record vs common conference opponents, the CFP-ranked final-week
+# clause, then the conference's computer-ranking composite
+# (Anderson & Hester / Massey / Colley / Wolfe - supply a composite via
+# `tiebreaker_data$analytics_ratings`).
+.sunbelt_official <- list(
+  list(kind = "h2h"),
+  list(kind = "div_pct"),
+  list(kind = "record_vs_common_desc", mode = "order_of_finish", grouped_ties = TRUE),
+  list(kind = "record_vs_common"),
+  list(kind = "cfp_ranked_final_week"),
+  list(kind = "analytics_rating"),
+  list(kind = "coin_toss")
+)
+
+#' Official conference tiebreaker procedures (internal registry)
 #'
-#' A named list of rung lists, one per registered conference. Conferences
-#' not listed here use `.generic_cascade`. G5 conferences intentionally stay
-#' on the fallback - their published procedures depend on unspecified
-#' external metric composites (see the design brief).
+#' A named list, one entry per registered conference. Each entry is a list
+#' of EPOCHS `list(from = <first season>, rungs = <rung list>, pool = ...)`;
+#' `.conf_rules()` resolves the epoch with the largest `from` not exceeding
+#' the season being ranked (an unknown season resolves to the CURRENT
+#' rules). Conferences not listed here (e.g. the re-formed Pac-12, which
+#' has not published a procedure) use `.generic_cascade`.
 #' @noRd
 CONFERENCE_TIEBREAKERS <- list(
-  "SEC" = list(
+  "SEC" = list(list(from = 0L, rungs = list(
     list(kind = "h2h"),
     list(kind = "record_vs_common"),
     list(kind = "record_vs_common_desc", mode = "order_of_finish", grouped_ties = TRUE),
     list(kind = "opp_conf_win_pct"),
     list(kind = "capped_scoring_margin", off_cap = SEC_OFF_CAP, def_cap = SEC_DEF_CAP),
     list(kind = "coin_toss")
+  ))),
+  "Big Ten" = list(list(from = 0L, rungs = .p5_template)),
+  "ACC" = list(
+    list(from = 0L, rungs = .p5_template),
+    list(from = 2026L, rungs = .acc_2026, pool = "wins_or_losses")
   ),
-  "Big Ten" = .p5_template,
-  "ACC" = .p5_template,
-  "MAC" = .p5_template,
-  "Mid-American" = .p5_template, # cfbfastR schedule naming for the MAC
-  "Big 12" = list(
+  "MAC" = list(list(from = 0L, rungs = .mac_official)),
+  "Mid-American" = list(list(from = 0L, rungs = .mac_official)), # cfbfastR naming
+  "Big 12" = list(list(from = 0L, rungs = list(
     list(kind = "h2h"),
     list(kind = "record_vs_common"),
     list(kind = "record_vs_common_desc", mode = "next_highest", grouped_ties = TRUE),
@@ -103,8 +184,27 @@ CONFERENCE_TIEBREAKERS <- list(
     list(kind = "total_wins", fcs_cap = B12_FCS_CAP),
     list(kind = "analytics_rating"),
     list(kind = "coin_toss")
-  )
+  ))),
+  "American Athletic" = list(list(from = 0L, rungs = .american_official)),
+  "American" = list(list(from = 0L, rungs = .american_official)),
+  "Conference USA" = list(list(from = 0L, rungs = .cusa_official)),
+  "Mountain West" = list(list(from = 0L, rungs = .mw_official)),
+  "Sun Belt" = list(list(from = 0L, rungs = .sunbelt_official))
 )
+
+# Resolve a conference's rules for one season: the registered epoch with
+# the largest `from` not exceeding `season` (season NA/unknown = current
+# rules). Unregistered conferences fall back to the generic cascade.
+.conf_rules <- function(conf_name, season = NA) {
+  epochs <- CONFERENCE_TIEBREAKERS[[conf_name]]
+  if (is.null(epochs)) {
+    return(list(rungs = .generic_cascade, pool = NULL))
+  }
+  froms <- vapply(epochs, function(e) e$from, numeric(1))
+  cutoff <- if (is.na(season)) max(froms) else max(froms[froms <= season])
+  e <- epochs[[which(froms == cutoff)[1]]]
+  list(rungs = e$rungs, pool = e$pool)
+}
 
 # Record (pts, n) of `team` versus `opps` within one (sim, conference) doubled
 # conference-REG-games frame `cg` (columns team/opp/outcome).
@@ -240,6 +340,52 @@ CONFERENCE_TIEBREAKERS <- list(
     if (anyNA(vals)) {
       .note_add(notes_env, sprintf(
         "%s: analytics_rating skipped (no tiebreaker_data$analytics_ratings supplied)",
+        ctx$conf_name
+      ))
+      return(cands)
+    }
+    return(.keep_max(cands, vals))
+  }
+  if (kind == "cfp_ranked_final_week") {
+    ranks <- vapply(cands, function(c) metrics[[c]]$cfp_rank, numeric(1))
+    if (all(is.na(ranks))) {
+      .note_add(notes_env, sprintf(
+        "%s: cfp_ranked_final_week skipped (no tiebreaker_data$cfp_rankings supplied, or no tied team ranked)",
+        ctx$conf_name
+      ))
+      return(cands)
+    }
+    best <- cands[which.min(dplyr::coalesce(ranks, Inf))]
+    # The clause advances the best-ranked tied team only if it WON its
+    # final regular-season conference game; a ranked team that lost falls
+    # through to the conference's metric composite.
+    played <- cg[cg$team == best & !is.na(cg$outcome), ]
+    if (nrow(played) > 0L) {
+      final_wk <- max(played$week)
+      if (all(played$outcome[played$week == final_wk] == 1)) return(best)
+    }
+    .note_add(notes_env, sprintf(
+      "%s: cfp_ranked_final_week fell through (best-ranked tied team lost its final conference game)",
+      ctx$conf_name
+    ))
+    return(cands)
+  }
+  if (kind == "apr") {
+    vals <- vapply(cands, function(c) metrics[[c]]$apr, numeric(1))
+    if (anyNA(vals)) {
+      .note_add(notes_env, sprintf(
+        "%s: apr skipped (no tiebreaker_data$apr supplied)",
+        ctx$conf_name
+      ))
+      return(cands)
+    }
+    return(.keep_max(cands, vals))
+  }
+  if (kind == "div_pct") {
+    vals <- vapply(cands, function(c) metrics[[c]]$div_pct, numeric(1))
+    if (anyNA(vals)) {
+      .note_add(notes_env, sprintf(
+        "%s: div_pct skipped (no conf_division column on teams)",
         ctx$conf_name
       ))
       return(cands)

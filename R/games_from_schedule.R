@@ -32,6 +32,7 @@
 #' | `neutral` | integer | Neutral-site flag (0/1). |
 #'
 #' @examples
+#' \donttest{
 #' schedule <- data.frame(
 #'   season = 2024, week = c(1, 1, 15, 16),
 #'   season_type = c("regular", "regular", "regular", "postseason"),
@@ -43,6 +44,7 @@
 #' )
 #' cfb_games_from_schedule(schedule)
 #'
+#' }
 #' @seealso [cfb_standings()], [cfb_simulations()],
 #'   `cfbfastR::load_cfb_schedules()` from
 #'   [cfbfastR](https://cfbfastR.sportsdataverse.org),

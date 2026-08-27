@@ -34,7 +34,13 @@ and is part of the [SportsDataverse](https://sportsdataverse.org).
 
 ## **Installation**
 
-You can install the development version of cfbseedR from
+Install the released version of cfbseedR from CRAN with:
+
+``` r
+install.packages("cfbseedR")
+```
+
+Or install the development version from
 [GitHub](https://github.com/sportsdataverse/cfbseedR) with:
 
 ``` r
@@ -82,23 +88,37 @@ results generator, after `nflseedR_compute_results()`) and
 
 ## **CFB semantics**
 
-* **Conferences, not divisions.** Standings group by conference;
-  independents (`"FBS Independents"` or `NA` conference) appear in overall
-  standings but get no conference rank.
+* **Conferences first, divisions on demand.** Standings group by
+  conference; independents (`"FBS Independents"` or `NA` conference)
+  appear in overall standings but get no conference rank. Supplying a
+  `conf_division` column on `teams` opts a conference into division-format
+  ranking (division champions take `conf_rank` 1-2 — the 2026 Sun Belt,
+  or any historical divisional season).
 * **Conference championship games** (`game_type == "CONF_CHAMP"`) count
   toward the overall record and decide the conference champion, but do
   **not** count toward the conference record/rank.
-* **CFP 12-team straight seeding** (2025 rule) via `cfb_playoff_seeds()`:
-  the 5 highest-ranked conference champions are guaranteed inclusion; the
-  field is seeded strictly by committee rank (`rankings`).
+* **Official per-conference tiebreakers, season-scoped.** The SEC, Big
+  Ten, Big 12, ACC (including its all-new 2026 policy with the
+  alternate-game-count candidate-pool rule), MAC, American, Conference
+  USA, Mountain West, and Sun Belt procedures are registered as dated
+  epochs; unregistered conferences (e.g. the re-formed Pac-12, which has
+  not published a procedure) use a documented generic cascade.
+* **CFP 12-team straight seeding** via `cfb_playoff_seeds()`, with a
+  season-keyed `autobid` policy: `"2026"` (default) puts the ACC / Big 12 /
+  Big Ten / SEC champions in regardless of ranking, plus the
+  highest-ranked Group-of-6 team (champion or not) and Notre Dame when
+  ranked inside the field; `"2025"` keeps the five-best-champions rule.
+  The field is seeded strictly by committee rank (`rankings`).
 
 ## **Documented simplifications vs. real CFB / nflseedR**
 
-* The tiebreaker cascade is **generic** (win pct → head-to-head → common
-  opponents → SOV → SOS → point differential → coin flip), not the
-  per-conference official tiebreak rules. All cascade quantities are
-  computed over regular-season conference games so conference ranks depend
-  only on conference play.
+* External metric composites (SportSource, Connelly SP+, ESPN SOR, KPI,
+  APR, CFP rankings) enter the official tiebreakers only through
+  `tiebreaker_data` — the package computes none of them; absent inputs
+  skip their rungs deterministically and are recorded in
+  `tiebreak_notes`. All cascade quantities the package does compute are
+  regular-season-conference-scoped, so conference ranks depend only on
+  conference play.
 * `sov`/`sos` in the standings output are **conference-scoped** (opponents'
   conference records over regular-season conference games; `sov` over
   conference victories, `sos` over conference opponents); independents
@@ -152,6 +172,9 @@ If you use the season-simulation methodology, please also cite
 ## **Follow the SportsDataverse**
 
 cfbseedR is part of the [SportsDataverse](https://sportsdataverse.org).
+A printable cheat sheet covering cfbplotR, cfb4th, and cfbseedR is
+available: [cheat sheet (PDF)](https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf).
+
 Related packages:
 
 * [cfbfastR](https://cfbfastR.sportsdataverse.org/) — College football
@@ -160,6 +183,8 @@ Related packages:
   down decision modeling
 * [cfbplotR](https://cfbplotR.sportsdataverse.org/) — College football
   plotting helpers
+* [recruitR](https://recruitr.sportsdataverse.org/) — College football
+  recruiting data
 * [nflseedR](https://nflseedr.com) — The NFL original this package adapts
 * [sportsdataverse-R](https://r.sportsdataverse.org/) — The SportsDataverse
   R meta-package

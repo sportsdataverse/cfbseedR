@@ -1,0 +1,154 @@
+---
+title: "Cookbook: tiebreakers & the 2026 CFP rules"
+description: >
+  Recipes for the official per-conference tiebreakers, division formats,
+  external metric inputs, and the 2026 CFP automatic-qualifier policy.
+output: rmarkdown::html_document
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+cfbseedR implements each FBS conference's **official championship-game
+tiebreaker procedure**, registered as season-scoped epochs, and the CFP's
+**season-keyed automatic-qualifier policies**. This cookbook shows how the
+pieces fit together, one recipe at a time. Everything below runs offline.
+
+```{r setup}
+library(cfbseedR)
+```
+
+## The rules, at a glance (2026 season)
+
+| Conference | Format | Procedure (after win pct) |
+|---|---|---|
+| SEC | single table | h2h → common opponents → standings descent → opponents' win pct → capped scoring margin (42/48) → draw |
+| Big Ten | single table | h2h → common opponents → descent → opponents' win pct → analytics rating → draw |
+| Big 12 | single table | h2h → common opponents → descent → opponents' win pct → capped total wins → analytics → draw |
+| ACC (2026+) | single table | candidate pool by wins-or-losses → h2h → SportSource SSR → draw |
+| American | single table | h2h → CFP-ranked final-week clause → metric composite → common opponents → draw |
+| Conference USA | single table | h2h → CFP-ranked clause → metric composite → APR → draw |
+| MAC | single table | h2h → common opponents → SportSource rating → draw |
+| Mountain West | single table | metric composite → h2h → draw |
+| Sun Belt | **two divisions** | h2h → divisional win pct → descent → common opponents → CFP-ranked clause → composite → draw |
+| Pac-12 (re-formed) | single table | no published procedure — generic fallback |
+
+The CFP field (12 teams, straight seeding) admits the ACC / Big 12 /
+Big Ten / SEC champions regardless of ranking, the highest-ranked
+Group-of-6 team (champion or not), and Notre Dame when ranked inside the
+field (`autobid = "2026"`, the default). `autobid = "2025"` restores the
+five-best-champions rule used in 2024-2025.
+
+## Recipe 1: season-scoped epochs
+
+The same schedule ranked as a 2025 season and as a 2026 season can crown
+different ACC championship-game participants, because the ACC replaced its
+entire procedure in 2026. Supply a `season` id column and the registry
+resolves the right epoch; a plain `sim` id always means "current rules".
+
+```{r epochs}
+teams <- data.frame(team = c("A", "B", "C", "D", "E"), conference = "ACC")
+games <- data.frame(
+  season = 2026, week = c(1, 2, 1, 2, 3, 4, 3), game_type = "REG",
+  home_team = c("A", "A", "B", "B", "C", "C", "D"),
+  away_team = c("C", "D", "C", "E", "D", "E", "E"),
+  result = 7
+)
+ratings <- data.frame(team = c("A", "B", "C"), rating = c(1, 2, 0.5))
+
+st <- cfb_standings(games, teams, verbosity = "NONE",
+  tiebreaker_data = list(analytics_ratings = ratings)
+)
+st[, c("team", "conf_rank", "conf_pct")]
+```
+
+Change `games$season` to `2025` and the pre-2026 cascade (common
+opponents, standings descent, opponents' win pct) applies instead.
+
+## Recipe 2: external metric inputs
+
+The American, CUSA, Mountain West, and Sun Belt procedures lean on
+published metric composites (Connelly SP+, ESPN SOR, KPI, SportSource) and
+the CFP committee rankings. cfbseedR computes none of these — you supply
+them through `tiebreaker_data`, and any missing input skips its rung
+deterministically (recorded in `attr(result, "tiebreak_notes")`):
+
+```{r inputs, eval = FALSE}
+st <- cfb_standings(
+  games, teams,
+  tiebreaker_data = list(
+    # your composite of the conference's published metrics
+    analytics_ratings = data.frame(team = teams$team, rating = my_composite),
+    # the latest CFP committee rankings
+    cfp_rankings = data.frame(team = c("Tulane", "Navy"), rank = c(24, 25)),
+    # multi-year APR (the CUSA policy's late fallback)
+    apr = data.frame(team = teams$team, apr = my_apr)
+  )
+)
+attr(st, "tiebreak_notes")
+```
+
+The `cfp_ranked_final_week` clause is faithful to the published text: the
+best-ranked tied team advances only if it **won** its final conference
+game; a ranked team that lost falls through to the composite.
+
+## Recipe 3: division formats (Sun Belt)
+
+Add a `conf_division` column to `teams` and that conference is ranked
+division-first: each division runs the official procedure internally and
+the division champions take `conf_rank` 1-2 (the championship-game
+matchup). This is the 2026 Sun Belt — and equally any historical
+divisional season you want to re-rank.
+
+```{r divisions}
+sb_teams <- data.frame(
+  team = c("E1", "E2", "W1", "W2"),
+  conference = "Sun Belt",
+  conf_division = c("East", "East", "West", "West")
+)
+sb_games <- data.frame(
+  season = 2026, week = c(1, 1, 2, 2), game_type = "REG",
+  home_team = c("E1", "W1", "E1", "E2"),
+  away_team = c("E2", "W2", "W1", "W2"),
+  result = 7
+)
+sb <- cfb_standings(sb_games, sb_teams, verbosity = "NONE")
+sb[, c("team", "conference", "conf_rank")]
+```
+
+`W1` (1-1) outranks `E2` (1-1) because divisions, not the overall table,
+decide who reaches the championship game.
+
+## Recipe 4: the 2026 CFP field
+
+```{r cfp}
+st <- data.frame(
+  sim = 1L,
+  team = c("BigTenChamp", "AccChamp", "B12Champ", "SecChamp",
+           "G6Team", "Notre Dame", paste0("AtLarge", 1:6)),
+  conference = c("Big Ten", "ACC", "Big 12", "SEC",
+                 "Mountain West", "FBS Independents", rep("Big Ten", 6)),
+  conf_champ = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, rep(FALSE, 6)),
+  win_pct = seq(1, 0.45, length.out = 12), sov = 0, sos = 0, pd = 0
+)
+rankings <- data.frame(team = st$team, rank = seq_len(12))
+
+seeded <- cfb_playoff_seeds(st, rankings = rankings, playoff_seeds = 12)
+seeded[order(seeded$seed), c("team", "conference", "seed")]
+```
+
+Note the Mountain West team enters as the Group-of-6 automatic qualifier
+without winning its conference, and an unranked Power-4 champion would
+still make the field. Straight seeding means nobody is bumped up: seeds
+follow the committee order exactly, with the top four seeds earning
+first-round byes in `cfb_simulations()`.
+
+## Where the rules come from
+
+Every registered procedure was transcribed from the conference's official
+policy (ACC July 2026 policy, SEC/Big Ten/Big 12 2024 policies, the
+published American/CUSA/MAC/Mountain West/Sun Belt procedures) and the
+CFP's published formats. The [cheat sheet
+(PDF)](https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf)
+condenses this package alongside cfbplotR and cfb4th.
