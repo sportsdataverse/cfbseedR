@@ -9,3 +9,4 @@ docs/
 .omc/
 *.tar.gz
 .DS_Store
+data-raw/
