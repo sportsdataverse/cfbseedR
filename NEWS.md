@@ -1,3 +1,36 @@
+# cfbseedR 0.2.0
+
+2026-season rules refresh (researched against official conference and CFP
+sources, 2026-08-26).
+
+* `cfb_playoff_seeds()` gains a season-keyed `autobid` policy. The new
+  default `"2026"` implements the current CFP automatic-qualifier rule:
+  the ACC / Big 12 / Big Ten / SEC champions are in regardless of ranking,
+  the highest-ranked Group-of-6 team is in whether or not it won its
+  conference, and Notre Dame is in when ranked inside the field.
+  `autobid = "2025"` keeps the 2024-2025 rule (5 highest-ranked
+  champions). `cfb_simulations()` passes the policy through.
+* The conference tiebreaker registry is now **season-scoped**: each
+  conference registers dated epochs, resolved per season (current rules
+  for plain `sim` ids). The ACC's all-new 2026 policy (head-to-head, then
+  SportSource Team Success Ranking, then a draw, with the
+  alternate-game-count candidate-pool rule and the postseason-eligibility
+  filter) applies from 2026; earlier ACC seasons keep the 2024 cascade.
+* New official registry entries: **American**, **Conference USA**, and
+  **Mountain West** (head-to-head / CFP-ranked-final-week clause /
+  metric-composite procedures), and the **Sun Belt** (division format).
+  The MAC entry now matches its published three-step procedure. The
+  re-formed Pac-12 has not published a procedure and stays on the generic
+  fallback.
+* New rung primitives: `cfp_ranked_final_week` (fed by
+  `tiebreaker_data$cfp_rankings`; the best-ranked tied team advances only
+  if it won its final conference game) and `div_pct` (win pct vs
+  same-division opponents).
+* `teams` gains two optional columns: `conf_division` (division-format
+  ranking - the two division champions take `conf_rank` 1-2, as in the
+  2026 Sun Belt) and `postseason_eligible` (an ineligible team cannot
+  occupy a championship-game berth while its games still count).
+
 # cfbseedR 0.1.0
 
 Initial release.

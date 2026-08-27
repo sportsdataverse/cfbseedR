@@ -2,7 +2,6 @@
 ^\.Rproj\.user$
 ^\.Rhistory$
 ^LICENSE\.md$
-^NEWS\.md$
 ^README\.md$
 ^\.github$
 ^docs$
@@ -15,4 +14,5 @@
 ^_pkgdown\.yml$
 ^pkgdown$
 ^CLAUDE\.md$
-^data-raw$
+^\.omc$
+^cran-comments\.md$
