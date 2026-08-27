@@ -46,8 +46,8 @@ remotes::install_github("sportsdataverse/cfbseedR")
 library(cfbseedR)
 
 # Bundled toy season (9 teams, 2 conferences + 1 independent)
-games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
-teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
+games <- cfb_games_example
+teams <- cfb_teams_example
 
 # Standings with conference ranks and champions
 standings <- cfb_standings(games, teams, tiebreaker_depth = "POINTS")
@@ -57,6 +57,14 @@ games$result[games$week >= 3] <- NA
 set.seed(42)
 sim <- cfb_simulations(games, teams, simulations = 100, playoff_seeds = 4)
 sim$overall
+
+# Pretty gt summary, grouped by conference.
+# Needs the optional presentation packages: install.packages(c("gt", "scales"))
+summary(sim)
+
+# Spread the simulations across cores
+# future::plan("multisession")
+# sim <- cfb_simulations(games, teams, simulations = 10000, chunks = 8)
 
 # Real data via cfbfastR (Suggests; the engine itself needs no cfbfastR)
 # sched <- cfbfastR::load_cfb_schedules(2024)
@@ -126,9 +134,8 @@ custom-generator contract checker).
   - Playoff games are generated only when the input `games` has no
     `game_type == "POST"` rows; the first round is hosted by the higher
     seed, later rounds are neutral-site.
-  - No draft order (not a CFB concept).
-  - No chunked/parallel simulation (nflseedR’s `chunks`/future support);
-    simulations run sequentially.
+  - No draft order and no `simulate_nfl()`-style legacy v1 API — the
+    former is not a CFB concept, the latter would be new-package cruft.
 
 ## **Attribution**
 

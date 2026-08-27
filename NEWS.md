@@ -40,6 +40,37 @@ sources, 2026-08-26).
   2026 Sun Belt) and `postseason_eligible` (an ineligible team cannot
   occupy a championship-game berth while its games still count).
 
+## nflseedR surface parity
+
+* **Parallel simulation.** `cfb_simulations()` gains `chunks` (default 8):
+  simulations are split into contiguous blocks and dispatched with
+  `furrr::future_map()`, so setting a parallel plan
+  (`future::plan("multisession")`) spreads them across cores. Progress is
+  reported through `progressr`. A given seed reproduces exactly for a fixed
+  `chunks`, and a parallel plan gives bit-identical results to a sequential
+  one -- but the RNG stream differs from a single unchunked pass, so output
+  for the same seed changes if you change `chunks`.
+* **`summary()` for simulations.** `cfbseedR_simulation` objects were classed
+  but had no methods, so `summary()` fell back to R's generic list summary.
+  There is now a `summary.cfbseedR_simulation()` gt method rendering the
+  `overall` table grouped by conference, the counterpart of nflseedR's
+  `summary.nflseedR_simulation()`.
+* **`fmt_pct_special()`** formats probabilities the way simulation summaries
+  want them: `<1%` instead of a flat `0%`, `>99.9%` instead of a false
+  `100%`. Ported from nflseedR.
+* **Exported example data.** `cfb_games_example` and `cfb_teams_example`
+  replace the `read.csv(system.file(...))` dance in examples, mirroring
+  nflseedR's `sims_games_example` / `sims_teams_example`.
+* **`verbosity` on `cfb_simulations()`**, matching `cfb_standings()` and
+  `nfl_simulations()`; `"NONE"` silences it completely. The simulation's
+  tiebreak notes are now attached to the returned standings as well -- they
+  were previously computed and discarded.
+* **`ranks = "NONE"`** on `cfb_standings()` skips the conference-rank
+  cascade entirely when you only need records, after nflseedR's `ranks`
+  argument.
+* New Imports: furrr, future, progressr. New Suggests: gt, scales (both
+  only needed for `summary()` and `fmt_pct_special()`).
+
 # cfbseedR 0.1.0
 
 Initial release.

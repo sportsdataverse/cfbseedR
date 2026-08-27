@@ -34,8 +34,17 @@
 #' @param autobid CFP automatic-qualifier policy passed to
 #'   [cfb_playoff_seeds()]: `"2026"` (default, current rule) or `"2025"`.
 #' @param tiebreaker_data Optional named list of external tiebreaker inputs
-#'   (`analytics_ratings`, `cfp_rankings`), held static across simulations -
-#'   see [cfb_standings()]. Missing inputs skip their rungs (noted).
+#'   (`analytics_ratings`, `cfp_rankings`, `apr`), held static across
+#'   simulations - see [cfb_standings()]. Missing inputs skip their rungs
+#'   (noted).
+#' @param chunks The number of chunks the simulations are split into
+#'   (default 8, capped at `simulations`). Chunks are dispatched with
+#'   [furrr::future_map()], so they run in parallel as soon as you set a
+#'   parallel plan, e.g. `future::plan("multisession")`; with the default
+#'   sequential plan they simply run one after another. There is no
+#'   universally best number - too many chunks can be as slow as too few.
+#' @param verbosity One of `"MIN"` (default), `"MAX"`, or `"NONE"`, as in
+#'   [cfb_standings()]. `"NONE"` silences the progress messages entirely.
 #'
 #' @details
 #' The playoff bracket is a standard single-elimination bracket of size
@@ -46,8 +55,15 @@
 #' (fixed bracket, per the CFP format). Conference championship matchups
 #' are simulated as scheduled, not re-derived from simulated standings.
 #'
-#' Simulations run sequentially (no chunk/parallel support). Set a seed
-#' with `set.seed()` for reproducibility.
+#' Simulations are split into `chunks` and dispatched with furrr, so a
+#' parallel [future::plan()] spreads them across cores. Progress can be
+#' reported by turning on [progressr::handlers()] before the call, or by
+#' piping the call into [progressr::with_progress()].
+#'
+#' Set a seed with `set.seed()` for reproducibility: furrr generates
+#' parallel-safe RNG streams per chunk, so a given seed reproduces exactly -
+#' but the stream differs from a single sequential pass, so results for the
+#' same seed change if you change `chunks`.
 #'
 #' @return A list of class `cfbseedR_simulation` with these elements:
 #'
@@ -84,15 +100,26 @@ cfb_simulations <- function(games,
                             sim_include = c("POST", "REG"),
                             rankings = NULL,
                             autobid = c("2026", "2025"),
-                            tiebreaker_data = NULL) {
+                            tiebreaker_data = NULL,
+                            chunks = 8L,
+                            verbosity = c("MIN", "MAX", "NONE")) {
   tiebreaker_depth <- rlang::arg_match(tiebreaker_depth)
   sim_include <- rlang::arg_match(sim_include)
   autobid <- rlang::arg_match(autobid)
+  verbosity <- rlang::arg_match(verbosity)
+  verbosity_out <- verbosity
+  verbosity <- switch(verbosity, "NONE" = 0L, "MIN" = 1L, "MAX" = 2L)
   if (!is.function(compute_results)) {
     cli::cli_abort("The {.arg compute_results} argument must be a function!")
   }
   simulations <- as.integer(simulations)
   playoff_seeds <- as.integer(playoff_seeds)
+  chunks <- as.integer(chunks)
+  if (is.na(chunks) || chunks < 1L) {
+    cli::cli_abort("{.arg chunks} must be a positive integer, not {.val {chunks}}.")
+  }
+  # More chunks than simulations would leave empty chunks doing nothing.
+  chunks <- min(chunks, simulations)
 
   games <- standings_validate_games(games, allow_na_results = TRUE)
   season <- unique(games$sim)
@@ -117,64 +144,57 @@ cfb_simulations <- function(games,
   teams <- standings_validate_teams(teams)
   if (!"neutral" %in% names(games)) games$neutral <- 0L
 
-  # Replicate games and teams across simulations
-  n_games <- nrow(games)
-  n_teams <- nrow(teams)
-  sim_games <- games[rep(seq_len(n_games), times = simulations), ] |>
-    dplyr::mutate(sim = rep(seq_len(simulations), each = n_games))
-  sim_teams <- teams[rep(seq_len(n_teams), times = simulations), ] |>
-    dplyr::mutate(sim = rep(seq_len(simulations), each = n_teams))
-
-  # SIMULATE SCHEDULED GAMES WEEK BY WEEK ------------------------------------
   weeks_to_simulate <- sort(unique(games$week[is.na(games$result)]))
-  cli::cli_inform(
-    "Start simulation of {simulations} season{?s} ({length(weeks_to_simulate)}
-     week{?s} to simulate)."
-  )
-  for (week_num in weeks_to_simulate) {
-    out <- compute_results(
-      teams = sim_teams, games = sim_games, week_num = week_num, ...
-    )
-    sim_teams <- out$teams
-    sim_games <- out$games
-  }
-
-  # STANDINGS, CHAMPIONS, SEEDS ----------------------------------------------
-  dg <- standings_double_games(sim_games, teams)
-  standings <- standings_init(dg, teams)
-  standings <- standings_add_tiebreak_metrics(standings, dg, teams, tiebreaker_data)
-  division_absent <- !("division" %in% names(teams))
-  notes_env <- new.env(parent = emptyenv())
-  notes_env$notes <- character(0)
   depth <- switch(tiebreaker_depth,
     "RANDOM" = 0L, "PRE-SOV" = 1L, "SOS" = 2L, "POINTS" = 3L
   )
-  standings <- standings_add_conf_ranks(
-    standings, dg, depth, verbosity = 0L, notes_env, division_absent,
-    teams = teams, seasons_by_sim = NULL # sims use the CURRENT registry rules
-  )
-  standings <- standings |>
-    dplyr::select(-dplyr::any_of(c(
-      "capped_margin", "capped_wins", "analytics_rating", "cfp_rank", "div_pct", "apr"
-    )))
-  standings <- standings_add_conf_champ(standings, dg)
-  standings <- cfb_playoff_seeds(
-    standings, rankings = rankings, playoff_seeds = playoff_seeds,
-    autobid = autobid
+
+  # Contiguous blocks of simulation ids, exactly one per chunk. Sizes differ
+  # by at most one when `simulations` is not a multiple of `chunks`; naively
+  # slicing by a rounded-up chunk size would silently produce FEWER chunks
+  # than asked for (10 simulations over 6 chunks would give 5).
+  sim_id_chunks <- split(
+    seq_len(simulations),
+    sort(rep_len(seq_len(chunks), simulations))
   )
 
-  # PLAYOFF SIMULATION --------------------------------------------------------
-  if (sim_include == "POST") {
-    post <- sims_simulate_playoffs(
-      sim_games = sim_games, sim_teams = sim_teams, standings = standings,
-      compute_results = compute_results, ..., playoff_seeds = playoff_seeds
+  if (verbosity > 0L) {
+    cli::cli_inform(
+      "Start simulation of {simulations} season{?s} ({length(weeks_to_simulate)}
+       week{?s} to simulate) in {length(sim_id_chunks)} chunk{?s}."
     )
-    sim_games <- post$games
-    standings <- standings |>
-      dplyr::left_join(post$exits, by = dplyr::join_by("sim", "team")) |>
-      dplyr::mutate(exit = dplyr::coalesce(.data$exit, 0L))
-    champ_exit <- post$champ_exit
+    if (length(sim_id_chunks) > 1L && sims_is_sequential()) {
+      cli::cli_inform(c(
+        "i" = "Chunks run sequentially. Set a parallel {.fun future::plan}, e.g.
+               {.code future::plan(\"multisession\")}, to use more cores."
+      ))
+    }
   }
+
+  p <- progressr::progressor(along = seq_along(sim_id_chunks))
+  chunk_out <- furrr::future_map(
+    .x = sim_id_chunks,
+    .f = sims_run_chunk,
+    games = games,
+    teams = teams,
+    weeks_to_simulate = weeks_to_simulate,
+    compute_results = compute_results,
+    ...,
+    depth = depth,
+    playoff_seeds = playoff_seeds,
+    sim_include = sim_include,
+    rankings = rankings,
+    autobid = autobid,
+    tiebreaker_data = tiebreaker_data,
+    verbosity = verbosity,
+    p = p,
+    .options = furrr::furrr_options(seed = TRUE)
+  )
+
+  standings <- purrr::list_rbind(lapply(chunk_out, `[[`, "standings"))
+  sim_games <- purrr::list_rbind(lapply(chunk_out, `[[`, "games"))
+  champ_exit <- chunk_out[[1]]$champ_exit
+  tiebreak_notes <- unique(unlist(lapply(chunk_out, `[[`, "notes")))
 
   standings <- standings |>
     dplyr::arrange(.data$sim, .data$conference, .data$conf_rank, .data$team)
@@ -237,17 +257,106 @@ cfb_simulations <- function(games,
         "cfb_season" = season,
         "playoff_seeds" = playoff_seeds,
         "simulations" = simulations,
+        "chunks" = length(sim_id_chunks),
         "tiebreaker_depth" = tiebreaker_depth,
         "sim_include" = sim_include,
+        "autobid" = autobid,
+        "verbosity" = verbosity_out,
         "cfbseedR_version" = utils::packageVersion("cfbseedR"),
         "finished_at" = Sys.time()
       )
     ),
     class = "cfbseedR_simulation"
   )
-  cli::cli_inform("DONE!")
+  attr(out$standings, "tiebreak_notes") <- tiebreak_notes
+  if (verbosity > 0L) cli::cli_inform("DONE!")
   out
 }
+
+# Run one chunk of simulations end to end: replicate the schedule for this
+# chunk's simulation ids, play the unplayed weeks, then compute standings,
+# champions, seeds and (optionally) the playoff bracket. Returns the pieces
+# `cfb_simulations()` stitches together across chunks.
+#
+# This is the unit furrr parallelizes over, so it must be self-contained -
+# everything it needs is an argument, and it touches no shared state.
+sims_run_chunk <- function(sim_ids,
+                           games,
+                           teams,
+                           weeks_to_simulate,
+                           compute_results,
+                           ...,
+                           depth,
+                           playoff_seeds,
+                           sim_include,
+                           rankings,
+                           autobid,
+                           tiebreaker_data,
+                           verbosity,
+                           p = NULL) {
+  n_sims <- length(sim_ids)
+  n_games <- nrow(games)
+  n_teams <- nrow(teams)
+  sim_games <- games[rep(seq_len(n_games), times = n_sims), ] |>
+    dplyr::mutate(sim = rep(sim_ids, each = n_games))
+  sim_teams <- teams[rep(seq_len(n_teams), times = n_sims), ] |>
+    dplyr::mutate(sim = rep(sim_ids, each = n_teams))
+
+  # SIMULATE SCHEDULED GAMES WEEK BY WEEK ------------------------------------
+  for (week_num in weeks_to_simulate) {
+    out <- compute_results(
+      teams = sim_teams, games = sim_games, week_num = week_num, ...
+    )
+    sim_teams <- out$teams
+    sim_games <- out$games
+  }
+
+  # STANDINGS, CHAMPIONS, SEEDS ----------------------------------------------
+  dg <- standings_double_games(sim_games, teams)
+  standings <- standings_init(dg, teams)
+  standings <- standings_add_tiebreak_metrics(standings, dg, teams, tiebreaker_data)
+  division_absent <- !("division" %in% names(teams))
+  notes_env <- new.env(parent = emptyenv())
+  notes_env$notes <- character(0)
+  standings <- standings_add_conf_ranks(
+    standings, dg, depth, verbosity = verbosity, notes_env, division_absent,
+    teams = teams, seasons_by_sim = NULL # sims use the CURRENT registry rules
+  )
+  standings <- standings |>
+    dplyr::select(-dplyr::any_of(c(
+      "capped_margin", "capped_wins", "analytics_rating", "cfp_rank", "div_pct", "apr"
+    )))
+  standings <- standings_add_conf_champ(standings, dg)
+  standings <- cfb_playoff_seeds(
+    standings, rankings = rankings, playoff_seeds = playoff_seeds,
+    autobid = autobid
+  )
+
+  # PLAYOFF SIMULATION --------------------------------------------------------
+  champ_exit <- NA_integer_
+  if (sim_include == "POST") {
+    post <- sims_simulate_playoffs(
+      sim_games = sim_games, sim_teams = sim_teams, standings = standings,
+      compute_results = compute_results, ..., playoff_seeds = playoff_seeds
+    )
+    sim_games <- post$games
+    standings <- standings |>
+      dplyr::left_join(post$exits, by = dplyr::join_by("sim", "team")) |>
+      dplyr::mutate(exit = dplyr::coalesce(.data$exit, 0L))
+    champ_exit <- post$champ_exit
+  }
+
+  if (!is.null(p)) p()
+  list(
+    standings = standings,
+    games = sim_games,
+    champ_exit = champ_exit,
+    notes = notes_env$notes
+  )
+}
+
+# TRUE when the active future plan runs in the calling process.
+sims_is_sequential <- function() inherits(future::plan(), "sequential")
 
 # Standard bracket seed order for a bracket of size m (power of 2), e.g.
 # m = 16 gives c(1,16,8,9,4,13,5,12,2,15,7,10,3,14,6,11): adjacent pairs are

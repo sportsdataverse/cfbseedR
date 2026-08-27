@@ -144,6 +144,32 @@ still make the field. Straight seeding means nobody is bumped up: seeds
 follow the committee order exactly, with the top four seeds earning
 first-round byes in `cfb_simulations()`.
 
+## Recipe 5: scaling up
+
+Ten thousand seasons is a `chunks` argument away. Simulations are split into
+contiguous blocks and dispatched with furrr, so a parallel plan uses every
+core; `summary()` renders the result as a gt table grouped by conference.
+
+```{r scale, eval = FALSE}
+future::plan("multisession")
+progressr::handlers(global = TRUE)
+
+sim <- cfb_simulations(
+  games, teams,
+  simulations = 10000,
+  chunks = 8,
+  autobid = "2026",
+  tiebreaker_data = list(analytics_ratings = my_composite)
+)
+summary(sim)
+
+future::plan("sequential")
+```
+
+A seed reproduces exactly for a fixed `chunks`, and parallel matches
+sequential -- but the stream depends on the chunking, so changing `chunks`
+changes which seasons you get.
+
 ## Where the rules come from
 
 Every registered procedure was transcribed from the conference's official

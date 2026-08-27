@@ -21,8 +21,8 @@ toy season.
 ```{r setup}
 library(cfbseedR)
 
-games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
-teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
+games <- cfb_games_example
+teams <- cfb_teams_example
 games$result[games$week >= 3] <- NA
 ```
 
@@ -99,7 +99,7 @@ by a cascade whose depth you control:
 way to understand (and trust) a rank:
 
 ```{r tiebreakers}
-played <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
+played <- cfb_games_example
 standings <- cfb_standings(played, teams,
                            tiebreaker_depth = "POINTS", verbosity = "MAX")
 standings[, c("team", "conference", "conf_pct", "sov", "sos", "conf_rank")]
@@ -156,18 +156,22 @@ sec_standings[, c("team", "conf_rank")]
 attr(sec_standings, "tiebreak_notes")
 ```
 
-## CFP-12 straight seeding
+## CFP-12 seeding and the `autobid` policy
 
-`cfb_playoff_seeds()` implements the 2025 **straight seeding** rule:
+`cfb_playoff_seeds()` always uses **straight seeding** - the field is
+ordered strictly by committee rank, and champions are never bumped up to
+the top-4 seeds (that was the pre-2025 rule). What changes between seasons
+is *who is guaranteed a place*, which is the `autobid` argument:
 
-1. Order all teams by committee rank (`rankings`); unranked teams fall back
-   behind ranked ones (and to win pct, SOV, SOS, and point differential
-   when `rankings = NULL`).
-2. The 5 highest-ranked **conference champions** are guaranteed a spot
-   (fewer if fewer champions exist).
-3. Fill the remaining spots with the best-ranked at-large teams.
-4. Seed the field strictly in ranking order - champions are **not** bumped
-   up to the top-4 seeds (that was the pre-2025 rule).
+* `autobid = "2026"` (the default, today's rule): the **ACC, Big 12, Big
+  Ten and SEC champions are in regardless of their ranking**, the
+  **highest-ranked Group-of-6 team** is in whether or not it won its
+  conference, and **Notre Dame** is in when ranked inside the field.
+* `autobid = "2025"`: the 5 highest-ranked **conference champions** are
+  guaranteed (fewer if fewer champions exist) - the 2024-2025 rule.
+
+Under either policy the remaining places go to the best-ranked at-large
+teams, and the whole field is then seeded in rank order.
 
 A synthetic 16-team example with 6 conference champions shows the
 guarantee and the straight ordering; champion `F1` (ranked 14th) displaces
@@ -195,6 +199,39 @@ In `cfb_simulations()`, the bracket generated from these seeds is the fixed
 CFP-12 bracket (first round hosted by the higher seed, later rounds
 neutral-site, no reseeding), and committee `rankings` are held static
 across simulations.
+
+## Running simulations in parallel
+
+Simulations are split into `chunks` (default 8) and dispatched with furrr,
+so a parallel plan spreads them across cores:
+
+```{r parallel, eval = FALSE}
+future::plan("multisession")
+sim <- cfb_simulations(games, teams, simulations = 10000, chunks = 8)
+future::plan("sequential")
+```
+
+Progress reporting comes from progressr - switch it on once and every call
+reports:
+
+```{r progress, eval = FALSE}
+progressr::handlers(global = TRUE)
+```
+
+A given seed reproduces exactly for a fixed `chunks`, and a parallel plan
+gives identical results to a sequential one. The RNG stream does depend on
+the chunking, though, so the same seed with a different `chunks` gives
+different (equally valid) simulations.
+
+## Summarising a simulation
+
+`summary()` renders the `overall` table as a gt table grouped by
+conference, with probabilities formatted by `fmt_pct_special()` so a
+long-shot reads `<1%` rather than a flat `0%`:
+
+```{r summary, eval = FALSE}
+summary(sim)
+```
 
 ## Real schedules
 

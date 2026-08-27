@@ -9,11 +9,13 @@ week-by-week season simulation with a pluggable results generator. It
 adapts [nflseedR](https://nflseedr.com) (MIT, Lee Sharpe & Sebastian Carl)
 to college football semantics. Docs: https://cfbseedR.sportsdataverse.org
 
-## Exports (6)
+## Exports (8 + 2 datasets)
 
 `cfb_standings()`, `cfb_playoff_seeds()`, `cfb_simulations()`,
 `cfbseedR_compute_results()`, `simulations_verify_fct()`,
-`cfb_games_from_schedule()`. User-facing engine functions use the `cfb_`
+`cfb_games_from_schedule()`, `fmt_pct_special()`, plus the S3
+`summary.cfbseedR_simulation()`. Exported data: `cfb_games_example`,
+`cfb_teams_example` — use these in examples, not `read.csv(system.file())`. User-facing engine functions use the `cfb_`
 prefix; the two helpers mirror their nflseedR namesakes.
 
 ## Semantics rulings (do not change casually)
@@ -28,6 +30,11 @@ prefix; the two helpers mirror their nflseedR namesakes.
   P4 champions regardless of ranking + best Group-of-6 team + Notre Dame
   top-12 clause; `"2025"` = 5 highest-ranked conference champions
   guaranteed; seeds strictly in ranking order (no champion bump).
+- Simulations are chunked and run through `furrr::future_map()`;
+  `sims_run_chunk()` must stay self-contained (no shared state) or parallel
+  workers break, and a parallel plan must match sequential bit-for-bit for
+  a fixed seed and `chunks`.
+- gt and scales are Suggests, reached only via `rlang::check_installed()`.
 - These rulings are cross-validated against sportsdataverse-py's CFB
   standings implementation — keep the two reconcilable.
 
