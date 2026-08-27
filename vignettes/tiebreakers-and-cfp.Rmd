@@ -4,7 +4,7 @@ description: >
   Worked scenarios for the official per-conference tiebreakers and the CFP
   automatic-qualifier policies: re-examining a settled season under new
   rules, building today's 12-team field, and stress-testing a 16-team one.
-output: rmarkdown::html_document
+output: html_document
 ---
 
 ```{r, include = FALSE}

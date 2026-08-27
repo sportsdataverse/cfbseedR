@@ -1,7 +1,7 @@
 ---
 title: "Simulating seasons"
 description: "Custom compute_results functions, the tiebreaker ladder, and CFP-12 seeding."
-output: rmarkdown::html_document
+output: html_document
 ---
 
 ```{r, include = FALSE}

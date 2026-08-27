@@ -39,9 +39,10 @@ R-hub reports Status: OK on all four platforms with no notes.
 
 ## Comments
 
-* The package ships one vignette ("Getting started with cfbseedR"); it
-  builds in about 3 seconds and needs no network. The longer pkgdown
-  articles are excluded from the build.
+* Long-form documentation is published as pkgdown articles at
+  <https://cfbseedR.sportsdataverse.org/> rather than shipped as vignettes,
+  matching the other SportsDataverse packages on CRAN (cfbfastR, hoopR,
+  wehoop, baseballr); the vignettes directory is excluded from the build.
 * All examples and tests run offline against the bundled toy season
   (exported as `cfb_games_example` / `cfb_teams_example`, also in
   `inst/extdata/`); no network access is required or attempted.

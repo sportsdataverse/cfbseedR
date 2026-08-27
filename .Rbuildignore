@@ -10,7 +10,7 @@
 ^\.github$
 ^docs$
 ^data-raw$
-^vignettes/articles$
+^vignettes$
 ^_pkgdown\.yml$
 ^pkgdown$
 ^CLAUDE\.md$

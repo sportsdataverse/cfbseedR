@@ -182,5 +182,5 @@ articles:
   navbar: ~
   contents:
   - getting-started
-  - articles/simulating-seasons
-  - articles/tiebreakers-and-cfp
+  - simulating-seasons
+  - tiebreakers-and-cfp
