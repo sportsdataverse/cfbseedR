@@ -223,14 +223,50 @@ gives identical results to a sequential one. The RNG stream does depend on
 the chunking, though, so the same seed with a different `chunks` gives
 different (equally valid) simulations.
 
-## Summarising a simulation
+## Summarising a simulation, and checking it
 
 `summary()` renders the `overall` table as a gt table grouped by
 conference, with probabilities formatted by `fmt_pct_special()` so a
-long-shot reads `<1%` rather than a flat `0%`:
+long-shot reads `<1%` rather than a flat `0%` and a near-lock `>99.9%`
+rather than a false `100%`. Here it is on a real 1,000-season run:
 
-```{r summary, eval = FALSE}
+```{r summary}
+set.seed(2026)
+sim <- cfb_simulations(games, teams, simulations = 1000, playoff_seeds = 4,
+                       chunks = 4, verbosity = "NONE")
 summary(sim)
+```
+
+Before trusting any of those numbers, check that the simulation is
+internally consistent. Three identities have to hold by construction, and
+they are cheap to assert:
+
+```{r sim-checks}
+checks <- data.frame(
+  Check = c("playoff probabilities sum to the seed count",
+            "national-title probabilities sum to one champion",
+            "conference titles sum to one per conference"),
+  Expected = c(sim$sim_params$playoff_seeds, 1, 2),
+  Observed = round(c(sum(sim$overall$playoff),
+                     sum(sim$overall$won_natty),
+                     sum(sim$overall$conf_champ)), 3)
+)
+checks$OK <- checks$Expected == checks$Observed
+checks
+```
+
+All three hold exactly on this run. When one drifts it is nearly always a
+data problem rather than a simulation problem: a team appearing in `games`
+but missing from `teams`, a conference with no `CONF_CHAMP` fixture, or a
+custom `compute_results` that left some scheduled results as `NA`.
+
+The per-team win distribution is the other output worth eyeballing, since
+it exposes the shape of a season rather than just its mean:
+
+```{r team-wins}
+tw <- sim$team_wins[sim$team_wins$team %in% c("A1", "B1"), ]
+tw <- tw[tw$wins %in% c(1, 2, 3, 4), c("team", "wins", "over_prob")]
+tw
 ```
 
 ## Real schedules
@@ -239,12 +275,28 @@ With cfbfastR installed, a real season plugs straight in:
 
 ```{r real, eval = FALSE}
 # Not run: requires network access via cfbfastR
-sched <- cfbfastR::load_cfb_schedules(2024)
-games_2024 <- cfb_games_from_schedule(sched)
-games_2024 <- games_2024[games_2024$game_type != "POST", ]
-teams_2024 <- unique(data.frame(
+sched <- cfbfastR::load_cfb_schedules(2026)
+real_games <- cfb_games_from_schedule(sched)
+real_games <- real_games[real_games$game_type != "POST", ]
+real_teams <- unique(data.frame(
   team = c(sched$home_team, sched$away_team),
   conference = c(sched$home_conference, sched$away_conference)
 ))
-sim <- cfb_simulations(games_2024, teams_2024, simulations = 1000)
+
+future::plan("multisession")
+sim <- cfb_simulations(real_games, real_teams, simulations = 10000, chunks = 8)
+future::plan("sequential")
+
+summary(sim)
 ```
+
+The same three identities apply to a real season and are worth asserting
+there too — with 130-odd FBS teams and a schedule pulled from a live API,
+a missing conference label or an unplayed fixture is far likelier than in
+the toy data, and the sums will say so immediately.
+
+Because the tiebreaker registry is season-scoped, feeding a `season` column
+of 2024 or 2025 ranks those seasons under the rules that were in force at
+the time, while `autobid = "2025"` / `"2026"` selects the CFP era
+independently. The [tiebreakers cookbook](https://cfbseedR.sportsdataverse.org/articles/tiebreakers-and-cfp.html)
+works through what changes when you flip each of them.

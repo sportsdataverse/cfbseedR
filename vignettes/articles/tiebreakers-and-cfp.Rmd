@@ -1,8 +1,9 @@
 ---
-title: "Cookbook: tiebreakers & the 2026 CFP rules"
+title: "Cookbook: tiebreakers & the CFP, past / present / future"
 description: >
-  Recipes for the official per-conference tiebreakers, division formats,
-  external metric inputs, and the 2026 CFP automatic-qualifier policy.
+  Worked scenarios for the official per-conference tiebreakers and the CFP
+  automatic-qualifier policies: re-examining a settled season under new
+  rules, building today's 12-team field, and stress-testing a 16-team one.
 output: rmarkdown::html_document
 ---
 
@@ -11,170 +12,353 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
 cfbseedR implements each FBS conference's **official championship-game
-tiebreaker procedure**, registered as season-scoped epochs, and the CFP's
-**season-keyed automatic-qualifier policies**. This cookbook shows how the
-pieces fit together, one recipe at a time. Everything below runs offline.
+tiebreaker procedure** as season-scoped epochs, and the CFP's
+**season-keyed automatic-qualifier policies**. That combination lets you
+ask the question the rulebook keeps forcing on college football: *would
+last year's outcome still hold under this year's rules?*
 
-```{r setup}
+This cookbook works through three time horizons — a settled season
+re-examined, the present field, and a plausible future one — and reports
+what actually comes out.
+
+```{r setup, message = FALSE}
 library(cfbseedR)
+library(gt)
 ```
+
+A small helper so every table below renders the same way:
+
+```{r helper}
+show <- function(x, title, subtitle = NULL) {
+  gt::gt(x) |>
+    gt::tab_header(title = title, subtitle = subtitle) |>
+    gt::tab_options(
+      table.font.size = gt::px(13),
+      column_labels.font.weight = "bold",
+      data_row.padding = gt::px(4)
+    )
+}
+```
+
+> **On the data below.** The team names and records are *constructed* to
+> isolate one rule difference at a time — they are not transcribed from a
+> real box score. The **rules** are real, taken from the conferences' and
+> the CFP's published policies. Every table is the package's actual output,
+> and the last section shows how to point the same code at a real season
+> through cfbfastR.
 
 ## The rules, at a glance (2026 season)
 
-| Conference | Format | Procedure (after win pct) |
-|---|---|---|
-| SEC | single table | h2h → common opponents → standings descent → opponents' win pct → capped scoring margin (42/48) → draw |
-| Big Ten | single table | h2h → common opponents → descent → opponents' win pct → analytics rating → draw |
-| Big 12 | single table | h2h → common opponents → descent → opponents' win pct → capped total wins → analytics → draw |
-| ACC (2026+) | single table | candidate pool by wins-or-losses → h2h → SportSource SSR → draw |
-| American | single table | h2h → CFP-ranked final-week clause → metric composite → common opponents → draw |
-| Conference USA | single table | h2h → CFP-ranked clause → metric composite → APR → draw |
-| MAC | single table | h2h → common opponents → SportSource rating → draw |
-| Mountain West | single table | metric composite → h2h → draw |
-| Sun Belt | **two divisions** | h2h → divisional win pct → descent → common opponents → CFP-ranked clause → composite → draw |
-| Pac-12 (re-formed) | single table | no published procedure — generic fallback |
-
-The CFP field (12 teams, straight seeding) admits the ACC / Big 12 /
-Big Ten / SEC champions regardless of ranking, the highest-ranked
-Group-of-6 team (champion or not), and Notre Dame when ranked inside the
-field (`autobid = "2026"`, the default). `autobid = "2025"` restores the
-five-best-champions rule used in 2024-2025.
-
-## Recipe 1: season-scoped epochs
-
-The same schedule ranked as a 2025 season and as a 2026 season can crown
-different ACC championship-game participants, because the ACC replaced its
-entire procedure in 2026. Supply a `season` id column and the registry
-resolves the right epoch; a plain `sim` id always means "current rules".
-
-```{r epochs}
-teams <- data.frame(team = c("A", "B", "C", "D", "E"), conference = "ACC")
-games <- data.frame(
-  season = 2026, week = c(1, 2, 1, 2, 3, 4, 3), game_type = "REG",
-  home_team = c("A", "A", "B", "B", "C", "C", "D"),
-  away_team = c("C", "D", "C", "E", "D", "E", "E"),
-  result = 7
+```{r rules}
+rules <- data.frame(
+  Conference = c("SEC", "Big Ten", "Big 12", "ACC (2026+)", "American",
+                 "Conference USA", "MAC", "Mountain West", "Sun Belt",
+                 "Pac-12 (re-formed)"),
+  Format = c(rep("single table", 8), "two divisions", "single table"),
+  `After win pct` = c(
+    "h2h -> common -> descent -> opp win% -> capped margin (42/48) -> draw",
+    "h2h -> common -> descent -> opp win% -> analytics -> draw",
+    "h2h -> common -> descent -> opp win% -> capped wins -> analytics -> draw",
+    "candidate pool (wins OR losses) -> h2h -> SportSource SSR -> draw",
+    "h2h -> CFP-ranked final week -> metric composite -> common -> draw",
+    "h2h -> CFP-ranked final week -> composite -> APR -> draw",
+    "h2h -> common opponents -> SportSource rating -> draw",
+    "metric composite -> h2h -> draw",
+    "h2h -> div win% -> descent -> common -> CFP clause -> composite -> draw",
+    "no published procedure: generic fallback"
+  ),
+  check.names = FALSE
 )
-ratings <- data.frame(team = c("A", "B", "C"), rating = c(1, 2, 0.5))
-
-st <- cfb_standings(games, teams, verbosity = "NONE",
-  tiebreaker_data = list(analytics_ratings = ratings)
-)
-st[, c("team", "conf_rank", "conf_pct")]
+show(rules, "Registered tiebreaker procedures",
+     "Unregistered conferences use the documented generic cascade")
 ```
 
-Change `games$season` to `2025` and the pre-2026 cascade (common
-opponents, standings descent, opponents' win pct) applies instead.
+## PAST — re-examining a settled tie
 
-## Recipe 2: external metric inputs
+The ACC replaced its entire tiebreaker in July 2026 for the move to a
+nine-game schedule. The new policy is short — head-to-head, then the
+SportSource Team Success Ranking, then a draw — but it adds a **candidate
+pool** rule: a team that played a different number of conference games
+joins the tie if it matches the leaders' win count *or* loss count.
 
-The American, CUSA, Mountain West, and Sun Belt procedures lean on
-published metric composites (Connelly SP+, ESPN SOR, KPI, SportSource) and
-the CFP committee rankings. cfbseedR computes none of these — you supply
-them through `tiebreaker_data`, and any missing input skips its rung
-deterministically (recorded in `attr(result, "tiebreak_notes")`):
+That pool rule is the part that rewrites history. Here is one league's
+season ranked twice, from **identical games** — once as a 2025 season,
+once as 2026:
+
+```{r past-setup}
+acc_teams <- data.frame(
+  team = c("Ashwood", "Brightwater", "Cedarcrest", "Dunmore", "Eastvale",
+           "Fairmont", "Glenrock", "Harborview", "Ironside"),
+  conference = "ACC"
+)
+mk <- function(season, w, h, a, r) {
+  data.frame(season = season, week = w, game_type = "REG",
+             home_team = h, away_team = a, result = r)
+}
+acc_games <- function(season) rbind(
+  mk(season, 1, "Ashwood", "Eastvale", 10),     mk(season, 2, "Ashwood", "Fairmont", 7),
+  mk(season, 3, "Ashwood", "Glenrock", 3),      mk(season, 4, "Harborview", "Ashwood", 6),
+  mk(season, 1, "Brightwater", "Glenrock", 14), mk(season, 2, "Brightwater", "Harborview", 21),
+  mk(season, 3, "Brightwater", "Ironside", 3),  mk(season, 4, "Dunmore", "Brightwater", 4),
+  mk(season, 1, "Cedarcrest", "Ironside", 17),  mk(season, 2, "Cedarcrest", "Dunmore", 9),
+  mk(season, 3, "Cedarcrest", "Eastvale", 6),   mk(season, 4, "Fairmont", "Cedarcrest", 2),
+  mk(season, 5, "Glenrock", "Cedarcrest", 1),   mk(season, 5, "Dunmore", "Eastvale", 8),
+  mk(season, 6, "Fairmont", "Glenrock", 5),     mk(season, 6, "Harborview", "Ironside", 12),
+  mk(season, 7, "Eastvale", "Ironside", 4),     mk(season, 7, "Dunmore", "Fairmont", 6)
+)
+
+# The conference's published metric. Brightwater rates best; Cedarcrest
+# rates above Ashwood.
+ssr <- data.frame(
+  team = acc_teams$team,
+  rating = c(88, 93, 90, 70, 60, 65, 62, 72, 55)
+)
+
+rank_season <- function(yr) {
+  st <- cfb_standings(acc_games(yr), acc_teams, verbosity = "NONE",
+                      tiebreaker_data = list(analytics_ratings = ssr))
+  st <- st[order(st$conf_rank), ]
+  data.frame(
+    Rank = st$conf_rank,
+    Team = st$team,
+    `Conf W-L` = paste0(st$conf_wins, "-", st$conf_losses),
+    `Win pct` = round(st$conf_pct, 3),
+    check.names = FALSE
+  )[1:5, ]
+}
+```
+
+```{r past-2025}
+show(rank_season(2025), "Ranked under the pre-2026 ACC cascade",
+     "The championship game is the top two rows")
+```
+
+```{r past-2026}
+show(rank_season(2026), "The same games under the 2026 ACC policy",
+     "The championship game is the top two rows")
+```
+
+**What changed, and why.** Three teams tie at .750 — Ashwood, Brightwater
+and Dunmore. Under the pre-2026 cascade the head-to-head chain seats
+**Dunmore and Brightwater**. Under the 2026 policy the matchup becomes
+**Brightwater and Cedarcrest** — and Cedarcrest is 3-2, a *worse* win
+percentage than the three teams above it. It qualifies because it played
+five conference games rather than four, so its three wins match the
+leaders' three and the candidate-pool rule pulls it into the tie; the SSR
+step then rates it above Ashwood. Dunmore, which played for the title under
+the old rules, drops out of the top two entirely.
+
+That is not a quirk to route around. It is the policy the ACC adopted, and
+the reason it exists is exactly this: teams no longer play the same number
+of conference games, so raw win percentage stopped being comparable.
+
+## PRESENT — the 2026 CFP field
+
+The 2026 automatic-qualifier rule is not "the five best champions". It is
+the ACC, Big 12, Big Ten and SEC champions **regardless of ranking**, the
+**highest-ranked Group-of-6 team whether or not it won its conference**,
+and **Notre Dame** when it is ranked inside the field.
+
+```{r present-setup}
+board <- data.frame(
+  sim = 1L,
+  team = c("Ashwood", "Brightwater", "Cedarcrest", "Dunmore", "Eastvale",
+           "Fairmont", "Glenrock", "Harborview", "Ironside", "Junction",
+           "Kingsport", "Lakeshore", "Marbury", "Northgate", "Oakhurst",
+           "Pinehurst", "Quarry Ridge", "Riverton", "Notre Dame", "Summit"),
+  conference = c("SEC", "Big Ten", "ACC", "Big 12", "SEC", "Big Ten",
+                 "SEC", "Big Ten", "ACC", "Big 12", "Mountain West",
+                 "American", "SEC", "Big Ten", "Sun Belt", "MAC",
+                 "Big 12", "ACC", "FBS Independents", "Conference USA"),
+  conf_champ = c(TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+                 TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE,
+                 FALSE, FALSE, FALSE, FALSE),
+  win_pct = seq(1, 0.4, length.out = 20), sov = 0.5, sos = 0.5, pd = 50
+)
+# The committee's final order. Kingsport - a Group-of-6 CHAMPION - sits at
+# 14, one place behind Lakeshore, a Group-of-6 team that is not a champion.
+committee <- data.frame(
+  team = c("Ashwood", "Brightwater", "Dunmore", "Eastvale", "Fairmont",
+           "Glenrock", "Harborview", "Junction", "Marbury", "Northgate",
+           "Notre Dame", "Riverton", "Lakeshore", "Kingsport", "Cedarcrest",
+           "Ironside", "Oakhurst", "Pinehurst", "Quarry Ridge", "Summit"),
+  rank = 1:20
+)
+
+field_of <- function(n, policy = "2026") {
+  s <- cfb_playoff_seeds(board, rankings = committee, playoff_seeds = n,
+                         autobid = policy)
+  s <- s[!is.na(s$seed), ]
+  s <- s[order(s$seed), ]
+  data.frame(
+    Seed = s$seed, Team = s$team, Conference = s$conference,
+    Champion = ifelse(s$conf_champ, "yes", ""),
+    check.names = FALSE
+  )
+}
+```
+
+```{r present-field}
+show(field_of(12), "The 12-team field under the 2026 rule",
+     "Straight seeding: the field is ordered by committee rank")
+```
+
+Two rows in that table are the 2026 rule doing work:
+
+* **Lakeshore (American) is in, and is not a champion.** The Group-of-6
+  place goes to the best-ranked G6 *team*, so the American's 13th-ranked
+  non-champion takes it.
+* **Kingsport, a Group-of-6 champion ranked 14th, misses the field.**
+  Outside the Power 4, winning your conference is no longer enough.
+
+Run the same board under the previous era and the difference is explicit:
+
+```{r present-diff}
+in26 <- field_of(12)$Team
+in25 <- field_of(12, policy = "2025")$Team
+data.frame(
+  Change = c("In under 2026, out under 2025", "In under 2025, out under 2026"),
+  Teams = c(paste(setdiff(in26, in25), collapse = ", "),
+            paste(setdiff(in25, in26), collapse = ", "))
+) |>
+  show("Same board, two automatic-qualifier eras")
+```
+
+`autobid = "2025"` reinstates the five-best-champions rule: Kingsport
+returns as a champion, Northgate takes the last at-large place, and both
+Lakeshore and Notre Dame drop out. **Two of the twelve places change
+occupants — four teams affected — on the rule change alone**, without a
+single game being played differently. Ten of the twelve are the same either
+way, which is the useful part: the eras disagree at the margin, and the
+margin is exactly where the arguments happen.
+
+## FUTURE — stress-testing a 16-team field
+
+Nothing in the seeding code is hard-wired to twelve, so raising
+`playoff_seeds` answers "who would expansion have let in?" directly:
+
+```{r future-field}
+show(field_of(16), "The same board as a 16-team field",
+     "The automatic qualifiers are unchanged; the extra places are at-large")
+```
+
+```{r future-diff}
+added <- setdiff(field_of(16)$Team, field_of(12)$Team)
+data.frame(
+  `Teams added by expanding 12 to 16` = paste(added, collapse = ", "),
+  check.names = FALSE
+) |>
+  show("What expansion actually buys")
+```
+
+The four extra places go to **Cedarcrest, Kingsport, Northgate and
+Riverton** — three at-larges plus the Group-of-6 champion who missed the
+12-team cut. Note what does *not* change: the automatic qualifiers are the
+same teams, because the AQ rule governs who is guaranteed a place, not how
+many places exist. Expansion is felt entirely at the bottom of the bracket.
+
+For a simulated 16-team postseason, pass the same argument to
+`cfb_simulations()`. The bracket generator handles any field size, giving
+byes to the top seeds when the field is not a power of two — 12 seeds
+produce the familiar 5v12 / 6v11 / 7v10 / 8v9 first round, 16 produce a
+full first round with no byes.
+
+## Feeding the rules real inputs
+
+Several procedures depend on published external numbers that cfbseedR does
+not compute. Supply them through `tiebreaker_data`; anything you omit skips
+its rung deterministically and records the fact:
 
 ```{r inputs, eval = FALSE}
 st <- cfb_standings(
   games, teams,
   tiebreaker_data = list(
-    # your composite of the conference's published metrics
-    analytics_ratings = data.frame(team = teams$team, rating = my_composite),
-    # the latest CFP committee rankings
-    cfp_rankings = data.frame(team = c("Tulane", "Navy"), rank = c(24, 25)),
-    # multi-year APR (the CUSA policy's late fallback)
-    apr = data.frame(team = teams$team, apr = my_apr)
+    analytics_ratings = my_composite,  # SportSource SSR, SP+, SOR, KPI...
+    cfp_rankings = latest_cfp,         # the committee's published top 25
+    apr = multi_year_apr               # the CUSA policy's late fallback
   )
 )
 attr(st, "tiebreak_notes")
 ```
 
-The `cfp_ranked_final_week` clause is faithful to the published text: the
-best-ranked tied team advances only if it **won** its final conference
-game; a ranked team that lost falls through to the composite.
+## Simulating, and checking the simulation
 
-## Recipe 3: division formats (Sun Belt)
+Simulations split into `chunks` dispatched with furrr, so a parallel plan
+uses every core, and `summary()` renders the result as a gt table:
 
-Add a `conf_division` column to `teams` and that conference is ranked
-division-first: each division runs the official procedure internally and
-the division champions take `conf_rank` 1-2 (the championship-game
-matchup). This is the 2026 Sun Belt — and equally any historical
-divisional season you want to re-rank.
+```{r sim}
+games <- cfb_games_example
+teams <- cfb_teams_example
+games$result[games$week >= 3] <- NA
 
-```{r divisions}
-sb_teams <- data.frame(
-  team = c("E1", "E2", "W1", "W2"),
-  conference = "Sun Belt",
-  conf_division = c("East", "East", "West", "West")
-)
-sb_games <- data.frame(
-  season = 2026, week = c(1, 1, 2, 2), game_type = "REG",
-  home_team = c("E1", "W1", "E1", "E2"),
-  away_team = c("E2", "W2", "W1", "W2"),
-  result = 7
-)
-sb <- cfb_standings(sb_games, sb_teams, verbosity = "NONE")
-sb[, c("team", "conference", "conf_rank")]
+set.seed(2026)
+sim <- cfb_simulations(games, teams, simulations = 1000, playoff_seeds = 4,
+                       chunks = 4, verbosity = "NONE")
+summary(sim)
 ```
 
-`W1` (1-1) outranks `E2` (1-1) because divisions, not the overall table,
-decide who reaches the championship game.
+Three identities make a good smoke test on any simulation output, and this
+run satisfies all three exactly:
 
-## Recipe 4: the 2026 CFP field
-
-```{r cfp}
-st <- data.frame(
-  sim = 1L,
-  team = c("BigTenChamp", "AccChamp", "B12Champ", "SecChamp",
-           "G6Team", "Notre Dame", paste0("AtLarge", 1:6)),
-  conference = c("Big Ten", "ACC", "Big 12", "SEC",
-                 "Mountain West", "FBS Independents", rep("Big Ten", 6)),
-  conf_champ = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, rep(FALSE, 6)),
-  win_pct = seq(1, 0.45, length.out = 12), sov = 0, sos = 0, pd = 0
-)
-rankings <- data.frame(team = st$team, rank = seq_len(12))
-
-seeded <- cfb_playoff_seeds(st, rankings = rankings, playoff_seeds = 12)
-seeded[order(seeded$seed), c("team", "conference", "seed")]
+```{r sim-checks}
+data.frame(
+  Check = c("playoff probabilities sum to the number of seeds",
+            "national-title probabilities sum to one champion",
+            "conference titles sum to one per conference"),
+  Expected = c(sim$sim_params$playoff_seeds, 1, 2),
+  Observed = round(c(sum(sim$overall$playoff),
+                     sum(sim$overall$won_natty),
+                     sum(sim$overall$conf_champ)), 3)
+) |>
+  show("Simulation sanity checks", "1000 simulations, seed 2026, 4 chunks")
 ```
 
-Note the Mountain West team enters as the Group-of-6 automatic qualifier
-without winning its conference, and an unranked Power-4 champion would
-still make the field. Straight seeding means nobody is bumped up: seeds
-follow the committee order exactly, with the top four seeds earning
-first-round byes in `cfb_simulations()`.
+If any of those drifts, something upstream is wrong — a team missing from
+`teams`, a conference with no championship game, or a `compute_results`
+function that is not filling every scheduled result.
 
-## Recipe 5: scaling up
-
-Ten thousand seasons is a `chunks` argument away. Simulations are split into
-contiguous blocks and dispatched with furrr, so a parallel plan uses every
-core; `summary()` renders the result as a gt table grouped by conference.
+Scaling up is one argument, and progress reporting is one line:
 
 ```{r scale, eval = FALSE}
 future::plan("multisession")
 progressr::handlers(global = TRUE)
 
-sim <- cfb_simulations(
-  games, teams,
-  simulations = 10000,
-  chunks = 8,
-  autobid = "2026",
-  tiebreaker_data = list(analytics_ratings = my_composite)
-)
-summary(sim)
+sim <- cfb_simulations(games, teams, simulations = 10000, chunks = 8)
 
 future::plan("sequential")
 ```
 
-A seed reproduces exactly for a fixed `chunks`, and parallel matches
-sequential -- but the stream depends on the chunking, so changing `chunks`
-changes which seasons you get.
+A seed reproduces exactly for a fixed `chunks`, and a parallel plan gives
+identical results to a sequential one — but the RNG stream depends on the
+chunking, so changing `chunks` changes which seasons you draw.
+
+## Pointing this at a real season
+
+Everything above runs on constructed records so the article builds offline.
+With cfbfastR installed, the same code takes a real season:
+
+```{r real, eval = FALSE}
+sched <- cfbfastR::load_cfb_schedules(2026)
+games <- cfb_games_from_schedule(sched)
+teams <- cfbfastR::cfbd_team_info(year = 2026) |>
+  dplyr::transmute(team = school, conference)
+
+# today's rules on this season
+standings <- cfb_standings(games, teams, playoff_seeds = 12)
+
+# the same season re-examined under the previous era's automatic bids
+cfb_playoff_seeds(standings, rankings = latest_cfp, autobid = "2025")
+```
+
+Because the registry is season-scoped, a `season` column of 2024 or 2025 is
+automatically ranked under the rules in force then — so year-over-year
+comparisons stay honest with no flags to remember.
 
 ## Where the rules come from
 
 Every registered procedure was transcribed from the conference's official
-policy (ACC July 2026 policy, SEC/Big Ten/Big 12 2024 policies, the
-published American/CUSA/MAC/Mountain West/Sun Belt procedures) and the
-CFP's published formats. The [cheat sheet
+policy (the ACC's July 2026 policy, the SEC/Big Ten/Big 12 2024 policies,
+and the published American / CUSA / MAC / Mountain West / Sun Belt
+procedures) and the CFP's published formats. The [cheat sheet
 (PDF)](https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf)
 condenses this package alongside cfbplotR and cfb4th.
