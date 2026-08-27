@@ -1,9 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="518" height="600" viewBox="0 0 518 600">
-  <!-- cfbseedR hex sticker: navy field, gold border, mirrored bracket converging on a gold diamond.
-       Canvas 518x600 matches the SportsDataverse hex family (hexSticker default at 300 dpi).
-       The outer hexagon is a regular pointy-top hex, circumradius 295, centered at (259,300),
-       leaving a 5px bleed at the top/bottom vertices and 3.5px at the sides so the border
-       renders complete instead of being clipped flat at the points. -->
+  <!--
+    cfbseedR hex sticker: navy field, gold border, mirrored playoff bracket
+    converging on a gold championship diamond.
+
+    Canvas 518x600 matches the SportsDataverse hex family (hexSticker default
+    at 300 dpi). The outer hexagon is a regular pointy-top hex, circumradius
+    295 centered at (259,300), leaving 5px of bleed at the top/bottom vertices
+    and 3.5px at the sides so the gold border renders complete instead of
+    being clipped flat at the points.
+
+    The bracket is a SIXTEEN-slot skeleton - four first-round games per side,
+    then quarterfinals, semifinals, and the final - carrying TWELVE filled
+    seeds (solid cyan) and FOUR open slots (outlined). That is today's 12-team
+    College Football Playoff, where the top four seeds' first-round opponents
+    do not exist yet, drawn so the expansion to sixteen is visibly just a
+    matter of filling the open slots.
+
+    Geometry: bracket centered on (259,342); team column x=82/436, first-round
+    junctions x=116/402, quarterfinal x=152/366, semifinal x=196/322.
+    Slot rows 243, 267, 301, 325, 359, 383, 417, 441 (symmetric about 342);
+    the open slots are rows 267 and 417 on each side. Every element keeps
+    at least 15px of clearance from the navy field edge.
+  -->
   <defs>
     <clipPath id="hexclip">
       <polygon points="259,29 493.69,164.5 493.69,435.5 259,571 24.31,435.5 24.31,164.5"/>
@@ -14,49 +32,53 @@
   <!-- navy field (inner hex, R = 273) -->
   <polygon points="259,27 495.42,163.5 495.42,436.5 259,573 22.58,436.5 22.58,163.5" fill="#0D1B2A"/>
   <g clip-path="url(#hexclip)">
-    <!-- Artwork is authored in the original 512x591 space and mapped into the
-         navy field, scaled 0.919 about the hex center so nothing crosses the
-         gold border: previously the outer bracket nodes overhung the field by
-         ~5px and the wordmark corners by ~3px, and the clip path simply cut
-         them off. Minimum clearance to the navy edge is now 14px. -->
-    <g transform="translate(24.117 28.873) scale(0.91752)">
-      <!-- wordmark -->
-      <text x="256" y="185" font-family="'DejaVu Sans','Segoe UI',Verdana,sans-serif" font-size="88" font-weight="600" fill="#FFFFFF" text-anchor="middle">cfbseedR</text>
-      <!-- bracket: left half (8 leaves -> 4 -> 2 -> final), mirrored right -->
-      <g stroke="#41566B" stroke-width="9" fill="none">
-        <!-- left leaves to round-2 -->
-        <path d="M96,268 h34 v30 h-34 M130,283 h30"/>
-        <path d="M96,338 h34 v-25 M130,313 h30"/>
-        <path d="M96,398 h34 v30 h-34 M130,413 h30"/>
-        <path d="M96,468 h34 v-25 M130,443 h30"/>
-        <!-- left round-2 to semi -->
-        <path d="M160,283 v30 M160,298 h36"/>
-        <path d="M160,413 v30 M160,428 h36"/>
-        <!-- left semi to final -->
-        <path d="M196,298 v130 M196,363 h42"/>
-        <!-- right leaves to round-2 (mirror) -->
-        <path d="M416,268 h-34 v30 h34 M382,283 h-30"/>
-        <path d="M416,338 h-34 v-25 M382,313 h-30"/>
-        <path d="M416,398 h-34 v30 h34 M382,413 h-30"/>
-        <path d="M416,468 h-34 v-25 M382,443 h-30"/>
-        <path d="M352,283 v30 M352,298 h-36"/>
-        <path d="M352,413 v30 M352,428 h-36"/>
-        <path d="M316,298 v130 M316,363 h-42"/>
-      </g>
-      <!-- leaf nodes (cyan) -->
-      <g fill="#A9D6E5">
-        <circle cx="96" cy="268" r="13"/><circle cx="96" cy="298" r="13"/>
-        <circle cx="96" cy="338" r="13"/>
-        <circle cx="130" cy="313" r="13"/>
-        <circle cx="96" cy="398" r="13"/><circle cx="96" cy="428" r="13"/>
-        <circle cx="96" cy="468" r="13"/><circle cx="130" cy="443" r="13"/>
-        <circle cx="416" cy="268" r="13"/><circle cx="416" cy="298" r="13"/>
-        <circle cx="416" cy="338" r="13"/><circle cx="382" cy="313" r="13"/>
-        <circle cx="416" cy="398" r="13"/><circle cx="416" cy="428" r="13"/>
-        <circle cx="416" cy="468" r="13"/><circle cx="382" cy="443" r="13"/>
-      </g>
-      <!-- championship diamond (gold) -->
-      <rect x="256" y="363" width="34" height="34" fill="#FFB612" transform="rotate(45 256 363) translate(-17 -17)"/>
+    <!-- wordmark -->
+    <text x="259" y="198" font-family="'DejaVu Sans','Segoe UI',Verdana,sans-serif" font-size="76" font-weight="600" fill="#FFFFFF" text-anchor="middle">cfbseedR</text>
+
+    <!-- bracket structure -->
+    <g stroke="#41566B" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <!-- LEFT: first round, four games -->
+      <path d="M82,243 H116 V267 H82 M116,255 H152"/>
+      <path d="M82,301 H116 V325 H82 M116,313 H152"/>
+      <path d="M82,359 H116 V383 H82 M116,371 H152"/>
+      <path d="M82,417 H116 V441 H82 M116,429 H152"/>
+      <!-- LEFT: quarterfinals -->
+      <path d="M152,255 V313 M152,284 H196"/>
+      <path d="M152,371 V429 M152,400 H196"/>
+      <!-- LEFT: semifinal into the title game -->
+      <path d="M196,284 V400 M196,342 H241"/>
+
+      <!-- RIGHT: first round, four games (mirrored) -->
+      <path d="M436,243 H402 V267 H436 M402,255 H366"/>
+      <path d="M436,301 H402 V325 H436 M402,313 H366"/>
+      <path d="M436,359 H402 V383 H436 M402,371 H366"/>
+      <path d="M436,417 H402 V441 H436 M402,429 H366"/>
+      <!-- RIGHT: quarterfinals -->
+      <path d="M366,255 V313 M366,284 H322"/>
+      <path d="M366,371 V429 M366,400 H322"/>
+      <!-- RIGHT: semifinal into the title game -->
+      <path d="M322,284 V400 M322,342 H277"/>
     </g>
+
+    <!-- the twelve seeds currently in the field -->
+    <g fill="#A9D6E5">
+      <circle cx="82" cy="243" r="10"/>
+      <circle cx="82" cy="301" r="10"/><circle cx="82" cy="325" r="10"/>
+      <circle cx="82" cy="359" r="10"/><circle cx="82" cy="383" r="10"/>
+      <circle cx="82" cy="441" r="10"/>
+      <circle cx="436" cy="243" r="10"/>
+      <circle cx="436" cy="301" r="10"/><circle cx="436" cy="325" r="10"/>
+      <circle cx="436" cy="359" r="10"/><circle cx="436" cy="383" r="10"/>
+      <circle cx="436" cy="441" r="10"/>
+    </g>
+
+    <!-- four open slots: the top seeds' byes today, seats 13-16 tomorrow -->
+    <g fill="none" stroke="#A9D6E5" stroke-width="4" stroke-opacity="0.5">
+      <circle cx="82" cy="267" r="9"/><circle cx="82" cy="417" r="9"/>
+      <circle cx="436" cy="267" r="9"/><circle cx="436" cy="417" r="9"/>
+    </g>
+
+    <!-- championship diamond -->
+    <polygon points="259,324 277,342 259,360 241,342" fill="#FFB612"/>
   </g>
 </svg>
