@@ -13,7 +13,8 @@ cfb_simulations(
   playoff_seeds = 12L,
   tiebreaker_depth = c("SOS", "PRE-SOV", "POINTS", "RANDOM"),
   sim_include = c("POST", "REG"),
-  rankings = NULL
+  rankings = NULL,
+  autobid = c("2026", "2025")
 )
 }
 \arguments{
@@ -28,8 +29,14 @@ conference \code{"FBS Independents"} or \code{NA} are treated as independents:
 they appear in overall standings but receive no conference rank. An
 optional \code{division} column (e.g. \code{"FBS"}/\code{"FCS"}) feeds the Big 12
 \code{total_wins} FCS cap; absent -> that cap degrades to uncapped win
-totals (noted, see \code{tiebreak_notes} below). \code{teams} need not list every
-team that appears in \code{games} - an unlisted opponent (e.g. an
+totals (noted, see \code{tiebreak_notes} below). An optional \code{conf_division}
+column (e.g. \code{"East"}/\code{"West"}) turns on division-format ranking for a
+conference (the 2026 Sun Belt): each division is ranked separately and
+the division champions take \code{conf_rank} 1-2. An optional logical
+\code{postseason_eligible} column (explicit \code{FALSE} = ineligible) keeps a
+team out of the championship-game ranks while its games still count in
+every comparison (the ACC policy makes this explicit). \code{teams} need not
+list every team that appears in \code{games} - an unlisted opponent (e.g. an
 FCS-or-lower team) gets no standings row of its own, but its games
 still count toward its opponents' records and toward the Big 12
 \code{total_wins} FCS cap (an unknown opponent counts as FCS-or-lower).}
@@ -57,8 +64,8 @@ falling back to a coin flip:
 }
 
 This depth ladder gates ONLY the generic fallback cascade used by
-unregistered conferences; the SEC/Big Ten/Big 12/ACC/MAC official
-procedures below always run in full.}
+unregistered conferences; the registered official procedures below
+always run in full.}
 
 \item{sim_include}{One of \code{"POST"} (default) or \code{"REG"}:
 \itemize{
@@ -71,6 +78,9 @@ conference champions, and playoff seeds.
 seeding, held static across simulations. When \code{NULL}, seeding falls
 back to the per-simulation standings ordering (see
 \code{\link[=cfb_playoff_seeds]{cfb_playoff_seeds()}}).}
+
+\item{autobid}{CFP automatic-qualifier policy passed to
+\code{\link[=cfb_playoff_seeds]{cfb_playoff_seeds()}}: \code{"2026"} (default, current rule) or \code{"2025"}.}
 }
 \value{
 A list of class \code{cfbseedR_simulation} with these elements:\tabular{lll}{

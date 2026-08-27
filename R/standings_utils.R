@@ -264,6 +264,44 @@ standings_add_tiebreak_metrics <- function(standings, dg, teams, tiebreaker_data
   } else {
     standings <- dplyr::mutate(standings, analytics_rating = NA_real_)
   }
+
+  # CFP committee rank (1 = best) for the `cfp_ranked_final_week` rung
+  # (American / CUSA / Sun Belt registry procedures). Absent = NA = the
+  # rung is skipped with a note.
+  if (!is.null(tiebreaker_data) && !is.null(tiebreaker_data$cfp_rankings)) {
+    cr <- tibble::as_tibble(tiebreaker_data$cfp_rankings) |>
+      dplyr::transmute(
+        team = as.character(.data$team),
+        cfp_rank = as.double(.data$rank)
+      )
+    standings <- dplyr::left_join(standings, cr, by = "team")
+  } else {
+    standings <- dplyr::mutate(standings, cfp_rank = NA_real_)
+  }
+
+  # Divisional win pct (conference REG games vs same-division opponents)
+  # for the Sun Belt's `div_pct` rung. Requires a `conf_division` column
+  # on `teams`; absent = NA = the rung is skipped with a note.
+  if ("conf_division" %in% names(teams)) {
+    div_map <- teams |>
+      dplyr::transmute(team = .data$team, team_div = .data$conf_division)
+    dp <- dg |>
+      dplyr::filter(.data$conf_game == TRUE) |>
+      dplyr::left_join(div_map, by = "team") |>
+      dplyr::left_join(
+        dplyr::rename(div_map, opp = "team", opp_div = "team_div"),
+        by = "opp"
+      ) |>
+      dplyr::filter(!is.na(.data$team_div), .data$team_div == .data$opp_div) |>
+      dplyr::summarise(
+        div_pct = sum(.data$outcome) / dplyr::n(),
+        .by = c("sim", "team")
+      )
+    standings <- dplyr::left_join(standings, dp, by = dplyr::join_by("sim", "team")) |>
+      dplyr::mutate(div_pct = dplyr::coalesce(.data$div_pct, 0))
+  } else {
+    standings <- dplyr::mutate(standings, div_pct = NA_real_)
+  }
   standings
 }
 
@@ -279,17 +317,31 @@ standings_add_tiebreak_metrics <- function(standings, dg, teams, tiebreaker_data
 # tiebreaking of many-conference schedules ever becomes a hot path (mirrors
 # the same ponytail note in sdv-py's `_build_rec_map`).
 standings_add_conf_ranks <- function(standings, dg, depth, verbosity,
-                                     notes_env, division_absent) {
+                                     notes_env, division_absent,
+                                     teams = NULL, seasons_by_sim = NULL) {
   non_ind <- standings |> dplyr::filter(!is_independent(.data$conference))
   cg_all <- dg |> dplyr::filter(.data$conf_game == TRUE)
+
+  conf_div_by_team <- if (!is.null(teams) && "conf_division" %in% names(teams)) {
+    setNames(as.character(teams$conf_division), teams$team)
+  } else {
+    NULL
+  }
+  eligible_by_team <- if (!is.null(teams) && "postseason_eligible" %in% names(teams)) {
+    # NA / missing = eligible; only an explicit FALSE marks a team out.
+    setNames(!(teams$postseason_eligible %in% FALSE), teams$team)
+  } else {
+    NULL
+  }
 
   ranked <- non_ind |>
     dplyr::group_split(.data$sim, .data$conference) |>
     purrr::map(function(grp) {
       sim_id <- grp$sim[1]
       conf_name <- grp$conference[1]
-      rungs <- CONFERENCE_TIEBREAKERS[[conf_name]]
-      if (is.null(rungs)) rungs <- .generic_cascade
+      season <- if (is.null(seasons_by_sim)) NA else seasons_by_sim[[as.character(sim_id)]]
+      rules <- .conf_rules(conf_name, season)
+      rungs <- rules$rungs
       cg <- cg_all[cg_all$sim == sim_id & cg_all$team_conf == conf_name, ]
 
       conf_pct_by_team <- setNames(grp$conf_pct, grp$team)
@@ -302,34 +354,84 @@ standings_add_conf_ranks <- function(standings, dg, depth, verbosity,
             opp_wp_pooled = grp$sos[i],
             capped_margin = grp$capped_margin[i],
             capped_wins = grp$capped_wins[i],
-            analytics_rating = grp$analytics_rating[i]
+            analytics_rating = grp$analytics_rating[i],
+            cfp_rank = grp$cfp_rank[i],
+            div_pct = grp$div_pct[i]
           )
         }),
         grp$team
       )
-      ctx <- list(
-        conf_name = conf_name,
-        conf_pct_by_team = conf_pct_by_team,
-        division_absent = division_absent
-      )
 
-      pct_rounded <- round(grp$conf_pct, 9)
-      rank <- 1L
-      rows <- list()
-      for (p in sort(unique(pct_rounded), decreasing = TRUE)) {
-        tier <- grp$team[pct_rounded == p]
-        if (length(tier) > 1L) {
-          if (verbosity >= 2L) {
-            cli::cli_inform("Breaking tie of {.val {tier}} in {.val {conf_name}} (sim {sim_id}).")
+      # Order one set of teams: win-pct tiers, registry/tiebreak walk
+      # inside each tier. `pct_by_team` scopes the descent-rung standings
+      # universe (the whole conference, or one division).
+      order_set <- function(team_set, pct_by_team, pool = NULL) {
+        ctx <- list(
+          conf_name = conf_name,
+          conf_pct_by_team = pct_by_team,
+          division_absent = division_absent
+        )
+        pct_rounded <- setNames(round(pct_by_team[team_set], 9), team_set)
+        # ACC 2026 candidate-pool rule: teams that played an alternate
+        # number of conference games join the leaders' tier when they
+        # match the leaders' win count OR loss count.
+        if (identical(pool, "wins_or_losses")) {
+          top_p <- max(pct_rounded)
+          leaders <- team_set[pct_rounded == top_p]
+          lw <- grp$conf_wins[match(leaders, grp$team)]
+          ll <- grp$conf_losses[match(leaders, grp$team)]
+          extra <- team_set[
+            pct_rounded < top_p &
+              (grp$conf_wins[match(team_set, grp$team)] %in% lw |
+                grp$conf_losses[match(team_set, grp$team)] %in% ll)
+          ]
+          if (length(extra) > 0L) pct_rounded[extra] <- top_p
+        }
+        ordered <- character(0)
+        for (p in sort(unique(pct_rounded), decreasing = TRUE)) {
+          tier <- team_set[pct_rounded[team_set] == p]
+          if (length(tier) > 1L) {
+            if (verbosity >= 2L) {
+              cli::cli_inform("Breaking tie of {.val {tier}} in {.val {conf_name}} (sim {sim_id}).")
+            }
+            tier <- .order_tied(tier, metrics, cg, rungs, depth, ctx, notes_env)
           }
-          tier <- .order_tied(tier, metrics, cg, rungs, depth, ctx, notes_env)
+          ordered <- c(ordered, tier)
         }
-        for (team in tier) {
-          rows[[length(rows) + 1L]] <- tibble::tibble(sim = sim_id, team = team, conf_rank = rank)
-          rank <- rank + 1L
-        }
+        ordered
       }
-      purrr::list_rbind(rows)
+
+      divs <- if (is.null(conf_div_by_team)) NULL else conf_div_by_team[grp$team]
+      has_divisions <- !is.null(divs) &&
+        length(unique(stats::na.omit(divs))) >= 2L && !anyNA(divs)
+
+      if (has_divisions) {
+        # Division format (Sun Belt): rank each division with the
+        # conference's procedure, then seat the division champions at
+        # conf_rank 1-2 (ordered between themselves by overall conference
+        # win pct, ties broken by the same procedure over the whole
+        # conference) ahead of everyone else.
+        div_orders <- lapply(split(grp$team, divs), function(members) {
+          order_set(members, conf_pct_by_team[members])
+        })
+        champs <- vapply(div_orders, function(o) o[1], character(1))
+        champs <- order_set(unname(champs), conf_pct_by_team[unname(champs)])
+        rest <- order_set(setdiff(grp$team, champs), conf_pct_by_team)
+        ordered <- c(champs, setdiff(rest, champs))
+      } else {
+        ordered <- order_set(grp$team, conf_pct_by_team, pool = rules$pool)
+      }
+
+      # Postseason-eligibility (ACC policy makes it explicit): an
+      # ineligible team cannot occupy a championship-game berth. Stable
+      # partition - eligible teams keep their order ahead of ineligible
+      # ones, whose games still counted in every comparison above.
+      if (!is.null(eligible_by_team)) {
+        elig <- dplyr::coalesce(eligible_by_team[ordered], TRUE)
+        if (any(!elig)) ordered <- c(ordered[elig], ordered[!elig])
+      }
+
+      tibble::tibble(sim = sim_id, team = ordered, conf_rank = seq_along(ordered))
     }) |>
     purrr::list_rbind()
 

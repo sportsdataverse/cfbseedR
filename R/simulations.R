@@ -31,6 +31,8 @@
 #'   seeding, held static across simulations. When `NULL`, seeding falls
 #'   back to the per-simulation standings ordering (see
 #'   [cfb_playoff_seeds()]).
+#' @param autobid CFP automatic-qualifier policy passed to
+#'   [cfb_playoff_seeds()]: `"2026"` (default, current rule) or `"2025"`.
 #'
 #' @details
 #' The playoff bracket is a standard single-elimination bracket of size
@@ -77,9 +79,11 @@ cfb_simulations <- function(games,
                             playoff_seeds = 12L,
                             tiebreaker_depth = c("SOS", "PRE-SOV", "POINTS", "RANDOM"),
                             sim_include = c("POST", "REG"),
-                            rankings = NULL) {
+                            rankings = NULL,
+                            autobid = c("2026", "2025")) {
   tiebreaker_depth <- rlang::arg_match(tiebreaker_depth)
   sim_include <- rlang::arg_match(sim_include)
+  autobid <- rlang::arg_match(autobid)
   if (!is.function(compute_results)) {
     cli::cli_abort("The {.arg compute_results} argument must be a function!")
   }
@@ -142,13 +146,17 @@ cfb_simulations <- function(games,
     "RANDOM" = 0L, "PRE-SOV" = 1L, "SOS" = 2L, "POINTS" = 3L
   )
   standings <- standings_add_conf_ranks(
-    standings, dg, depth, verbosity = 0L, notes_env, division_absent
+    standings, dg, depth, verbosity = 0L, notes_env, division_absent,
+    teams = teams, seasons_by_sim = NULL # sims use the CURRENT registry rules
   )
   standings <- standings |>
-    dplyr::select(-dplyr::any_of(c("capped_margin", "capped_wins", "analytics_rating")))
+    dplyr::select(-dplyr::any_of(c(
+      "capped_margin", "capped_wins", "analytics_rating", "cfp_rank", "div_pct"
+    )))
   standings <- standings_add_conf_champ(standings, dg)
   standings <- cfb_playoff_seeds(
-    standings, rankings = rankings, playoff_seeds = playoff_seeds
+    standings, rankings = rankings, playoff_seeds = playoff_seeds,
+    autobid = autobid
   )
 
   # PLAYOFF SIMULATION --------------------------------------------------------

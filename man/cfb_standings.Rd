@@ -35,8 +35,14 @@ conference \code{"FBS Independents"} or \code{NA} are treated as independents:
 they appear in overall standings but receive no conference rank. An
 optional \code{division} column (e.g. \code{"FBS"}/\code{"FCS"}) feeds the Big 12
 \code{total_wins} FCS cap; absent -> that cap degrades to uncapped win
-totals (noted, see \code{tiebreak_notes} below). \code{teams} need not list every
-team that appears in \code{games} - an unlisted opponent (e.g. an
+totals (noted, see \code{tiebreak_notes} below). An optional \code{conf_division}
+column (e.g. \code{"East"}/\code{"West"}) turns on division-format ranking for a
+conference (the 2026 Sun Belt): each division is ranked separately and
+the division champions take \code{conf_rank} 1-2. An optional logical
+\code{postseason_eligible} column (explicit \code{FALSE} = ineligible) keeps a
+team out of the championship-game ranks while its games still count in
+every comparison (the ACC policy makes this explicit). \code{teams} need not
+list every team that appears in \code{games} - an unlisted opponent (e.g. an
 FCS-or-lower team) gets no standings row of its own, but its games
 still count toward its opponents' records and toward the Big 12
 \code{total_wins} FCS cap (an unknown opponent counts as FCS-or-lower).}
@@ -54,8 +60,8 @@ falling back to a coin flip:
 }
 
 This depth ladder gates ONLY the generic fallback cascade used by
-unregistered conferences; the SEC/Big Ten/Big 12/ACC/MAC official
-procedures below always run in full.}
+unregistered conferences; the registered official procedures below
+always run in full.}
 
 \item{playoff_seeds}{If not \code{NULL}, a \code{seed} column is added via
 \code{\link[=cfb_playoff_seeds]{cfb_playoff_seeds()}} with this number of playoff spots.}
@@ -65,10 +71,14 @@ procedures below always run in full.}
 \code{playoff_seeds} is \code{NULL}.}
 
 \item{tiebreaker_data}{Optional named list of external inputs for the
-official registry rungs. Currently supported: \code{analytics_ratings}, a
-data frame with columns \code{team} and \code{rating} (feeds the SportSource
-Analytics-style rating rung used by Big Ten/Big 12/ACC/MAC). Missing
--> that rung is skipped for those conferences (noted).}
+official registry rungs. Supported: \code{analytics_ratings}, a data frame
+with columns \code{team} and \code{rating} (feeds the SportSource-style rating /
+metric-composite rungs used by the Big Ten, Big 12, ACC, MAC,
+American, CUSA, Mountain West, and Sun Belt - supply your own
+composite of the conference's published metrics), and \code{cfp_rankings},
+a data frame with columns \code{team} and \code{rank} (feeds the
+\code{cfp_ranked_final_week} clause used by the American, CUSA, and Sun
+Belt). A missing input -> that rung is skipped (noted).}
 
 \item{verbosity}{One of \code{"MIN"} (default), \code{"MAX"}, or \code{"NONE"}.
 \code{"MAX"} logs every tied group as it's broken.}
@@ -121,20 +131,28 @@ conference record.
 \details{
 Conference ranks are seeded by conference win percentage; ties within a
 tier are broken by a documented cascade. \strong{Registered conferences} (SEC,
-Big Ten, Big 12, ACC, MAC) use their \strong{official 2024+ procedures} (see
-"Official per-conference tiebreakers" below); every other conference uses
-the \strong{generic fallback}: head-to-head record among the tied teams,
-record vs. common conference opponents (minimum one), conference-scoped
-strength of victory, conference-scoped strength of schedule, conference
-point differential, and finally a coin flip, gated by \code{tiebreaker_depth}.
+Big Ten, Big 12, ACC, MAC, American, Conference USA, Mountain West, Sun
+Belt) use their \strong{official procedures} (see "Official per-conference
+tiebreakers" below); every other conference - including the re-formed
+Pac-12, which has not published a procedure - uses the \strong{generic
+fallback}: head-to-head record among the tied teams, record vs. common
+conference opponents (minimum one), conference-scoped strength of
+victory, conference-scoped strength of schedule, conference point
+differential, and finally a coin flip, gated by \code{tiebreaker_depth}.
 All cascade quantities are computed over regular-season conference games
 so conference ranks depend only on conference play.
 \subsection{Official per-conference tiebreakers}{
 
-\code{CONFERENCE_TIEBREAKERS} (internal) registers the SEC, Big Ten, Big 12,
-ACC, and MAC 2024+ procedures as rung lists, ported verbatim from sdv-py's
-\code{cfb_standings.py} so both engines produce identical output on the shared
-cross-language parity fixture. Rung primitives: \code{h2h} (multi-team combined
+\code{CONFERENCE_TIEBREAKERS} (internal) registers each conference's official
+procedure as a list of season-scoped \strong{epochs}, so a policy change
+applies from its first season: with a \code{season} id column, the ACC's
+all-new 2026 policy (head-to-head, then SportSource Team Success
+Ranking, then a draw, with the alternate-game-count candidate-pool rule)
+applies from 2026 while earlier seasons keep the 2024 cascade; plain
+\code{sim} ids resolve to the current rules. The SEC/Big Ten/Big 12 2024
+procedures are ported verbatim from sdv-py's \code{cfb_standings.py} so both
+engines produce identical output on the shared cross-language parity
+fixture. Rung primitives: \code{h2h} (multi-team combined
 head-to-head, applied only when every tied pair played; otherwise only
 "defeated-all" elimination - the symmetric "lost-to-all" elimination is
 intentionally not modeled, a documented simplification, see
@@ -148,7 +166,14 @@ scored capped at 42 / allowed capped at 48, per game, summed over
 conference games; needs \code{home_points}/\code{away_points}), \code{total_wins} (Big
 12: overall wins with at most one win vs an FCS-or-lower opponent
 counted; needs \code{teams$division}), \code{analytics_rating} (external, via
-\code{tiebreaker_data$analytics_ratings}), and \code{coin_toss}. After each team is
+\code{tiebreaker_data$analytics_ratings} - stands in for each conference's
+published metric composite, e.g. Connelly SP+ / ESPN SOR / KPI /
+SportSource for the American, CUSA, and Mountain West),
+\code{cfp_ranked_final_week} (American/CUSA/Sun Belt: the best-ranked tied
+team advances if it won its final conference game, else the clause falls
+through; needs \code{tiebreaker_data$cfp_rankings}), \code{div_pct} (Sun Belt:
+win pct vs same-division opponents; needs \code{teams$conf_division}), and
+\code{coin_toss}. After each team is
 seeded/eliminated the procedure restarts from the first rung with the
 remaining tied set; when a rung's required input is unavailable it is
 skipped deterministically and the skip is recorded once (per conference)
