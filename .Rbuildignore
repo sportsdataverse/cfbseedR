@@ -16,3 +16,4 @@
 ^CLAUDE\.md$
 ^\.omc$
 ^cran-comments\.md$
+^\.ruff_cache$

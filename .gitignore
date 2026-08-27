@@ -11,3 +11,4 @@ docs/
 .DS_Store
 data-raw/DATASET.R
 data-raw/hexsticker-prototype.png
+.ruff_cache/
