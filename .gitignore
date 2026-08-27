@@ -1,14 +1,35 @@
+# R
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
 *.Rcheck/
+*.tar.gz
 inst/doc
 docs/
+
+# secrets — never commit
+.Renviron
+.env
+
+# agent / editor scratch
 .positai
 .omc/
-*.tar.gz
+.claude/
+.remember/
+.vscode/
+.idea/
+
+# python tooling strays
+.ruff_cache/
+__pycache__/
+.venv/
+
+# OS
 .DS_Store
+Thumbs.db
+
+# data-raw: the maintenance scripts (hex.R, logo-assets.R) ARE tracked;
+# only their generated artifacts and the usethis stub are ignored.
 data-raw/DATASET.R
 data-raw/hexsticker-prototype.png
-.ruff_cache/
