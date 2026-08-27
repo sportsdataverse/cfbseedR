@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Cookbook: tiebreakers &amp; the 2026 CFP rules • cfbseedR</title>
+<title>Cookbook: tiebreakers &amp; the CFP, past / present / future • cfbseedR</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -16,10 +16,10 @@
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
-<meta property="og:title" content="Cookbook: tiebreakers &amp; the 2026 CFP rules">
-<meta name="description" content="Recipes for the official per-conference tiebreakers, division formats, external metric inputs, and the 2026 CFP automatic-qualifier policy.
+<meta property="og:title" content="Cookbook: tiebreakers &amp; the CFP, past / present / future">
+<meta name="description" content="Worked scenarios for the official per-conference tiebreakers and the CFP automatic-qualifier policies: re-examining a settled season under new rules, building today's 12-team field, and stress-testing a 16-team one.
 ">
-<meta property="og:description" content="Recipes for the official per-conference tiebreakers, division formats, external metric inputs, and the 2026 CFP automatic-qualifier policy.
+<meta property="og:description" content="Worked scenarios for the official per-conference tiebreakers and the CFP automatic-qualifier policies: re-examining a settled season under new rules, building today's 12-team field, and stress-testing a 16-team one.
 ">
 <meta property="og:image" content="https://raw.githubusercontent.com/sportsdataverse/cfbseedR/main/man/figures/logo.png">
 <meta property="og:image:alt" content="cfbseedR social preview card">
@@ -107,7 +107,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.svg" class="logo" alt=""><h1>Cookbook: tiebreakers &amp; the 2026 CFP rules</h1>
+      <img src="../logo.svg" class="logo" alt=""><h1>Cookbook: tiebreakers &amp; the CFP, past / present / future</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/sportsdataverse/cfbseedR/blob/main/vignettes/articles/tiebreakers-and-cfp.Rmd" class="external-link"><code>vignettes/articles/tiebreakers-and-cfp.Rmd</code></a></small>
@@ -117,257 +117,4915 @@
     
     
 <p>cfbseedR implements each FBS conference’s <strong>official
-championship-game tiebreaker procedure</strong>, registered as
-season-scoped epochs, and the CFP’s <strong>season-keyed
-automatic-qualifier policies</strong>. This cookbook shows how the
-pieces fit together, one recipe at a time. Everything below runs
-offline.</p>
+championship-game tiebreaker procedure</strong> as season-scoped epochs,
+and the CFP’s <strong>season-keyed automatic-qualifier
+policies</strong>. That combination lets you ask the question the
+rulebook keeps forcing on college football: <em>would last year’s
+outcome still hold under this year’s rules?</em></p>
+<p>This cookbook works through three time horizons — a settled season
+re-examined, the present field, and a plausible future one — and reports
+what actually comes out.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://cfbseedR.sportsdataverse.org">cfbseedR</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://cfbseedR.sportsdataverse.org">cfbseedR</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://gt.rstudio.com" class="external-link">gt</a></span><span class="op">)</span></span></code></pre></div>
+<p>A small helper so every table below renders the same way:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">show</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">title</span>, <span class="va">subtitle</span> <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">gt</span><span class="fu">::</span><span class="fu"><a href="https://gt.rstudio.com/reference/gt.html" class="external-link">gt</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">gt</span><span class="fu">::</span><span class="fu"><a href="https://gt.rstudio.com/reference/tab_header.html" class="external-link">tab_header</a></span><span class="op">(</span>title <span class="op">=</span> <span class="va">title</span>, subtitle <span class="op">=</span> <span class="va">subtitle</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">gt</span><span class="fu">::</span><span class="fu"><a href="https://gt.rstudio.com/reference/tab_options.html" class="external-link">tab_options</a></span><span class="op">(</span></span>
+<span>      table.font.size <span class="op">=</span> <span class="fu">gt</span><span class="fu">::</span><span class="fu"><a href="https://gt.rstudio.com/reference/px.html" class="external-link">px</a></span><span class="op">(</span><span class="fl">13</span><span class="op">)</span>,</span>
+<span>      column_labels.font.weight <span class="op">=</span> <span class="st">"bold"</span>,</span>
+<span>      data_row.padding <span class="op">=</span> <span class="fu">gt</span><span class="fu">::</span><span class="fu"><a href="https://gt.rstudio.com/reference/px.html" class="external-link">px</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<blockquote>
+<p><strong>On the data below.</strong> The team names and records are
+<em>constructed</em> to isolate one rule difference at a time — they are
+not transcribed from a real box score. The <strong>rules</strong> are
+real, taken from the conferences’ and the CFP’s published policies.
+Every table is the package’s actual output, and the last section shows
+how to point the same code at a real season through cfbfastR.</p>
+</blockquote>
 <div class="section level2">
 <h2 id="the-rules-at-a-glance-2026-season">The rules, at a glance (2026 season)<a class="anchor" aria-label="anchor" href="#the-rules-at-a-glance-2026-season"></a>
 </h2>
-<table class="table">
-<colgroup>
-<col width="33%">
-<col width="33%">
-<col width="33%">
-</colgroup>
-<thead><tr class="header">
-<th>Conference</th>
-<th>Format</th>
-<th>Procedure (after win pct)</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>SEC</td>
-<td>single table</td>
-<td>h2h → common opponents → standings descent → opponents’ win pct →
-capped scoring margin (42/48) → draw</td>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rules</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  Conference <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SEC"</span>, <span class="st">"Big Ten"</span>, <span class="st">"Big 12"</span>, <span class="st">"ACC (2026+)"</span>, <span class="st">"American"</span>,</span>
+<span>                 <span class="st">"Conference USA"</span>, <span class="st">"MAC"</span>, <span class="st">"Mountain West"</span>, <span class="st">"Sun Belt"</span>,</span>
+<span>                 <span class="st">"Pac-12 (re-formed)"</span><span class="op">)</span>,</span>
+<span>  Format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"single table"</span>, <span class="fl">8</span><span class="op">)</span>, <span class="st">"two divisions"</span>, <span class="st">"single table"</span><span class="op">)</span>,</span>
+<span>  `After win pct` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"h2h -&gt; common -&gt; descent -&gt; opp win% -&gt; capped margin (42/48) -&gt; draw"</span>,</span>
+<span>    <span class="st">"h2h -&gt; common -&gt; descent -&gt; opp win% -&gt; analytics -&gt; draw"</span>,</span>
+<span>    <span class="st">"h2h -&gt; common -&gt; descent -&gt; opp win% -&gt; capped wins -&gt; analytics -&gt; draw"</span>,</span>
+<span>    <span class="st">"candidate pool (wins OR losses) -&gt; h2h -&gt; SportSource SSR -&gt; draw"</span>,</span>
+<span>    <span class="st">"h2h -&gt; CFP-ranked final week -&gt; metric composite -&gt; common -&gt; draw"</span>,</span>
+<span>    <span class="st">"h2h -&gt; CFP-ranked final week -&gt; composite -&gt; APR -&gt; draw"</span>,</span>
+<span>    <span class="st">"h2h -&gt; common opponents -&gt; SportSource rating -&gt; draw"</span>,</span>
+<span>    <span class="st">"metric composite -&gt; h2h -&gt; draw"</span>,</span>
+<span>    <span class="st">"h2h -&gt; div win% -&gt; descent -&gt; common -&gt; CFP clause -&gt; composite -&gt; draw"</span>,</span>
+<span>    <span class="st">"no published procedure: generic fallback"</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu">show</span><span class="op">(</span><span class="va">rules</span>, <span class="st">"Registered tiebreaker procedures"</span>,</span>
+<span>     <span class="st">"Unregistered conferences use the documented generic cascade"</span><span class="op">)</span></span></code></pre></div>
+<div id="mwlefoodfi" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#mwlefoodfi table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#mwlefoodfi thead, #mwlefoodfi tbody, #mwlefoodfi tfoot, #mwlefoodfi tr, #mwlefoodfi td, #mwlefoodfi th {
+  border-style: none;
+}
+
+#mwlefoodfi p {
+  margin: 0;
+  padding: 0;
+}
+
+#mwlefoodfi .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 13px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#mwlefoodfi .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#mwlefoodfi .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#mwlefoodfi .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#mwlefoodfi .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#mwlefoodfi .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#mwlefoodfi .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#mwlefoodfi .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#mwlefoodfi .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#mwlefoodfi .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#mwlefoodfi .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#mwlefoodfi .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#mwlefoodfi .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#mwlefoodfi .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#mwlefoodfi .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#mwlefoodfi .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#mwlefoodfi .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#mwlefoodfi .gt_row {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#mwlefoodfi .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#mwlefoodfi .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#mwlefoodfi .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#mwlefoodfi .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#mwlefoodfi .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#mwlefoodfi .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#mwlefoodfi .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#mwlefoodfi .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#mwlefoodfi .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#mwlefoodfi .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#mwlefoodfi .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#mwlefoodfi .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#mwlefoodfi .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#mwlefoodfi .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#mwlefoodfi .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#mwlefoodfi .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#mwlefoodfi .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#mwlefoodfi .gt_left {
+  text-align: left;
+}
+
+#mwlefoodfi .gt_center {
+  text-align: center;
+}
+
+#mwlefoodfi .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#mwlefoodfi .gt_font_normal {
+  font-weight: normal;
+}
+
+#mwlefoodfi .gt_font_bold {
+  font-weight: bold;
+}
+
+#mwlefoodfi .gt_font_italic {
+  font-style: italic;
+}
+
+#mwlefoodfi .gt_super {
+  font-size: 65%;
+}
+
+#mwlefoodfi .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#mwlefoodfi .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#mwlefoodfi .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#mwlefoodfi .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#mwlefoodfi .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#mwlefoodfi .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#mwlefoodfi .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#mwlefoodfi .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#mwlefoodfi div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading">
+<td colspan="3" class="gt_heading gt_title gt_font_normal" style>Registered tiebreaker procedures</td>
+    </tr>
+<tr class="gt_heading">
+<td colspan="3" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border" style>Unregistered conferences use the documented generic cascade</td>
+    </tr>
+<tr class="gt_col_headings">
+<th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="Conference">Conference</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="Format">Format</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="After-win-pct">After win pct</th>
+    </tr>
+</thead>
+<tbody class="gt_table_body">
+<tr>
+<td headers="Conference" class="gt_row gt_left">SEC</td>
+<td headers="Format" class="gt_row gt_left">single table</td>
+<td headers="After win pct" class="gt_row gt_left">h2h -&gt; common -&gt; descent -&gt; opp win% -&gt; capped margin (42/48) -&gt; draw</td>
 </tr>
-<tr class="even">
-<td>Big Ten</td>
-<td>single table</td>
-<td>h2h → common opponents → descent → opponents’ win pct → analytics
-rating → draw</td>
+<tr>
+<td headers="Conference" class="gt_row gt_left">Big Ten</td>
+<td headers="Format" class="gt_row gt_left">single table</td>
+<td headers="After win pct" class="gt_row gt_left">h2h -&gt; common -&gt; descent -&gt; opp win% -&gt; analytics -&gt; draw</td>
 </tr>
-<tr class="odd">
-<td>Big 12</td>
-<td>single table</td>
-<td>h2h → common opponents → descent → opponents’ win pct → capped total
-wins → analytics → draw</td>
+<tr>
+<td headers="Conference" class="gt_row gt_left">Big 12</td>
+<td headers="Format" class="gt_row gt_left">single table</td>
+<td headers="After win pct" class="gt_row gt_left">h2h -&gt; common -&gt; descent -&gt; opp win% -&gt; capped wins -&gt; analytics -&gt; draw</td>
 </tr>
-<tr class="even">
-<td>ACC (2026+)</td>
-<td>single table</td>
-<td>candidate pool by wins-or-losses → h2h → SportSource SSR → draw</td>
+<tr>
+<td headers="Conference" class="gt_row gt_left">ACC (2026+)</td>
+<td headers="Format" class="gt_row gt_left">single table</td>
+<td headers="After win pct" class="gt_row gt_left">candidate pool (wins OR losses) -&gt; h2h -&gt; SportSource SSR -&gt; draw</td>
 </tr>
-<tr class="odd">
-<td>American</td>
-<td>single table</td>
-<td>h2h → CFP-ranked final-week clause → metric composite → common
-opponents → draw</td>
+<tr>
+<td headers="Conference" class="gt_row gt_left">American</td>
+<td headers="Format" class="gt_row gt_left">single table</td>
+<td headers="After win pct" class="gt_row gt_left">h2h -&gt; CFP-ranked final week -&gt; metric composite -&gt; common -&gt; draw</td>
 </tr>
-<tr class="even">
-<td>Conference USA</td>
-<td>single table</td>
-<td>h2h → CFP-ranked clause → metric composite → APR → draw</td>
+<tr>
+<td headers="Conference" class="gt_row gt_left">Conference USA</td>
+<td headers="Format" class="gt_row gt_left">single table</td>
+<td headers="After win pct" class="gt_row gt_left">h2h -&gt; CFP-ranked final week -&gt; composite -&gt; APR -&gt; draw</td>
 </tr>
-<tr class="odd">
-<td>MAC</td>
-<td>single table</td>
-<td>h2h → common opponents → SportSource rating → draw</td>
+<tr>
+<td headers="Conference" class="gt_row gt_left">MAC</td>
+<td headers="Format" class="gt_row gt_left">single table</td>
+<td headers="After win pct" class="gt_row gt_left">h2h -&gt; common opponents -&gt; SportSource rating -&gt; draw</td>
 </tr>
-<tr class="even">
-<td>Mountain West</td>
-<td>single table</td>
-<td>metric composite → h2h → draw</td>
+<tr>
+<td headers="Conference" class="gt_row gt_left">Mountain West</td>
+<td headers="Format" class="gt_row gt_left">single table</td>
+<td headers="After win pct" class="gt_row gt_left">metric composite -&gt; h2h -&gt; draw</td>
 </tr>
-<tr class="odd">
-<td>Sun Belt</td>
-<td><strong>two divisions</strong></td>
-<td>h2h → divisional win pct → descent → common opponents → CFP-ranked
-clause → composite → draw</td>
+<tr>
+<td headers="Conference" class="gt_row gt_left">Sun Belt</td>
+<td headers="Format" class="gt_row gt_left">two divisions</td>
+<td headers="After win pct" class="gt_row gt_left">h2h -&gt; div win% -&gt; descent -&gt; common -&gt; CFP clause -&gt; composite -&gt; draw</td>
 </tr>
-<tr class="even">
-<td>Pac-12 (re-formed)</td>
-<td>single table</td>
-<td>no published procedure — generic fallback</td>
+<tr>
+<td headers="Conference" class="gt_row gt_left">Pac-12 (re-formed)</td>
+<td headers="Format" class="gt_row gt_left">single table</td>
+<td headers="After win pct" class="gt_row gt_left">no published procedure: generic fallback</td>
 </tr>
 </tbody>
 </table>
-<p>The CFP field (12 teams, straight seeding) admits the ACC / Big 12 /
-Big Ten / SEC champions regardless of ranking, the highest-ranked
-Group-of-6 team (champion or not), and Notre Dame when ranked inside the
-field (<code>autobid = "2026"</code>, the default).
-<code>autobid = "2025"</code> restores the five-best-champions rule used
-in 2024-2025.</p>
+</div>
 </div>
 <div class="section level2">
-<h2 id="recipe-1-season-scoped-epochs">Recipe 1: season-scoped epochs<a class="anchor" aria-label="anchor" href="#recipe-1-season-scoped-epochs"></a>
+<h2 id="past-re-examining-a-settled-tie">PAST — re-examining a settled tie<a class="anchor" aria-label="anchor" href="#past-re-examining-a-settled-tie"></a>
 </h2>
-<p>The same schedule ranked as a 2025 season and as a 2026 season can
-crown different ACC championship-game participants, because the ACC
-replaced its entire procedure in 2026. Supply a <code>season</code> id
-column and the registry resolves the right epoch; a plain
-<code>sim</code> id always means “current rules”.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">teams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>team <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>, <span class="st">"D"</span>, <span class="st">"E"</span><span class="op">)</span>, conference <span class="op">=</span> <span class="st">"ACC"</span><span class="op">)</span></span>
-<span><span class="va">games</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  season <span class="op">=</span> <span class="fl">2026</span>, week <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">3</span><span class="op">)</span>, game_type <span class="op">=</span> <span class="st">"REG"</span>,</span>
-<span>  home_team <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>, <span class="st">"C"</span>, <span class="st">"D"</span><span class="op">)</span>,</span>
-<span>  away_team <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"C"</span>, <span class="st">"D"</span>, <span class="st">"C"</span>, <span class="st">"E"</span>, <span class="st">"D"</span>, <span class="st">"E"</span>, <span class="st">"E"</span><span class="op">)</span>,</span>
-<span>  result <span class="op">=</span> <span class="fl">7</span></span>
+<p>The ACC replaced its entire tiebreaker in July 2026 for the move to a
+nine-game schedule. The new policy is short — head-to-head, then the
+SportSource Team Success Ranking, then a draw — but it adds a
+<strong>candidate pool</strong> rule: a team that played a different
+number of conference games joins the tie if it matches the leaders’ win
+count <em>or</em> loss count.</p>
+<p>That pool rule is the part that rewrites history. Here is one
+league’s season ranked twice, from <strong>identical games</strong> —
+once as a 2025 season, once as 2026:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">acc_teams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  team <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Ashwood"</span>, <span class="st">"Brightwater"</span>, <span class="st">"Cedarcrest"</span>, <span class="st">"Dunmore"</span>, <span class="st">"Eastvale"</span>,</span>
+<span>           <span class="st">"Fairmont"</span>, <span class="st">"Glenrock"</span>, <span class="st">"Harborview"</span>, <span class="st">"Ironside"</span><span class="op">)</span>,</span>
+<span>  conference <span class="op">=</span> <span class="st">"ACC"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">ratings</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>team <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span><span class="op">)</span>, rating <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">mk</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">season</span>, <span class="va">w</span>, <span class="va">h</span>, <span class="va">a</span>, <span class="va">r</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>season <span class="op">=</span> <span class="va">season</span>, week <span class="op">=</span> <span class="va">w</span>, game_type <span class="op">=</span> <span class="st">"REG"</span>,</span>
+<span>             home_team <span class="op">=</span> <span class="va">h</span>, away_team <span class="op">=</span> <span class="va">a</span>, result <span class="op">=</span> <span class="va">r</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">acc_games</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">season</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
+<span>  <span class="fu">mk</span><span class="op">(</span><span class="va">season</span>, <span class="fl">1</span>, <span class="st">"Ashwood"</span>, <span class="st">"Eastvale"</span>, <span class="fl">10</span><span class="op">)</span>,     <span class="fu">mk</span><span class="op">(</span><span class="va">season</span>, <span class="fl">2</span>, <span class="st">"Ashwood"</span>, <span class="st">"Fairmont"</span>, <span class="fl">7</span><span class="op">)</span>,</span>
+<span>  <span class="fu">mk</span><span class="op">(</span><span class="va">season</span>, <span class="fl">3</span>, <span class="st">"Ashwood"</span>, <span class="st">"Glenrock"</span>, <span class="fl">3</span><span class="op">)</span>,      <span class="fu">mk</span><span class="op">(</span><span class="va">season</span>, <span class="fl">4</span>, <span class="st">"Harborview"</span>, <span class="st">"Ashwood"</span>, <span class="fl">6</span><span class="op">)</span>,</span>
+<span>  <span class="fu">mk</span><span class="op">(</span><span class="va">season</span>, <span class="fl">1</span>, <span class="st">"Brightwater"</span>, <span class="st">"Glenrock"</span>, <span class="fl">14</span><span class="op">)</span>, <span class="fu">mk</span><span class="op">(</span><span class="va">season</span>, <span class="fl">2</span>, <span class="st">"Brightwater"</span>, <span class="st">"Harborview"</span>, <span class="fl">21</span><span class="op">)</span>,</span>
+<span>  <span class="fu">mk</span><span class="op">(</span><span class="va">season</span>, <span class="fl">3</span>, <span class="st">"Brightwater"</span>, <span class="st">"Ironside"</span>, <span class="fl">3</span><span class="op">)</span>,  <span class="fu">mk</span><span class="op">(</span><span class="va">season</span>, <span class="fl">4</span>, <span class="st">"Dunmore"</span>, <span class="st">"Brightwater"</span>, <span class="fl">4</span><span class="op">)</span>,</span>
+<span>  <span class="fu">mk</span><span class="op">(</span><span class="va">season</span>, <span class="fl">1</span>, <span class="st">"Cedarcrest"</span>, <span class="st">"Ironside"</span>, <span class="fl">17</span><span class="op">)</span>,  <span class="fu">mk</span><span class="op">(</span><span class="va">season</span>, <span class="fl">2</span>, <span class="st">"Cedarcrest"</span>, <span class="st">"Dunmore"</span>, <span class="fl">9</span><span class="op">)</span>,</span>
+<span>  <span class="fu">mk</span><span class="op">(</span><span class="va">season</span>, <span class="fl">3</span>, <span class="st">"Cedarcrest"</span>, <span class="st">"Eastvale"</span>, <span class="fl">6</span><span class="op">)</span>,   <span class="fu">mk</span><span class="op">(</span><span class="va">season</span>, <span class="fl">4</span>, <span class="st">"Fairmont"</span>, <span class="st">"Cedarcrest"</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  <span class="fu">mk</span><span class="op">(</span><span class="va">season</span>, <span class="fl">5</span>, <span class="st">"Glenrock"</span>, <span class="st">"Cedarcrest"</span>, <span class="fl">1</span><span class="op">)</span>,   <span class="fu">mk</span><span class="op">(</span><span class="va">season</span>, <span class="fl">5</span>, <span class="st">"Dunmore"</span>, <span class="st">"Eastvale"</span>, <span class="fl">8</span><span class="op">)</span>,</span>
+<span>  <span class="fu">mk</span><span class="op">(</span><span class="va">season</span>, <span class="fl">6</span>, <span class="st">"Fairmont"</span>, <span class="st">"Glenrock"</span>, <span class="fl">5</span><span class="op">)</span>,     <span class="fu">mk</span><span class="op">(</span><span class="va">season</span>, <span class="fl">6</span>, <span class="st">"Harborview"</span>, <span class="st">"Ironside"</span>, <span class="fl">12</span><span class="op">)</span>,</span>
+<span>  <span class="fu">mk</span><span class="op">(</span><span class="va">season</span>, <span class="fl">7</span>, <span class="st">"Eastvale"</span>, <span class="st">"Ironside"</span>, <span class="fl">4</span><span class="op">)</span>,     <span class="fu">mk</span><span class="op">(</span><span class="va">season</span>, <span class="fl">7</span>, <span class="st">"Dunmore"</span>, <span class="st">"Fairmont"</span>, <span class="fl">6</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">st</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_standings.html">cfb_standings</a></span><span class="op">(</span><span class="va">games</span>, <span class="va">teams</span>, verbosity <span class="op">=</span> <span class="st">"NONE"</span>,</span>
-<span>  tiebreaker_data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>analytics_ratings <span class="op">=</span> <span class="va">ratings</span><span class="op">)</span></span>
+<span><span class="co"># The conference's published metric. Brightwater rates best; Cedarcrest</span></span>
+<span><span class="co"># rates above Ashwood.</span></span>
+<span><span class="va">ssr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  team <span class="op">=</span> <span class="va">acc_teams</span><span class="op">$</span><span class="va">team</span>,</span>
+<span>  rating <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">88</span>, <span class="fl">93</span>, <span class="fl">90</span>, <span class="fl">70</span>, <span class="fl">60</span>, <span class="fl">65</span>, <span class="fl">62</span>, <span class="fl">72</span>, <span class="fl">55</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">st</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"team"</span>, <span class="st">"conf_rank"</span>, <span class="st">"conf_pct"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 3</span></span></span>
-<span><span class="co">#&gt;   team  conf_rank conf_pct</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> B             1    1    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> A             2    1    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> C             3    0.5  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> D             4    0.333</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> E             5    0</span></span></code></pre></div>
-<p>Change <code>games$season</code> to <code>2025</code> and the
-pre-2026 cascade (common opponents, standings descent, opponents’ win
-pct) applies instead.</p>
+<span></span>
+<span><span class="va">rank_season</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">yr</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">st</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_standings.html">cfb_standings</a></span><span class="op">(</span><span class="fu">acc_games</span><span class="op">(</span><span class="va">yr</span><span class="op">)</span>, <span class="va">acc_teams</span>, verbosity <span class="op">=</span> <span class="st">"NONE"</span>,</span>
+<span>                      tiebreaker_data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>analytics_ratings <span class="op">=</span> <span class="va">ssr</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">st</span> <span class="op">&lt;-</span> <span class="va">st</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">st</span><span class="op">$</span><span class="va">conf_rank</span><span class="op">)</span>, <span class="op">]</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    Rank <span class="op">=</span> <span class="va">st</span><span class="op">$</span><span class="va">conf_rank</span>,</span>
+<span>    Team <span class="op">=</span> <span class="va">st</span><span class="op">$</span><span class="va">team</span>,</span>
+<span>    `Conf W-L` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">st</span><span class="op">$</span><span class="va">conf_wins</span>, <span class="st">"-"</span>, <span class="va">st</span><span class="op">$</span><span class="va">conf_losses</span><span class="op">)</span>,</span>
+<span>    `Win pct` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">st</span><span class="op">$</span><span class="va">conf_pct</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>    check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="op">]</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">show</span><span class="op">(</span><span class="fu">rank_season</span><span class="op">(</span><span class="fl">2025</span><span class="op">)</span>, <span class="st">"Ranked under the pre-2026 ACC cascade"</span>,</span>
+<span>     <span class="st">"The championship game is the top two rows"</span><span class="op">)</span></span></code></pre></div>
+<div id="eexombwkke" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#eexombwkke table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#eexombwkke thead, #eexombwkke tbody, #eexombwkke tfoot, #eexombwkke tr, #eexombwkke td, #eexombwkke th {
+  border-style: none;
+}
+
+#eexombwkke p {
+  margin: 0;
+  padding: 0;
+}
+
+#eexombwkke .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 13px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#eexombwkke .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#eexombwkke .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#eexombwkke .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#eexombwkke .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#eexombwkke .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#eexombwkke .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#eexombwkke .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#eexombwkke .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#eexombwkke .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#eexombwkke .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#eexombwkke .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#eexombwkke .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#eexombwkke .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#eexombwkke .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#eexombwkke .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#eexombwkke .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#eexombwkke .gt_row {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#eexombwkke .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#eexombwkke .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#eexombwkke .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#eexombwkke .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#eexombwkke .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#eexombwkke .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#eexombwkke .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#eexombwkke .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#eexombwkke .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#eexombwkke .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#eexombwkke .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#eexombwkke .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#eexombwkke .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#eexombwkke .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#eexombwkke .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#eexombwkke .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#eexombwkke .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#eexombwkke .gt_left {
+  text-align: left;
+}
+
+#eexombwkke .gt_center {
+  text-align: center;
+}
+
+#eexombwkke .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#eexombwkke .gt_font_normal {
+  font-weight: normal;
+}
+
+#eexombwkke .gt_font_bold {
+  font-weight: bold;
+}
+
+#eexombwkke .gt_font_italic {
+  font-style: italic;
+}
+
+#eexombwkke .gt_super {
+  font-size: 65%;
+}
+
+#eexombwkke .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#eexombwkke .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#eexombwkke .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#eexombwkke .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#eexombwkke .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#eexombwkke .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#eexombwkke .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#eexombwkke .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#eexombwkke div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading">
+<td colspan="4" class="gt_heading gt_title gt_font_normal" style>Ranked under the pre-2026 ACC cascade</td>
+    </tr>
+<tr class="gt_heading">
+<td colspan="4" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border" style>The championship game is the top two rows</td>
+    </tr>
+<tr class="gt_col_headings">
+<th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Rank">Rank</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="Team">Team</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Conf-W-L">Conf W-L</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Win-pct">Win pct</th>
+    </tr>
+</thead>
+<tbody class="gt_table_body">
+<tr>
+<td headers="Rank" class="gt_row gt_right">1</td>
+<td headers="Team" class="gt_row gt_left">Dunmore</td>
+<td headers="Conf W-L" class="gt_row gt_right">3-1</td>
+<td headers="Win pct" class="gt_row gt_right">0.750</td>
+</tr>
+<tr>
+<td headers="Rank" class="gt_row gt_right">2</td>
+<td headers="Team" class="gt_row gt_left">Brightwater</td>
+<td headers="Conf W-L" class="gt_row gt_right">3-1</td>
+<td headers="Win pct" class="gt_row gt_right">0.750</td>
+</tr>
+<tr>
+<td headers="Rank" class="gt_row gt_right">3</td>
+<td headers="Team" class="gt_row gt_left">Ashwood</td>
+<td headers="Conf W-L" class="gt_row gt_right">3-1</td>
+<td headers="Win pct" class="gt_row gt_right">0.750</td>
+</tr>
+<tr>
+<td headers="Rank" class="gt_row gt_right">4</td>
+<td headers="Team" class="gt_row gt_left">Harborview</td>
+<td headers="Conf W-L" class="gt_row gt_right">2-1</td>
+<td headers="Win pct" class="gt_row gt_right">0.667</td>
+</tr>
+<tr>
+<td headers="Rank" class="gt_row gt_right">5</td>
+<td headers="Team" class="gt_row gt_left">Cedarcrest</td>
+<td headers="Conf W-L" class="gt_row gt_right">3-2</td>
+<td headers="Win pct" class="gt_row gt_right">0.600</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">show</span><span class="op">(</span><span class="fu">rank_season</span><span class="op">(</span><span class="fl">2026</span><span class="op">)</span>, <span class="st">"The same games under the 2026 ACC policy"</span>,</span>
+<span>     <span class="st">"The championship game is the top two rows"</span><span class="op">)</span></span></code></pre></div>
+<div id="ulbfdpbcyv" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#ulbfdpbcyv table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#ulbfdpbcyv thead, #ulbfdpbcyv tbody, #ulbfdpbcyv tfoot, #ulbfdpbcyv tr, #ulbfdpbcyv td, #ulbfdpbcyv th {
+  border-style: none;
+}
+
+#ulbfdpbcyv p {
+  margin: 0;
+  padding: 0;
+}
+
+#ulbfdpbcyv .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 13px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#ulbfdpbcyv .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#ulbfdpbcyv .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#ulbfdpbcyv .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#ulbfdpbcyv .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#ulbfdpbcyv .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ulbfdpbcyv .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#ulbfdpbcyv .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#ulbfdpbcyv .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#ulbfdpbcyv .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#ulbfdpbcyv .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#ulbfdpbcyv .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#ulbfdpbcyv .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#ulbfdpbcyv .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#ulbfdpbcyv .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#ulbfdpbcyv .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#ulbfdpbcyv .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#ulbfdpbcyv .gt_row {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#ulbfdpbcyv .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ulbfdpbcyv .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#ulbfdpbcyv .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#ulbfdpbcyv .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#ulbfdpbcyv .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ulbfdpbcyv .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#ulbfdpbcyv .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#ulbfdpbcyv .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ulbfdpbcyv .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ulbfdpbcyv .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#ulbfdpbcyv .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ulbfdpbcyv .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#ulbfdpbcyv .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ulbfdpbcyv .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#ulbfdpbcyv .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ulbfdpbcyv .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#ulbfdpbcyv .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ulbfdpbcyv .gt_left {
+  text-align: left;
+}
+
+#ulbfdpbcyv .gt_center {
+  text-align: center;
+}
+
+#ulbfdpbcyv .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#ulbfdpbcyv .gt_font_normal {
+  font-weight: normal;
+}
+
+#ulbfdpbcyv .gt_font_bold {
+  font-weight: bold;
+}
+
+#ulbfdpbcyv .gt_font_italic {
+  font-style: italic;
+}
+
+#ulbfdpbcyv .gt_super {
+  font-size: 65%;
+}
+
+#ulbfdpbcyv .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#ulbfdpbcyv .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#ulbfdpbcyv .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#ulbfdpbcyv .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#ulbfdpbcyv .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#ulbfdpbcyv .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#ulbfdpbcyv .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#ulbfdpbcyv .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#ulbfdpbcyv div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading">
+<td colspan="4" class="gt_heading gt_title gt_font_normal" style>The same games under the 2026 ACC policy</td>
+    </tr>
+<tr class="gt_heading">
+<td colspan="4" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border" style>The championship game is the top two rows</td>
+    </tr>
+<tr class="gt_col_headings">
+<th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Rank">Rank</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="Team">Team</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Conf-W-L">Conf W-L</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Win-pct">Win pct</th>
+    </tr>
+</thead>
+<tbody class="gt_table_body">
+<tr>
+<td headers="Rank" class="gt_row gt_right">1</td>
+<td headers="Team" class="gt_row gt_left">Brightwater</td>
+<td headers="Conf W-L" class="gt_row gt_right">3-1</td>
+<td headers="Win pct" class="gt_row gt_right">0.750</td>
+</tr>
+<tr>
+<td headers="Rank" class="gt_row gt_right">2</td>
+<td headers="Team" class="gt_row gt_left">Cedarcrest</td>
+<td headers="Conf W-L" class="gt_row gt_right">3-2</td>
+<td headers="Win pct" class="gt_row gt_right">0.600</td>
+</tr>
+<tr>
+<td headers="Rank" class="gt_row gt_right">3</td>
+<td headers="Team" class="gt_row gt_left">Ashwood</td>
+<td headers="Conf W-L" class="gt_row gt_right">3-1</td>
+<td headers="Win pct" class="gt_row gt_right">0.750</td>
+</tr>
+<tr>
+<td headers="Rank" class="gt_row gt_right">4</td>
+<td headers="Team" class="gt_row gt_left">Harborview</td>
+<td headers="Conf W-L" class="gt_row gt_right">2-1</td>
+<td headers="Win pct" class="gt_row gt_right">0.667</td>
+</tr>
+<tr>
+<td headers="Rank" class="gt_row gt_right">5</td>
+<td headers="Team" class="gt_row gt_left">Dunmore</td>
+<td headers="Conf W-L" class="gt_row gt_right">3-1</td>
+<td headers="Win pct" class="gt_row gt_right">0.750</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>What changed, and why.</strong> Three teams tie at .750 —
+Ashwood, Brightwater and Dunmore. Under the pre-2026 cascade the
+head-to-head chain seats <strong>Dunmore and Brightwater</strong>. Under
+the 2026 policy the matchup becomes <strong>Brightwater and
+Cedarcrest</strong> — and Cedarcrest is 3-2, a <em>worse</em> win
+percentage than the three teams above it. It qualifies because it played
+five conference games rather than four, so its three wins match the
+leaders’ three and the candidate-pool rule pulls it into the tie; the
+SSR step then rates it above Ashwood. Dunmore, which played for the
+title under the old rules, drops out of the top two entirely.</p>
+<p>That is not a quirk to route around. It is the policy the ACC
+adopted, and the reason it exists is exactly this: teams no longer play
+the same number of conference games, so raw win percentage stopped being
+comparable.</p>
 </div>
 <div class="section level2">
-<h2 id="recipe-2-external-metric-inputs">Recipe 2: external metric inputs<a class="anchor" aria-label="anchor" href="#recipe-2-external-metric-inputs"></a>
+<h2 id="present-the-2026-cfp-field">PRESENT — the 2026 CFP field<a class="anchor" aria-label="anchor" href="#present-the-2026-cfp-field"></a>
 </h2>
-<p>The American, CUSA, Mountain West, and Sun Belt procedures lean on
-published metric composites (Connelly SP+, ESPN SOR, KPI, SportSource)
-and the CFP committee rankings. cfbseedR computes none of these — you
-supply them through <code>tiebreaker_data</code>, and any missing input
-skips its rung deterministically (recorded in
-<code>attr(result, "tiebreak_notes")</code>):</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<p>The 2026 automatic-qualifier rule is not “the five best champions”.
+It is the ACC, Big 12, Big Ten and SEC champions <strong>regardless of
+ranking</strong>, the <strong>highest-ranked Group-of-6 team whether or
+not it won its conference</strong>, and <strong>Notre Dame</strong> when
+it is ranked inside the field.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">board</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  sim <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  team <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Ashwood"</span>, <span class="st">"Brightwater"</span>, <span class="st">"Cedarcrest"</span>, <span class="st">"Dunmore"</span>, <span class="st">"Eastvale"</span>,</span>
+<span>           <span class="st">"Fairmont"</span>, <span class="st">"Glenrock"</span>, <span class="st">"Harborview"</span>, <span class="st">"Ironside"</span>, <span class="st">"Junction"</span>,</span>
+<span>           <span class="st">"Kingsport"</span>, <span class="st">"Lakeshore"</span>, <span class="st">"Marbury"</span>, <span class="st">"Northgate"</span>, <span class="st">"Oakhurst"</span>,</span>
+<span>           <span class="st">"Pinehurst"</span>, <span class="st">"Quarry Ridge"</span>, <span class="st">"Riverton"</span>, <span class="st">"Notre Dame"</span>, <span class="st">"Summit"</span><span class="op">)</span>,</span>
+<span>  conference <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SEC"</span>, <span class="st">"Big Ten"</span>, <span class="st">"ACC"</span>, <span class="st">"Big 12"</span>, <span class="st">"SEC"</span>, <span class="st">"Big Ten"</span>,</span>
+<span>                 <span class="st">"SEC"</span>, <span class="st">"Big Ten"</span>, <span class="st">"ACC"</span>, <span class="st">"Big 12"</span>, <span class="st">"Mountain West"</span>,</span>
+<span>                 <span class="st">"American"</span>, <span class="st">"SEC"</span>, <span class="st">"Big Ten"</span>, <span class="st">"Sun Belt"</span>, <span class="st">"MAC"</span>,</span>
+<span>                 <span class="st">"Big 12"</span>, <span class="st">"ACC"</span>, <span class="st">"FBS Independents"</span>, <span class="st">"Conference USA"</span><span class="op">)</span>,</span>
+<span>  conf_champ <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span>,</span>
+<span>                 <span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span>,</span>
+<span>                 <span class="cn">FALSE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span><span class="op">)</span>,</span>
+<span>  win_pct <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0.4</span>, length.out <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>, sov <span class="op">=</span> <span class="fl">0.5</span>, sos <span class="op">=</span> <span class="fl">0.5</span>, pd <span class="op">=</span> <span class="fl">50</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co"># The committee's final order. Kingsport - a Group-of-6 CHAMPION - sits at</span></span>
+<span><span class="co"># 14, one place behind Lakeshore, a Group-of-6 team that is not a champion.</span></span>
+<span><span class="va">committee</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  team <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Ashwood"</span>, <span class="st">"Brightwater"</span>, <span class="st">"Dunmore"</span>, <span class="st">"Eastvale"</span>, <span class="st">"Fairmont"</span>,</span>
+<span>           <span class="st">"Glenrock"</span>, <span class="st">"Harborview"</span>, <span class="st">"Junction"</span>, <span class="st">"Marbury"</span>, <span class="st">"Northgate"</span>,</span>
+<span>           <span class="st">"Notre Dame"</span>, <span class="st">"Riverton"</span>, <span class="st">"Lakeshore"</span>, <span class="st">"Kingsport"</span>, <span class="st">"Cedarcrest"</span>,</span>
+<span>           <span class="st">"Ironside"</span>, <span class="st">"Oakhurst"</span>, <span class="st">"Pinehurst"</span>, <span class="st">"Quarry Ridge"</span>, <span class="st">"Summit"</span><span class="op">)</span>,</span>
+<span>  rank <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">20</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">field_of</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span>, <span class="va">policy</span> <span class="op">=</span> <span class="st">"2026"</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">s</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_playoff_seeds.html">cfb_playoff_seeds</a></span><span class="op">(</span><span class="va">board</span>, rankings <span class="op">=</span> <span class="va">committee</span>, playoff_seeds <span class="op">=</span> <span class="va">n</span>,</span>
+<span>                         autobid <span class="op">=</span> <span class="va">policy</span><span class="op">)</span></span>
+<span>  <span class="va">s</span> <span class="op">&lt;-</span> <span class="va">s</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">s</span><span class="op">$</span><span class="va">seed</span><span class="op">)</span>, <span class="op">]</span></span>
+<span>  <span class="va">s</span> <span class="op">&lt;-</span> <span class="va">s</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">s</span><span class="op">$</span><span class="va">seed</span><span class="op">)</span>, <span class="op">]</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    Seed <span class="op">=</span> <span class="va">s</span><span class="op">$</span><span class="va">seed</span>, Team <span class="op">=</span> <span class="va">s</span><span class="op">$</span><span class="va">team</span>, Conference <span class="op">=</span> <span class="va">s</span><span class="op">$</span><span class="va">conference</span>,</span>
+<span>    Champion <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">s</span><span class="op">$</span><span class="va">conf_champ</span>, <span class="st">"yes"</span>, <span class="st">""</span><span class="op">)</span>,</span>
+<span>    check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">show</span><span class="op">(</span><span class="fu">field_of</span><span class="op">(</span><span class="fl">12</span><span class="op">)</span>, <span class="st">"The 12-team field under the 2026 rule"</span>,</span>
+<span>     <span class="st">"Straight seeding: the field is ordered by committee rank"</span><span class="op">)</span></span></code></pre></div>
+<div id="kgufivjubq" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#kgufivjubq table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#kgufivjubq thead, #kgufivjubq tbody, #kgufivjubq tfoot, #kgufivjubq tr, #kgufivjubq td, #kgufivjubq th {
+  border-style: none;
+}
+
+#kgufivjubq p {
+  margin: 0;
+  padding: 0;
+}
+
+#kgufivjubq .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 13px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#kgufivjubq .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#kgufivjubq .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#kgufivjubq .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#kgufivjubq .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#kgufivjubq .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#kgufivjubq .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#kgufivjubq .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#kgufivjubq .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#kgufivjubq .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#kgufivjubq .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#kgufivjubq .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#kgufivjubq .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#kgufivjubq .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#kgufivjubq .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#kgufivjubq .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#kgufivjubq .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#kgufivjubq .gt_row {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#kgufivjubq .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#kgufivjubq .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#kgufivjubq .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#kgufivjubq .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#kgufivjubq .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#kgufivjubq .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#kgufivjubq .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#kgufivjubq .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#kgufivjubq .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#kgufivjubq .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#kgufivjubq .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#kgufivjubq .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#kgufivjubq .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#kgufivjubq .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#kgufivjubq .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#kgufivjubq .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#kgufivjubq .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#kgufivjubq .gt_left {
+  text-align: left;
+}
+
+#kgufivjubq .gt_center {
+  text-align: center;
+}
+
+#kgufivjubq .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#kgufivjubq .gt_font_normal {
+  font-weight: normal;
+}
+
+#kgufivjubq .gt_font_bold {
+  font-weight: bold;
+}
+
+#kgufivjubq .gt_font_italic {
+  font-style: italic;
+}
+
+#kgufivjubq .gt_super {
+  font-size: 65%;
+}
+
+#kgufivjubq .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#kgufivjubq .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#kgufivjubq .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#kgufivjubq .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#kgufivjubq .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#kgufivjubq .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#kgufivjubq .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#kgufivjubq .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#kgufivjubq div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading">
+<td colspan="4" class="gt_heading gt_title gt_font_normal" style>The 12-team field under the 2026 rule</td>
+    </tr>
+<tr class="gt_heading">
+<td colspan="4" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border" style>Straight seeding: the field is ordered by committee rank</td>
+    </tr>
+<tr class="gt_col_headings">
+<th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Seed">Seed</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="Team">Team</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="Conference">Conference</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="Champion">Champion</th>
+    </tr>
+</thead>
+<tbody class="gt_table_body">
+<tr>
+<td headers="Seed" class="gt_row gt_right">1</td>
+<td headers="Team" class="gt_row gt_left">Ashwood</td>
+<td headers="Conference" class="gt_row gt_left">SEC</td>
+<td headers="Champion" class="gt_row gt_left">yes</td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">2</td>
+<td headers="Team" class="gt_row gt_left">Brightwater</td>
+<td headers="Conference" class="gt_row gt_left">Big Ten</td>
+<td headers="Champion" class="gt_row gt_left">yes</td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">3</td>
+<td headers="Team" class="gt_row gt_left">Dunmore</td>
+<td headers="Conference" class="gt_row gt_left">Big 12</td>
+<td headers="Champion" class="gt_row gt_left"></td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">4</td>
+<td headers="Team" class="gt_row gt_left">Eastvale</td>
+<td headers="Conference" class="gt_row gt_left">SEC</td>
+<td headers="Champion" class="gt_row gt_left"></td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">5</td>
+<td headers="Team" class="gt_row gt_left">Fairmont</td>
+<td headers="Conference" class="gt_row gt_left">Big Ten</td>
+<td headers="Champion" class="gt_row gt_left"></td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">6</td>
+<td headers="Team" class="gt_row gt_left">Glenrock</td>
+<td headers="Conference" class="gt_row gt_left">SEC</td>
+<td headers="Champion" class="gt_row gt_left"></td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">7</td>
+<td headers="Team" class="gt_row gt_left">Harborview</td>
+<td headers="Conference" class="gt_row gt_left">Big Ten</td>
+<td headers="Champion" class="gt_row gt_left"></td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">8</td>
+<td headers="Team" class="gt_row gt_left">Junction</td>
+<td headers="Conference" class="gt_row gt_left">Big 12</td>
+<td headers="Champion" class="gt_row gt_left">yes</td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">9</td>
+<td headers="Team" class="gt_row gt_left">Marbury</td>
+<td headers="Conference" class="gt_row gt_left">SEC</td>
+<td headers="Champion" class="gt_row gt_left"></td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">10</td>
+<td headers="Team" class="gt_row gt_left">Notre Dame</td>
+<td headers="Conference" class="gt_row gt_left">FBS Independents</td>
+<td headers="Champion" class="gt_row gt_left"></td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">11</td>
+<td headers="Team" class="gt_row gt_left">Lakeshore</td>
+<td headers="Conference" class="gt_row gt_left">American</td>
+<td headers="Champion" class="gt_row gt_left"></td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">12</td>
+<td headers="Team" class="gt_row gt_left">Ironside</td>
+<td headers="Conference" class="gt_row gt_left">ACC</td>
+<td headers="Champion" class="gt_row gt_left">yes</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Two rows in that table are the 2026 rule doing work:</p>
+<ul>
+<li>
+<strong>Lakeshore (American) is in, and is not a champion.</strong>
+The Group-of-6 place goes to the best-ranked G6 <em>team</em>, so the
+American’s 13th-ranked non-champion takes it.</li>
+<li>
+<strong>Kingsport, a Group-of-6 champion ranked 14th, misses the
+field.</strong> Outside the Power 4, winning your conference is no
+longer enough.</li>
+</ul>
+<p>Run the same board under the previous era and the difference is
+explicit:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">in26</span> <span class="op">&lt;-</span> <span class="fu">field_of</span><span class="op">(</span><span class="fl">12</span><span class="op">)</span><span class="op">$</span><span class="va">Team</span></span>
+<span><span class="va">in25</span> <span class="op">&lt;-</span> <span class="fu">field_of</span><span class="op">(</span><span class="fl">12</span>, policy <span class="op">=</span> <span class="st">"2025"</span><span class="op">)</span><span class="op">$</span><span class="va">Team</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  Change <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"In under 2026, out under 2025"</span>, <span class="st">"In under 2025, out under 2026"</span><span class="op">)</span>,</span>
+<span>  Teams <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="va">in26</span>, <span class="va">in25</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span>,</span>
+<span>            <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="va">in25</span>, <span class="va">in26</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">show</span><span class="op">(</span><span class="st">"Same board, two automatic-qualifier eras"</span><span class="op">)</span></span></code></pre></div>
+<div id="txvafbsnay" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#txvafbsnay table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#txvafbsnay thead, #txvafbsnay tbody, #txvafbsnay tfoot, #txvafbsnay tr, #txvafbsnay td, #txvafbsnay th {
+  border-style: none;
+}
+
+#txvafbsnay p {
+  margin: 0;
+  padding: 0;
+}
+
+#txvafbsnay .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 13px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#txvafbsnay .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#txvafbsnay .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#txvafbsnay .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#txvafbsnay .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#txvafbsnay .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#txvafbsnay .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#txvafbsnay .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#txvafbsnay .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#txvafbsnay .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#txvafbsnay .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#txvafbsnay .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#txvafbsnay .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#txvafbsnay .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#txvafbsnay .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#txvafbsnay .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#txvafbsnay .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#txvafbsnay .gt_row {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#txvafbsnay .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#txvafbsnay .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#txvafbsnay .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#txvafbsnay .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#txvafbsnay .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#txvafbsnay .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#txvafbsnay .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#txvafbsnay .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#txvafbsnay .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#txvafbsnay .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#txvafbsnay .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#txvafbsnay .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#txvafbsnay .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#txvafbsnay .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#txvafbsnay .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#txvafbsnay .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#txvafbsnay .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#txvafbsnay .gt_left {
+  text-align: left;
+}
+
+#txvafbsnay .gt_center {
+  text-align: center;
+}
+
+#txvafbsnay .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#txvafbsnay .gt_font_normal {
+  font-weight: normal;
+}
+
+#txvafbsnay .gt_font_bold {
+  font-weight: bold;
+}
+
+#txvafbsnay .gt_font_italic {
+  font-style: italic;
+}
+
+#txvafbsnay .gt_super {
+  font-size: 65%;
+}
+
+#txvafbsnay .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#txvafbsnay .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#txvafbsnay .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#txvafbsnay .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#txvafbsnay .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#txvafbsnay .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#txvafbsnay .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#txvafbsnay .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#txvafbsnay div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading">
+<td colspan="2" class="gt_heading gt_title gt_font_normal gt_bottom_border" style>Same board, two automatic-qualifier eras</td>
+    </tr>
+<tr class="gt_col_headings">
+<th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="Change">Change</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="Teams">Teams</th>
+    </tr>
+</thead>
+<tbody class="gt_table_body">
+<tr>
+<td headers="Change" class="gt_row gt_left">In under 2026, out under 2025</td>
+<td headers="Teams" class="gt_row gt_left">Notre Dame, Lakeshore</td>
+</tr>
+<tr>
+<td headers="Change" class="gt_row gt_left">In under 2025, out under 2026</td>
+<td headers="Teams" class="gt_row gt_left">Northgate, Kingsport</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code>autobid = "2025"</code> reinstates the five-best-champions
+rule: Kingsport returns as a champion, Northgate takes the last at-large
+place, and both Lakeshore and Notre Dame drop out. <strong>Two of the
+twelve places change occupants — four teams affected — on the rule
+change alone</strong>, without a single game being played differently.
+Ten of the twelve are the same either way, which is the useful part: the
+eras disagree at the margin, and the margin is exactly where the
+arguments happen.</p>
+</div>
+<div class="section level2">
+<h2 id="future-stress-testing-a-16-team-field">FUTURE — stress-testing a 16-team field<a class="anchor" aria-label="anchor" href="#future-stress-testing-a-16-team-field"></a>
+</h2>
+<p>Nothing in the seeding code is hard-wired to twelve, so raising
+<code>playoff_seeds</code> answers “who would expansion have let in?”
+directly:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">show</span><span class="op">(</span><span class="fu">field_of</span><span class="op">(</span><span class="fl">16</span><span class="op">)</span>, <span class="st">"The same board as a 16-team field"</span>,</span>
+<span>     <span class="st">"The automatic qualifiers are unchanged; the extra places are at-large"</span><span class="op">)</span></span></code></pre></div>
+<div id="orehalspkz" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#orehalspkz table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#orehalspkz thead, #orehalspkz tbody, #orehalspkz tfoot, #orehalspkz tr, #orehalspkz td, #orehalspkz th {
+  border-style: none;
+}
+
+#orehalspkz p {
+  margin: 0;
+  padding: 0;
+}
+
+#orehalspkz .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 13px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#orehalspkz .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#orehalspkz .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#orehalspkz .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#orehalspkz .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#orehalspkz .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#orehalspkz .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#orehalspkz .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#orehalspkz .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#orehalspkz .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#orehalspkz .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#orehalspkz .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#orehalspkz .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#orehalspkz .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#orehalspkz .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#orehalspkz .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#orehalspkz .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#orehalspkz .gt_row {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#orehalspkz .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#orehalspkz .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#orehalspkz .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#orehalspkz .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#orehalspkz .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#orehalspkz .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#orehalspkz .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#orehalspkz .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#orehalspkz .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#orehalspkz .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#orehalspkz .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#orehalspkz .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#orehalspkz .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#orehalspkz .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#orehalspkz .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#orehalspkz .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#orehalspkz .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#orehalspkz .gt_left {
+  text-align: left;
+}
+
+#orehalspkz .gt_center {
+  text-align: center;
+}
+
+#orehalspkz .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#orehalspkz .gt_font_normal {
+  font-weight: normal;
+}
+
+#orehalspkz .gt_font_bold {
+  font-weight: bold;
+}
+
+#orehalspkz .gt_font_italic {
+  font-style: italic;
+}
+
+#orehalspkz .gt_super {
+  font-size: 65%;
+}
+
+#orehalspkz .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#orehalspkz .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#orehalspkz .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#orehalspkz .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#orehalspkz .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#orehalspkz .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#orehalspkz .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#orehalspkz .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#orehalspkz div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading">
+<td colspan="4" class="gt_heading gt_title gt_font_normal" style>The same board as a 16-team field</td>
+    </tr>
+<tr class="gt_heading">
+<td colspan="4" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border" style>The automatic qualifiers are unchanged; the extra places are at-large</td>
+    </tr>
+<tr class="gt_col_headings">
+<th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Seed">Seed</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="Team">Team</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="Conference">Conference</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="Champion">Champion</th>
+    </tr>
+</thead>
+<tbody class="gt_table_body">
+<tr>
+<td headers="Seed" class="gt_row gt_right">1</td>
+<td headers="Team" class="gt_row gt_left">Ashwood</td>
+<td headers="Conference" class="gt_row gt_left">SEC</td>
+<td headers="Champion" class="gt_row gt_left">yes</td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">2</td>
+<td headers="Team" class="gt_row gt_left">Brightwater</td>
+<td headers="Conference" class="gt_row gt_left">Big Ten</td>
+<td headers="Champion" class="gt_row gt_left">yes</td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">3</td>
+<td headers="Team" class="gt_row gt_left">Dunmore</td>
+<td headers="Conference" class="gt_row gt_left">Big 12</td>
+<td headers="Champion" class="gt_row gt_left"></td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">4</td>
+<td headers="Team" class="gt_row gt_left">Eastvale</td>
+<td headers="Conference" class="gt_row gt_left">SEC</td>
+<td headers="Champion" class="gt_row gt_left"></td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">5</td>
+<td headers="Team" class="gt_row gt_left">Fairmont</td>
+<td headers="Conference" class="gt_row gt_left">Big Ten</td>
+<td headers="Champion" class="gt_row gt_left"></td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">6</td>
+<td headers="Team" class="gt_row gt_left">Glenrock</td>
+<td headers="Conference" class="gt_row gt_left">SEC</td>
+<td headers="Champion" class="gt_row gt_left"></td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">7</td>
+<td headers="Team" class="gt_row gt_left">Harborview</td>
+<td headers="Conference" class="gt_row gt_left">Big Ten</td>
+<td headers="Champion" class="gt_row gt_left"></td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">8</td>
+<td headers="Team" class="gt_row gt_left">Junction</td>
+<td headers="Conference" class="gt_row gt_left">Big 12</td>
+<td headers="Champion" class="gt_row gt_left">yes</td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">9</td>
+<td headers="Team" class="gt_row gt_left">Marbury</td>
+<td headers="Conference" class="gt_row gt_left">SEC</td>
+<td headers="Champion" class="gt_row gt_left"></td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">10</td>
+<td headers="Team" class="gt_row gt_left">Northgate</td>
+<td headers="Conference" class="gt_row gt_left">Big Ten</td>
+<td headers="Champion" class="gt_row gt_left"></td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">11</td>
+<td headers="Team" class="gt_row gt_left">Notre Dame</td>
+<td headers="Conference" class="gt_row gt_left">FBS Independents</td>
+<td headers="Champion" class="gt_row gt_left"></td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">12</td>
+<td headers="Team" class="gt_row gt_left">Riverton</td>
+<td headers="Conference" class="gt_row gt_left">ACC</td>
+<td headers="Champion" class="gt_row gt_left"></td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">13</td>
+<td headers="Team" class="gt_row gt_left">Lakeshore</td>
+<td headers="Conference" class="gt_row gt_left">American</td>
+<td headers="Champion" class="gt_row gt_left"></td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">14</td>
+<td headers="Team" class="gt_row gt_left">Kingsport</td>
+<td headers="Conference" class="gt_row gt_left">Mountain West</td>
+<td headers="Champion" class="gt_row gt_left">yes</td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">15</td>
+<td headers="Team" class="gt_row gt_left">Cedarcrest</td>
+<td headers="Conference" class="gt_row gt_left">ACC</td>
+<td headers="Champion" class="gt_row gt_left"></td>
+</tr>
+<tr>
+<td headers="Seed" class="gt_row gt_right">16</td>
+<td headers="Team" class="gt_row gt_left">Ironside</td>
+<td headers="Conference" class="gt_row gt_left">ACC</td>
+<td headers="Champion" class="gt_row gt_left">yes</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">added</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="fu">field_of</span><span class="op">(</span><span class="fl">16</span><span class="op">)</span><span class="op">$</span><span class="va">Team</span>, <span class="fu">field_of</span><span class="op">(</span><span class="fl">12</span><span class="op">)</span><span class="op">$</span><span class="va">Team</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  `Teams added by expanding 12 to 16` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">added</span>, collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span>,</span>
+<span>  check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">show</span><span class="op">(</span><span class="st">"What expansion actually buys"</span><span class="op">)</span></span></code></pre></div>
+<div id="cbwjcfdjag" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#cbwjcfdjag table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#cbwjcfdjag thead, #cbwjcfdjag tbody, #cbwjcfdjag tfoot, #cbwjcfdjag tr, #cbwjcfdjag td, #cbwjcfdjag th {
+  border-style: none;
+}
+
+#cbwjcfdjag p {
+  margin: 0;
+  padding: 0;
+}
+
+#cbwjcfdjag .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 13px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#cbwjcfdjag .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#cbwjcfdjag .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#cbwjcfdjag .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#cbwjcfdjag .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#cbwjcfdjag .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#cbwjcfdjag .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#cbwjcfdjag .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#cbwjcfdjag .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#cbwjcfdjag .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#cbwjcfdjag .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#cbwjcfdjag .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#cbwjcfdjag .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#cbwjcfdjag .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#cbwjcfdjag .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#cbwjcfdjag .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#cbwjcfdjag .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#cbwjcfdjag .gt_row {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#cbwjcfdjag .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#cbwjcfdjag .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#cbwjcfdjag .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#cbwjcfdjag .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#cbwjcfdjag .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#cbwjcfdjag .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#cbwjcfdjag .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#cbwjcfdjag .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#cbwjcfdjag .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#cbwjcfdjag .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#cbwjcfdjag .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#cbwjcfdjag .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#cbwjcfdjag .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#cbwjcfdjag .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#cbwjcfdjag .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#cbwjcfdjag .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#cbwjcfdjag .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#cbwjcfdjag .gt_left {
+  text-align: left;
+}
+
+#cbwjcfdjag .gt_center {
+  text-align: center;
+}
+
+#cbwjcfdjag .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#cbwjcfdjag .gt_font_normal {
+  font-weight: normal;
+}
+
+#cbwjcfdjag .gt_font_bold {
+  font-weight: bold;
+}
+
+#cbwjcfdjag .gt_font_italic {
+  font-style: italic;
+}
+
+#cbwjcfdjag .gt_super {
+  font-size: 65%;
+}
+
+#cbwjcfdjag .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#cbwjcfdjag .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#cbwjcfdjag .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#cbwjcfdjag .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#cbwjcfdjag .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#cbwjcfdjag .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#cbwjcfdjag .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#cbwjcfdjag .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#cbwjcfdjag div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading">
+<td colspan="1" class="gt_heading gt_title gt_font_normal gt_bottom_border" style>What expansion actually buys</td>
+    </tr>
+<tr class="gt_col_headings">
+<th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="Teams-added-by-expanding-12-to-16">Teams added by expanding 12 to 16</th>
+    </tr>
+</thead>
+<tbody class="gt_table_body"><tr><td headers="Teams added by expanding 12 to 16" class="gt_row gt_left">Northgate, Riverton, Kingsport, Cedarcrest</td></tr></tbody>
+</table>
+</div>
+<p>The four extra places go to <strong>Cedarcrest, Kingsport, Northgate
+and Riverton</strong> — three at-larges plus the Group-of-6 champion who
+missed the 12-team cut. Note what does <em>not</em> change: the
+automatic qualifiers are the same teams, because the AQ rule governs who
+is guaranteed a place, not how many places exist. Expansion is felt
+entirely at the bottom of the bracket.</p>
+<p>For a simulated 16-team postseason, pass the same argument to
+<code><a href="../reference/cfb_simulations.html">cfb_simulations()</a></code>. The bracket generator handles any field
+size, giving byes to the top seeds when the field is not a power of two
+— 12 seeds produce the familiar 5v12 / 6v11 / 7v10 / 8v9 first round, 16
+produce a full first round with no byes.</p>
+</div>
+<div class="section level2">
+<h2 id="feeding-the-rules-real-inputs">Feeding the rules real inputs<a class="anchor" aria-label="anchor" href="#feeding-the-rules-real-inputs"></a>
+</h2>
+<p>Several procedures depend on published external numbers that cfbseedR
+does not compute. Supply them through <code>tiebreaker_data</code>;
+anything you omit skips its rung deterministically and records the
+fact:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">st</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_standings.html">cfb_standings</a></span><span class="op">(</span></span>
 <span>  <span class="va">games</span>, <span class="va">teams</span>,</span>
 <span>  tiebreaker_data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    <span class="co"># your composite of the conference's published metrics</span></span>
-<span>    analytics_ratings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>team <span class="op">=</span> <span class="va">teams</span><span class="op">$</span><span class="va">team</span>, rating <span class="op">=</span> <span class="va">my_composite</span><span class="op">)</span>,</span>
-<span>    <span class="co"># the latest CFP committee rankings</span></span>
-<span>    cfp_rankings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>team <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Tulane"</span>, <span class="st">"Navy"</span><span class="op">)</span>, rank <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">24</span>, <span class="fl">25</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>    <span class="co"># multi-year APR (the CUSA policy's late fallback)</span></span>
-<span>    apr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>team <span class="op">=</span> <span class="va">teams</span><span class="op">$</span><span class="va">team</span>, apr <span class="op">=</span> <span class="va">my_apr</span><span class="op">)</span></span>
+<span>    analytics_ratings <span class="op">=</span> <span class="va">my_composite</span>,  <span class="co"># SportSource SSR, SP+, SOR, KPI...</span></span>
+<span>    cfp_rankings <span class="op">=</span> <span class="va">latest_cfp</span>,         <span class="co"># the committee's published top 25</span></span>
+<span>    apr <span class="op">=</span> <span class="va">multi_year_apr</span>               <span class="co"># the CUSA policy's late fallback</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">st</span>, <span class="st">"tiebreak_notes"</span><span class="op">)</span></span></code></pre></div>
-<p>The <code>cfp_ranked_final_week</code> clause is faithful to the
-published text: the best-ranked tied team advances only if it
-<strong>won</strong> its final conference game; a ranked team that lost
-falls through to the composite.</p>
 </div>
 <div class="section level2">
-<h2 id="recipe-3-division-formats-sun-belt">Recipe 3: division formats (Sun Belt)<a class="anchor" aria-label="anchor" href="#recipe-3-division-formats-sun-belt"></a>
+<h2 id="simulating-and-checking-the-simulation">Simulating, and checking the simulation<a class="anchor" aria-label="anchor" href="#simulating-and-checking-the-simulation"></a>
 </h2>
-<p>Add a <code>conf_division</code> column to <code>teams</code> and
-that conference is ranked division-first: each division runs the
-official procedure internally and the division champions take
-<code>conf_rank</code> 1-2 (the championship-game matchup). This is the
-2026 Sun Belt — and equally any historical divisional season you want to
-re-rank.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sb_teams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  team <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"E1"</span>, <span class="st">"E2"</span>, <span class="st">"W1"</span>, <span class="st">"W2"</span><span class="op">)</span>,</span>
-<span>  conference <span class="op">=</span> <span class="st">"Sun Belt"</span>,</span>
-<span>  conf_division <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"East"</span>, <span class="st">"East"</span>, <span class="st">"West"</span>, <span class="st">"West"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">sb_games</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  season <span class="op">=</span> <span class="fl">2026</span>, week <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>, game_type <span class="op">=</span> <span class="st">"REG"</span>,</span>
-<span>  home_team <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"E1"</span>, <span class="st">"W1"</span>, <span class="st">"E1"</span>, <span class="st">"E2"</span><span class="op">)</span>,</span>
-<span>  away_team <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"E2"</span>, <span class="st">"W2"</span>, <span class="st">"W1"</span>, <span class="st">"W2"</span><span class="op">)</span>,</span>
-<span>  result <span class="op">=</span> <span class="fl">7</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">sb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_standings.html">cfb_standings</a></span><span class="op">(</span><span class="va">sb_games</span>, <span class="va">sb_teams</span>, verbosity <span class="op">=</span> <span class="st">"NONE"</span><span class="op">)</span></span>
-<span><span class="va">sb</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"team"</span>, <span class="st">"conference"</span>, <span class="st">"conf_rank"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 3</span></span></span>
-<span><span class="co">#&gt;   team  conference conf_rank</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> E1    Sun Belt           1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> W1    Sun Belt           2</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> E2    Sun Belt           3</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> W2    Sun Belt           4</span></span></code></pre></div>
-<p><code>W1</code> (1-1) outranks <code>E2</code> (1-1) because
-divisions, not the overall table, decide who reaches the championship
-game.</p>
-</div>
-<div class="section level2">
-<h2 id="recipe-4-the-2026-cfp-field">Recipe 4: the 2026 CFP field<a class="anchor" aria-label="anchor" href="#recipe-4-the-2026-cfp-field"></a>
-</h2>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">st</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  sim <span class="op">=</span> <span class="fl">1L</span>,</span>
-<span>  team <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BigTenChamp"</span>, <span class="st">"AccChamp"</span>, <span class="st">"B12Champ"</span>, <span class="st">"SecChamp"</span>,</span>
-<span>           <span class="st">"G6Team"</span>, <span class="st">"Notre Dame"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"AtLarge"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  conference <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Big Ten"</span>, <span class="st">"ACC"</span>, <span class="st">"Big 12"</span>, <span class="st">"SEC"</span>,</span>
-<span>                 <span class="st">"Mountain West"</span>, <span class="st">"FBS Independents"</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Big Ten"</span>, <span class="fl">6</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  conf_champ <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">FALSE</span>, <span class="fl">6</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  win_pct <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0.45</span>, length.out <span class="op">=</span> <span class="fl">12</span><span class="op">)</span>, sov <span class="op">=</span> <span class="fl">0</span>, sos <span class="op">=</span> <span class="fl">0</span>, pd <span class="op">=</span> <span class="fl">0</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">rankings</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>team <span class="op">=</span> <span class="va">st</span><span class="op">$</span><span class="va">team</span>, rank <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fl">12</span><span class="op">)</span><span class="op">)</span></span>
+<p>Simulations split into <code>chunks</code> dispatched with furrr, so
+a parallel plan uses every core, and <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> renders the
+result as a gt table:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">games</span> <span class="op">&lt;-</span> <span class="va">cfb_games_example</span></span>
+<span><span class="va">teams</span> <span class="op">&lt;-</span> <span class="va">cfb_teams_example</span></span>
+<span><span class="va">games</span><span class="op">$</span><span class="va">result</span><span class="op">[</span><span class="va">games</span><span class="op">$</span><span class="va">week</span> <span class="op">&gt;=</span> <span class="fl">3</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA</span></span>
 <span></span>
-<span><span class="va">seeded</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_playoff_seeds.html">cfb_playoff_seeds</a></span><span class="op">(</span><span class="va">st</span>, rankings <span class="op">=</span> <span class="va">rankings</span>, playoff_seeds <span class="op">=</span> <span class="fl">12</span><span class="op">)</span></span>
-<span><span class="va">seeded</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">seeded</span><span class="op">$</span><span class="va">seed</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"team"</span>, <span class="st">"conference"</span>, <span class="st">"seed"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 12 × 3</span></span></span>
-<span><span class="co">#&gt;    team        conference        seed</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> BigTenChamp Big Ten              1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> AccChamp    ACC                  2</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> B12Champ    Big 12               3</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> SecChamp    SEC                  4</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> G6Team      Mountain West        5</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Notre Dame  FBS Independents     6</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> AtLarge1    Big Ten              7</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> AtLarge2    Big Ten              8</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> AtLarge3    Big Ten              9</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> AtLarge4    Big Ten             10</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> AtLarge5    Big Ten             11</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span> AtLarge6    Big Ten             12</span></span></code></pre></div>
-<p>Note the Mountain West team enters as the Group-of-6 automatic
-qualifier without winning its conference, and an unranked Power-4
-champion would still make the field. Straight seeding means nobody is
-bumped up: seeds follow the committee order exactly, with the top four
-seeds earning first-round byes in <code><a href="../reference/cfb_simulations.html">cfb_simulations()</a></code>.</p>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2026</span><span class="op">)</span></span>
+<span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_simulations.html">cfb_simulations</a></span><span class="op">(</span><span class="va">games</span>, <span class="va">teams</span>, simulations <span class="op">=</span> <span class="fl">1000</span>, playoff_seeds <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>                       chunks <span class="op">=</span> <span class="fl">4</span>, verbosity <span class="op">=</span> <span class="st">"NONE"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">sim</span><span class="op">)</span></span></code></pre></div>
+<div id="afmoldpelz" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#afmoldpelz table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#afmoldpelz thead, #afmoldpelz tbody, #afmoldpelz tfoot, #afmoldpelz tr, #afmoldpelz td, #afmoldpelz th {
+  border-style: none;
+}
+
+#afmoldpelz p {
+  margin: 0;
+  padding: 0;
+}
+
+#afmoldpelz .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 13px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#afmoldpelz .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#afmoldpelz .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#afmoldpelz .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#afmoldpelz .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#afmoldpelz .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#afmoldpelz .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#afmoldpelz .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#afmoldpelz .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#afmoldpelz .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#afmoldpelz .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#afmoldpelz .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#afmoldpelz .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#afmoldpelz .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#afmoldpelz .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#afmoldpelz .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#afmoldpelz .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#afmoldpelz .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#afmoldpelz .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#afmoldpelz .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#afmoldpelz .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#afmoldpelz .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#afmoldpelz .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#afmoldpelz .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#afmoldpelz .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#afmoldpelz .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#afmoldpelz .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#afmoldpelz .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#afmoldpelz .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#afmoldpelz .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#afmoldpelz .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#afmoldpelz .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#afmoldpelz .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#afmoldpelz .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#afmoldpelz .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#afmoldpelz .gt_left {
+  text-align: left;
+}
+
+#afmoldpelz .gt_center {
+  text-align: center;
+}
+
+#afmoldpelz .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#afmoldpelz .gt_font_normal {
+  font-weight: normal;
+}
+
+#afmoldpelz .gt_font_bold {
+  font-weight: bold;
+}
+
+#afmoldpelz .gt_font_italic {
+  font-style: italic;
+}
+
+#afmoldpelz .gt_super {
+  font-size: 65%;
+}
+
+#afmoldpelz .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#afmoldpelz .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#afmoldpelz .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#afmoldpelz .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#afmoldpelz .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#afmoldpelz .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#afmoldpelz .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#afmoldpelz .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#afmoldpelz div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading">
+<td colspan="6" class="gt_heading gt_title gt_font_normal" style>Simulating the 2024 college football season</td>
+    </tr>
+<tr class="gt_heading">
+<td colspan="6" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border" style>summary of 1K simulations using cfbseedR</td>
+    </tr>
+<tr class="gt_col_headings">
+<th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="team"></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="wins">AVG.<br>WINS</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="conf_champ">Win<br>CONF</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="playoff">Make<br>CFP</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="seed1">No.1<br>Seed</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="won_natty">Win<br>NATTY</th>
+    </tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="gt_group_heading_row">
+<th colspan="6" class="gt_group_heading" scope="colgroup" id="Alpha">Alpha</th>
+    </tr>
+<tr class="gt_row_group_first">
+<td headers="Alpha  team" class="gt_row gt_left">A3</td>
+<td headers="Alpha  wins" class="gt_row gt_center">2.6</td>
+<td headers="Alpha  conf_champ" class="gt_row gt_center">0%</td>
+<td headers="Alpha  playoff" class="gt_row gt_center">98%</td>
+<td headers="Alpha  seed1" class="gt_row gt_center">52%</td>
+<td headers="Alpha  won_natty" class="gt_row gt_center">19%</td>
+</tr>
+<tr>
+<td headers="Alpha  team" class="gt_row gt_left">A1</td>
+<td headers="Alpha  wins" class="gt_row gt_center">2.5</td>
+<td headers="Alpha  conf_champ" class="gt_row gt_center">57%</td>
+<td headers="Alpha  playoff" class="gt_row gt_center">42%</td>
+<td headers="Alpha  seed1" class="gt_row gt_center">3%</td>
+<td headers="Alpha  won_natty" class="gt_row gt_center">6%</td>
+</tr>
+<tr>
+<td headers="Alpha  team" class="gt_row gt_left">A2</td>
+<td headers="Alpha  wins" class="gt_row gt_center">1.8</td>
+<td headers="Alpha  conf_champ" class="gt_row gt_center">43%</td>
+<td headers="Alpha  playoff" class="gt_row gt_center">33%</td>
+<td headers="Alpha  seed1" class="gt_row gt_center">7%</td>
+<td headers="Alpha  won_natty" class="gt_row gt_center">4%</td>
+</tr>
+<tr>
+<td headers="Alpha  team" class="gt_row gt_left">A4</td>
+<td headers="Alpha  wins" class="gt_row gt_center">1.1</td>
+<td headers="Alpha  conf_champ" class="gt_row gt_center">0%</td>
+<td headers="Alpha  playoff" class="gt_row gt_center">13%</td>
+<td headers="Alpha  seed1" class="gt_row gt_center">0%</td>
+<td headers="Alpha  won_natty" class="gt_row gt_center">6%</td>
+</tr>
+<tr class="gt_group_heading_row">
+<th colspan="6" class="gt_group_heading" scope="colgroup" id="Beta">Beta</th>
+    </tr>
+<tr class="gt_row_group_first">
+<td headers="Beta  team" class="gt_row gt_left">B1</td>
+<td headers="Beta  wins" class="gt_row gt_center">3.4</td>
+<td headers="Beta  conf_champ" class="gt_row gt_center">38%</td>
+<td headers="Beta  playoff" class="gt_row gt_center">67%</td>
+<td headers="Beta  seed1" class="gt_row gt_center">22%</td>
+<td headers="Beta  won_natty" class="gt_row gt_center">14%</td>
+</tr>
+<tr>
+<td headers="Beta  team" class="gt_row gt_left">B2</td>
+<td headers="Beta  wins" class="gt_row gt_center">2.3</td>
+<td headers="Beta  conf_champ" class="gt_row gt_center">62%</td>
+<td headers="Beta  playoff" class="gt_row gt_center">60%</td>
+<td headers="Beta  seed1" class="gt_row gt_center">5%</td>
+<td headers="Beta  won_natty" class="gt_row gt_center">17%</td>
+</tr>
+<tr>
+<td headers="Beta  team" class="gt_row gt_left">B3</td>
+<td headers="Beta  wins" class="gt_row gt_center">1.5</td>
+<td headers="Beta  conf_champ" class="gt_row gt_center">0%</td>
+<td headers="Beta  playoff" class="gt_row gt_center">53%</td>
+<td headers="Beta  seed1" class="gt_row gt_center">2%</td>
+<td headers="Beta  won_natty" class="gt_row gt_center">23%</td>
+</tr>
+<tr>
+<td headers="Beta  team" class="gt_row gt_left">B4</td>
+<td headers="Beta  wins" class="gt_row gt_center">0.7</td>
+<td headers="Beta  conf_champ" class="gt_row gt_center">0%</td>
+<td headers="Beta  playoff" class="gt_row gt_center">2%</td>
+<td headers="Beta  seed1" class="gt_row gt_center">0%</td>
+<td headers="Beta  won_natty" class="gt_row gt_center">&lt;1%</td>
+</tr>
+<tr class="gt_group_heading_row">
+<th colspan="6" class="gt_group_heading" scope="colgroup" id="FBS Independents">FBS Independents</th>
+    </tr>
+<tr class="gt_row_group_first">
+<td headers="FBS Independents  team" class="gt_row gt_left">I1</td>
+<td headers="FBS Independents  wins" class="gt_row gt_center">1.0</td>
+<td headers="FBS Independents  conf_champ" class="gt_row gt_center">0%</td>
+<td headers="FBS Independents  playoff" class="gt_row gt_center">32%</td>
+<td headers="FBS Independents  seed1" class="gt_row gt_center">9%</td>
+<td headers="FBS Independents  won_natty" class="gt_row gt_center">11%</td>
+</tr>
+</tbody>
+</table>
 </div>
-<div class="section level2">
-<h2 id="recipe-5-scaling-up">Recipe 5: scaling up<a class="anchor" aria-label="anchor" href="#recipe-5-scaling-up"></a>
-</h2>
-<p>Ten thousand seasons is a <code>chunks</code> argument away.
-Simulations are split into contiguous blocks and dispatched with furrr,
-so a parallel plan uses every core; <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> renders the
-result as a gt table grouped by conference.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<p>Three identities make a good smoke test on any simulation output, and
+this run satisfies all three exactly:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  Check <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"playoff probabilities sum to the number of seeds"</span>,</span>
+<span>            <span class="st">"national-title probabilities sum to one champion"</span>,</span>
+<span>            <span class="st">"conference titles sum to one per conference"</span><span class="op">)</span>,</span>
+<span>  Expected <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">sim_params</span><span class="op">$</span><span class="va">playoff_seeds</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  Observed <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">overall</span><span class="op">$</span><span class="va">playoff</span><span class="op">)</span>,</span>
+<span>                     <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">overall</span><span class="op">$</span><span class="va">won_natty</span><span class="op">)</span>,</span>
+<span>                     <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">overall</span><span class="op">$</span><span class="va">conf_champ</span><span class="op">)</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">show</span><span class="op">(</span><span class="st">"Simulation sanity checks"</span>, <span class="st">"1000 simulations, seed 2026, 4 chunks"</span><span class="op">)</span></span></code></pre></div>
+<div id="bxsonqljvr" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#bxsonqljvr table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#bxsonqljvr thead, #bxsonqljvr tbody, #bxsonqljvr tfoot, #bxsonqljvr tr, #bxsonqljvr td, #bxsonqljvr th {
+  border-style: none;
+}
+
+#bxsonqljvr p {
+  margin: 0;
+  padding: 0;
+}
+
+#bxsonqljvr .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 13px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#bxsonqljvr .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#bxsonqljvr .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#bxsonqljvr .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#bxsonqljvr .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#bxsonqljvr .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bxsonqljvr .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#bxsonqljvr .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#bxsonqljvr .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#bxsonqljvr .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#bxsonqljvr .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#bxsonqljvr .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#bxsonqljvr .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#bxsonqljvr .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#bxsonqljvr .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#bxsonqljvr .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#bxsonqljvr .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#bxsonqljvr .gt_row {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#bxsonqljvr .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bxsonqljvr .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#bxsonqljvr .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#bxsonqljvr .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#bxsonqljvr .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bxsonqljvr .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#bxsonqljvr .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#bxsonqljvr .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bxsonqljvr .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bxsonqljvr .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#bxsonqljvr .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bxsonqljvr .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#bxsonqljvr .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bxsonqljvr .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#bxsonqljvr .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bxsonqljvr .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#bxsonqljvr .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bxsonqljvr .gt_left {
+  text-align: left;
+}
+
+#bxsonqljvr .gt_center {
+  text-align: center;
+}
+
+#bxsonqljvr .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#bxsonqljvr .gt_font_normal {
+  font-weight: normal;
+}
+
+#bxsonqljvr .gt_font_bold {
+  font-weight: bold;
+}
+
+#bxsonqljvr .gt_font_italic {
+  font-style: italic;
+}
+
+#bxsonqljvr .gt_super {
+  font-size: 65%;
+}
+
+#bxsonqljvr .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#bxsonqljvr .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#bxsonqljvr .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#bxsonqljvr .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#bxsonqljvr .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#bxsonqljvr .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#bxsonqljvr .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#bxsonqljvr .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#bxsonqljvr div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading">
+<td colspan="3" class="gt_heading gt_title gt_font_normal" style>Simulation sanity checks</td>
+    </tr>
+<tr class="gt_heading">
+<td colspan="3" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border" style>1000 simulations, seed 2026, 4 chunks</td>
+    </tr>
+<tr class="gt_col_headings">
+<th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="Check">Check</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Expected">Expected</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Observed">Observed</th>
+    </tr>
+</thead>
+<tbody class="gt_table_body">
+<tr>
+<td headers="Check" class="gt_row gt_left">playoff probabilities sum to the number of seeds</td>
+<td headers="Expected" class="gt_row gt_right">4</td>
+<td headers="Observed" class="gt_row gt_right">4</td>
+</tr>
+<tr>
+<td headers="Check" class="gt_row gt_left">national-title probabilities sum to one champion</td>
+<td headers="Expected" class="gt_row gt_right">1</td>
+<td headers="Observed" class="gt_row gt_right">1</td>
+</tr>
+<tr>
+<td headers="Check" class="gt_row gt_left">conference titles sum to one per conference</td>
+<td headers="Expected" class="gt_row gt_right">2</td>
+<td headers="Observed" class="gt_row gt_right">2</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>If any of those drifts, something upstream is wrong — a team missing
+from <code>teams</code>, a conference with no championship game, or a
+<code>compute_results</code> function that is not filling every
+scheduled result.</p>
+<p>Scaling up is one argument, and progress reporting is one line:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="st">"multisession"</span><span class="op">)</span></span>
 <span><span class="fu">progressr</span><span class="fu">::</span><span class="fu"><a href="https://progressr.futureverse.org/reference/handlers.html" class="external-link">handlers</a></span><span class="op">(</span>global <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_simulations.html">cfb_simulations</a></span><span class="op">(</span></span>
-<span>  <span class="va">games</span>, <span class="va">teams</span>,</span>
-<span>  simulations <span class="op">=</span> <span class="fl">10000</span>,</span>
-<span>  chunks <span class="op">=</span> <span class="fl">8</span>,</span>
-<span>  autobid <span class="op">=</span> <span class="st">"2026"</span>,</span>
-<span>  tiebreaker_data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>analytics_ratings <span class="op">=</span> <span class="va">my_composite</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">sim</span><span class="op">)</span></span>
+<span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_simulations.html">cfb_simulations</a></span><span class="op">(</span><span class="va">games</span>, <span class="va">teams</span>, simulations <span class="op">=</span> <span class="fl">10000</span>, chunks <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="st">"sequential"</span><span class="op">)</span></span></code></pre></div>
-<p>A seed reproduces exactly for a fixed <code>chunks</code>, and
-parallel matches sequential – but the stream depends on the chunking, so
-changing <code>chunks</code> changes which seasons you get.</p>
+<p>A seed reproduces exactly for a fixed <code>chunks</code>, and a
+parallel plan gives identical results to a sequential one — but the RNG
+stream depends on the chunking, so changing <code>chunks</code> changes
+which seasons you draw.</p>
+</div>
+<div class="section level2">
+<h2 id="pointing-this-at-a-real-season">Pointing this at a real season<a class="anchor" aria-label="anchor" href="#pointing-this-at-a-real-season"></a>
+</h2>
+<p>Everything above runs on constructed records so the article builds
+offline. With cfbfastR installed, the same code takes a real season:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sched</span> <span class="op">&lt;-</span> <span class="fu">cfbfastR</span><span class="fu">::</span><span class="fu"><a href="https://cfbfastR.sportsdataverse.org/reference/load_cfb_schedules.html" class="external-link">load_cfb_schedules</a></span><span class="op">(</span><span class="fl">2026</span><span class="op">)</span></span>
+<span><span class="va">games</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_games_from_schedule.html">cfb_games_from_schedule</a></span><span class="op">(</span><span class="va">sched</span><span class="op">)</span></span>
+<span><span class="va">teams</span> <span class="op">&lt;-</span> <span class="fu">cfbfastR</span><span class="fu">::</span><span class="fu"><a href="https://cfbfastR.sportsdataverse.org/reference/cfbd_team_info.html" class="external-link">cfbd_team_info</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2026</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/transmute.html" class="external-link">transmute</a></span><span class="op">(</span>team <span class="op">=</span> <span class="va">school</span>, <span class="va">conference</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># today's rules on this season</span></span>
+<span><span class="va">standings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_standings.html">cfb_standings</a></span><span class="op">(</span><span class="va">games</span>, <span class="va">teams</span>, playoff_seeds <span class="op">=</span> <span class="fl">12</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># the same season re-examined under the previous era's automatic bids</span></span>
+<span><span class="fu"><a href="../reference/cfb_playoff_seeds.html">cfb_playoff_seeds</a></span><span class="op">(</span><span class="va">standings</span>, rankings <span class="op">=</span> <span class="va">latest_cfp</span>, autobid <span class="op">=</span> <span class="st">"2025"</span><span class="op">)</span></span></code></pre></div>
+<p>Because the registry is season-scoped, a <code>season</code> column
+of 2024 or 2025 is automatically ranked under the rules in force then —
+so year-over-year comparisons stay honest with no flags to remember.</p>
 </div>
 <div class="section level2">
 <h2 id="where-the-rules-come-from">Where the rules come from<a class="anchor" aria-label="anchor" href="#where-the-rules-come-from"></a>
 </h2>
 <p>Every registered procedure was transcribed from the conference’s
-official policy (ACC July 2026 policy, SEC/Big Ten/Big 12 2024 policies,
-the published American/CUSA/MAC/Mountain West/Sun Belt procedures) and
-the CFP’s published formats. The <a href="https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf" class="external-link">cheat
+official policy (the ACC’s July 2026 policy, the SEC/Big Ten/Big 12 2024
+policies, and the published American / CUSA / MAC / Mountain West / Sun
+Belt procedures) and the CFP’s published formats. The <a href="https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf" class="external-link">cheat
 sheet (PDF)</a> condenses this package alongside cfbplotR and
 cfb4th.</p>
 </div>

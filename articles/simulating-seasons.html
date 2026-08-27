@@ -417,29 +417,642 @@ different <code>chunks</code> gives different (equally valid)
 simulations.</p>
 </div>
 <div class="section level2">
-<h2 id="summarising-a-simulation">Summarising a simulation<a class="anchor" aria-label="anchor" href="#summarising-a-simulation"></a>
+<h2 id="summarising-a-simulation-and-checking-it">Summarising a simulation, and checking it<a class="anchor" aria-label="anchor" href="#summarising-a-simulation-and-checking-it"></a>
 </h2>
 <p><code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> renders the <code>overall</code> table as a gt
 table grouped by conference, with probabilities formatted by
 <code><a href="../reference/fmt_pct_special.html">fmt_pct_special()</a></code> so a long-shot reads <code>&lt;1%</code>
-rather than a flat <code>0%</code>:</p>
+rather than a flat <code>0%</code> and a near-lock
+<code>&gt;99.9%</code> rather than a false <code>100%</code>. Here it is
+on a real 1,000-season run:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">sim</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2026</span><span class="op">)</span></span>
+<span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_simulations.html">cfb_simulations</a></span><span class="op">(</span><span class="va">games</span>, <span class="va">teams</span>, simulations <span class="op">=</span> <span class="fl">1000</span>, playoff_seeds <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>                       chunks <span class="op">=</span> <span class="fl">4</span>, verbosity <span class="op">=</span> <span class="st">"NONE"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">sim</span><span class="op">)</span></span></code></pre></div>
+<div id="afmoldpelz" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#afmoldpelz table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#afmoldpelz thead, #afmoldpelz tbody, #afmoldpelz tfoot, #afmoldpelz tr, #afmoldpelz td, #afmoldpelz th {
+  border-style: none;
+}
+
+#afmoldpelz p {
+  margin: 0;
+  padding: 0;
+}
+
+#afmoldpelz .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 13px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#afmoldpelz .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#afmoldpelz .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#afmoldpelz .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#afmoldpelz .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#afmoldpelz .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#afmoldpelz .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#afmoldpelz .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#afmoldpelz .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#afmoldpelz .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#afmoldpelz .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#afmoldpelz .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#afmoldpelz .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#afmoldpelz .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#afmoldpelz .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#afmoldpelz .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#afmoldpelz .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#afmoldpelz .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#afmoldpelz .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#afmoldpelz .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#afmoldpelz .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#afmoldpelz .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#afmoldpelz .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#afmoldpelz .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#afmoldpelz .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#afmoldpelz .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#afmoldpelz .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#afmoldpelz .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#afmoldpelz .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#afmoldpelz .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#afmoldpelz .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#afmoldpelz .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#afmoldpelz .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#afmoldpelz .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#afmoldpelz .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#afmoldpelz .gt_left {
+  text-align: left;
+}
+
+#afmoldpelz .gt_center {
+  text-align: center;
+}
+
+#afmoldpelz .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#afmoldpelz .gt_font_normal {
+  font-weight: normal;
+}
+
+#afmoldpelz .gt_font_bold {
+  font-weight: bold;
+}
+
+#afmoldpelz .gt_font_italic {
+  font-style: italic;
+}
+
+#afmoldpelz .gt_super {
+  font-size: 65%;
+}
+
+#afmoldpelz .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#afmoldpelz .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#afmoldpelz .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#afmoldpelz .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#afmoldpelz .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#afmoldpelz .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#afmoldpelz .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#afmoldpelz .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#afmoldpelz div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading">
+<td colspan="6" class="gt_heading gt_title gt_font_normal" style>Simulating the 2024 college football season</td>
+    </tr>
+<tr class="gt_heading">
+<td colspan="6" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border" style>summary of 1K simulations using cfbseedR</td>
+    </tr>
+<tr class="gt_col_headings">
+<th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="team"></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="wins">AVG.<br>WINS</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="conf_champ">Win<br>CONF</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="playoff">Make<br>CFP</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="seed1">No.1<br>Seed</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="won_natty">Win<br>NATTY</th>
+    </tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="gt_group_heading_row">
+<th colspan="6" class="gt_group_heading" scope="colgroup" id="Alpha">Alpha</th>
+    </tr>
+<tr class="gt_row_group_first">
+<td headers="Alpha  team" class="gt_row gt_left">A3</td>
+<td headers="Alpha  wins" class="gt_row gt_center">2.6</td>
+<td headers="Alpha  conf_champ" class="gt_row gt_center">0%</td>
+<td headers="Alpha  playoff" class="gt_row gt_center">98%</td>
+<td headers="Alpha  seed1" class="gt_row gt_center">52%</td>
+<td headers="Alpha  won_natty" class="gt_row gt_center">19%</td>
+</tr>
+<tr>
+<td headers="Alpha  team" class="gt_row gt_left">A1</td>
+<td headers="Alpha  wins" class="gt_row gt_center">2.5</td>
+<td headers="Alpha  conf_champ" class="gt_row gt_center">57%</td>
+<td headers="Alpha  playoff" class="gt_row gt_center">42%</td>
+<td headers="Alpha  seed1" class="gt_row gt_center">3%</td>
+<td headers="Alpha  won_natty" class="gt_row gt_center">6%</td>
+</tr>
+<tr>
+<td headers="Alpha  team" class="gt_row gt_left">A2</td>
+<td headers="Alpha  wins" class="gt_row gt_center">1.8</td>
+<td headers="Alpha  conf_champ" class="gt_row gt_center">43%</td>
+<td headers="Alpha  playoff" class="gt_row gt_center">33%</td>
+<td headers="Alpha  seed1" class="gt_row gt_center">7%</td>
+<td headers="Alpha  won_natty" class="gt_row gt_center">4%</td>
+</tr>
+<tr>
+<td headers="Alpha  team" class="gt_row gt_left">A4</td>
+<td headers="Alpha  wins" class="gt_row gt_center">1.1</td>
+<td headers="Alpha  conf_champ" class="gt_row gt_center">0%</td>
+<td headers="Alpha  playoff" class="gt_row gt_center">13%</td>
+<td headers="Alpha  seed1" class="gt_row gt_center">0%</td>
+<td headers="Alpha  won_natty" class="gt_row gt_center">6%</td>
+</tr>
+<tr class="gt_group_heading_row">
+<th colspan="6" class="gt_group_heading" scope="colgroup" id="Beta">Beta</th>
+    </tr>
+<tr class="gt_row_group_first">
+<td headers="Beta  team" class="gt_row gt_left">B1</td>
+<td headers="Beta  wins" class="gt_row gt_center">3.4</td>
+<td headers="Beta  conf_champ" class="gt_row gt_center">38%</td>
+<td headers="Beta  playoff" class="gt_row gt_center">67%</td>
+<td headers="Beta  seed1" class="gt_row gt_center">22%</td>
+<td headers="Beta  won_natty" class="gt_row gt_center">14%</td>
+</tr>
+<tr>
+<td headers="Beta  team" class="gt_row gt_left">B2</td>
+<td headers="Beta  wins" class="gt_row gt_center">2.3</td>
+<td headers="Beta  conf_champ" class="gt_row gt_center">62%</td>
+<td headers="Beta  playoff" class="gt_row gt_center">60%</td>
+<td headers="Beta  seed1" class="gt_row gt_center">5%</td>
+<td headers="Beta  won_natty" class="gt_row gt_center">17%</td>
+</tr>
+<tr>
+<td headers="Beta  team" class="gt_row gt_left">B3</td>
+<td headers="Beta  wins" class="gt_row gt_center">1.5</td>
+<td headers="Beta  conf_champ" class="gt_row gt_center">0%</td>
+<td headers="Beta  playoff" class="gt_row gt_center">53%</td>
+<td headers="Beta  seed1" class="gt_row gt_center">2%</td>
+<td headers="Beta  won_natty" class="gt_row gt_center">23%</td>
+</tr>
+<tr>
+<td headers="Beta  team" class="gt_row gt_left">B4</td>
+<td headers="Beta  wins" class="gt_row gt_center">0.7</td>
+<td headers="Beta  conf_champ" class="gt_row gt_center">0%</td>
+<td headers="Beta  playoff" class="gt_row gt_center">2%</td>
+<td headers="Beta  seed1" class="gt_row gt_center">0%</td>
+<td headers="Beta  won_natty" class="gt_row gt_center">&lt;1%</td>
+</tr>
+<tr class="gt_group_heading_row">
+<th colspan="6" class="gt_group_heading" scope="colgroup" id="FBS Independents">FBS Independents</th>
+    </tr>
+<tr class="gt_row_group_first">
+<td headers="FBS Independents  team" class="gt_row gt_left">I1</td>
+<td headers="FBS Independents  wins" class="gt_row gt_center">1.0</td>
+<td headers="FBS Independents  conf_champ" class="gt_row gt_center">0%</td>
+<td headers="FBS Independents  playoff" class="gt_row gt_center">32%</td>
+<td headers="FBS Independents  seed1" class="gt_row gt_center">9%</td>
+<td headers="FBS Independents  won_natty" class="gt_row gt_center">11%</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Before trusting any of those numbers, check that the simulation is
+internally consistent. Three identities have to hold by construction,
+and they are cheap to assert:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">checks</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  Check <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"playoff probabilities sum to the seed count"</span>,</span>
+<span>            <span class="st">"national-title probabilities sum to one champion"</span>,</span>
+<span>            <span class="st">"conference titles sum to one per conference"</span><span class="op">)</span>,</span>
+<span>  Expected <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">sim_params</span><span class="op">$</span><span class="va">playoff_seeds</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  Observed <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">overall</span><span class="op">$</span><span class="va">playoff</span><span class="op">)</span>,</span>
+<span>                     <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">overall</span><span class="op">$</span><span class="va">won_natty</span><span class="op">)</span>,</span>
+<span>                     <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">overall</span><span class="op">$</span><span class="va">conf_champ</span><span class="op">)</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">checks</span><span class="op">$</span><span class="va">OK</span> <span class="op">&lt;-</span> <span class="va">checks</span><span class="op">$</span><span class="va">Expected</span> <span class="op">==</span> <span class="va">checks</span><span class="op">$</span><span class="va">Observed</span></span>
+<span><span class="va">checks</span></span>
+<span><span class="co">#&gt;                                              Check Expected Observed   OK</span></span>
+<span><span class="co">#&gt; 1      playoff probabilities sum to the seed count        4        4 TRUE</span></span>
+<span><span class="co">#&gt; 2 national-title probabilities sum to one champion        1        1 TRUE</span></span>
+<span><span class="co">#&gt; 3      conference titles sum to one per conference        2        2 TRUE</span></span></code></pre></div>
+<p>All three hold exactly on this run. When one drifts it is nearly
+always a data problem rather than a simulation problem: a team appearing
+in <code>games</code> but missing from <code>teams</code>, a conference
+with no <code>CONF_CHAMP</code> fixture, or a custom
+<code>compute_results</code> that left some scheduled results as
+<code>NA</code>.</p>
+<p>The per-team win distribution is the other output worth eyeballing,
+since it exposes the shape of a season rather than just its mean:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tw</span> <span class="op">&lt;-</span> <span class="va">sim</span><span class="op">$</span><span class="va">team_wins</span><span class="op">[</span><span class="va">sim</span><span class="op">$</span><span class="va">team_wins</span><span class="op">$</span><span class="va">team</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A1"</span>, <span class="st">"B1"</span><span class="op">)</span>, <span class="op">]</span></span>
+<span><span class="va">tw</span> <span class="op">&lt;-</span> <span class="va">tw</span><span class="op">[</span><span class="va">tw</span><span class="op">$</span><span class="va">wins</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"team"</span>, <span class="st">"wins"</span>, <span class="st">"over_prob"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">tw</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 8 × 3</span></span></span>
+<span><span class="co">#&gt;   team   wins over_prob</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> A1        1     0.831</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> A1        2     0.483</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> A1        3     0.168</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> A1        4     0    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> B1        1     1    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> B1        2     0.759</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> B1        3     0.452</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> B1        4     0.152</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="real-schedules">Real schedules<a class="anchor" aria-label="anchor" href="#real-schedules"></a>
 </h2>
 <p>With cfbfastR installed, a real season plugs straight in:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Not run: requires network access via cfbfastR</span></span>
-<span><span class="va">sched</span> <span class="op">&lt;-</span> <span class="fu">cfbfastR</span><span class="fu">::</span><span class="fu"><a href="https://cfbfastR.sportsdataverse.org/reference/load_cfb_schedules.html" class="external-link">load_cfb_schedules</a></span><span class="op">(</span><span class="fl">2024</span><span class="op">)</span></span>
-<span><span class="va">games_2024</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_games_from_schedule.html">cfb_games_from_schedule</a></span><span class="op">(</span><span class="va">sched</span><span class="op">)</span></span>
-<span><span class="va">games_2024</span> <span class="op">&lt;-</span> <span class="va">games_2024</span><span class="op">[</span><span class="va">games_2024</span><span class="op">$</span><span class="va">game_type</span> <span class="op">!=</span> <span class="st">"POST"</span>, <span class="op">]</span></span>
-<span><span class="va">teams_2024</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span><span class="va">sched</span> <span class="op">&lt;-</span> <span class="fu">cfbfastR</span><span class="fu">::</span><span class="fu"><a href="https://cfbfastR.sportsdataverse.org/reference/load_cfb_schedules.html" class="external-link">load_cfb_schedules</a></span><span class="op">(</span><span class="fl">2026</span><span class="op">)</span></span>
+<span><span class="va">real_games</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_games_from_schedule.html">cfb_games_from_schedule</a></span><span class="op">(</span><span class="va">sched</span><span class="op">)</span></span>
+<span><span class="va">real_games</span> <span class="op">&lt;-</span> <span class="va">real_games</span><span class="op">[</span><span class="va">real_games</span><span class="op">$</span><span class="va">game_type</span> <span class="op">!=</span> <span class="st">"POST"</span>, <span class="op">]</span></span>
+<span><span class="va">real_teams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  team <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">sched</span><span class="op">$</span><span class="va">home_team</span>, <span class="va">sched</span><span class="op">$</span><span class="va">away_team</span><span class="op">)</span>,</span>
 <span>  conference <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">sched</span><span class="op">$</span><span class="va">home_conference</span>, <span class="va">sched</span><span class="op">$</span><span class="va">away_conference</span><span class="op">)</span></span>
 <span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_simulations.html">cfb_simulations</a></span><span class="op">(</span><span class="va">games_2024</span>, <span class="va">teams_2024</span>, simulations <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></code></pre></div>
+<span></span>
+<span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="st">"multisession"</span><span class="op">)</span></span>
+<span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfb_simulations.html">cfb_simulations</a></span><span class="op">(</span><span class="va">real_games</span>, <span class="va">real_teams</span>, simulations <span class="op">=</span> <span class="fl">10000</span>, chunks <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
+<span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="st">"sequential"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">sim</span><span class="op">)</span></span></code></pre></div>
+<p>The same three identities apply to a real season and are worth
+asserting there too — with 130-odd FBS teams and a schedule pulled from
+a live API, a missing conference label or an unplayed fixture is far
+likelier than in the toy data, and the sums will say so immediately.</p>
+<p>Because the tiebreaker registry is season-scoped, feeding a
+<code>season</code> column of 2024 or 2025 ranks those seasons under the
+rules that were in force at the time, while
+<code>autobid = "2025"</code> / <code>"2026"</code> selects the CFP era
+independently. The <a href="https://cfbseedR.sportsdataverse.org/articles/tiebreakers-and-cfp.html">tiebreakers
+cookbook</a> works through what changes when you flip each of them.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
