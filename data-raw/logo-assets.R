@@ -1,12 +1,23 @@
-# Regenerate pkgdown/favicon/* from man/figures/logo.svg.
+# Regenerate the raster logos and pkgdown/favicon/* from man/figures/logo.svg.
 #
-# The hex is taller than it is wide, so each square favicon is the hex
-# rendered at the target height and centered on a transparent square canvas.
+# man/figures/logo.svg is the source of truth. This script renders the two
+# raster sizes used across the SportsDataverse hex family (518x600, and
+# 1036x1200 for retina/print, matching cfbfastR) plus the favicon set. The hex
+# is taller than it is wide, so each square favicon is the hex rendered at the
+# target height and centered on a transparent square canvas.
+#
 # Run after any change to the logo: Rscript data-raw/favicons.R
 
 library(magick)
 
 svg <- "man/figures/logo.svg"
+
+# raster logos
+for (px in c(518, 1036)) {
+  out <- if (px == 518) "man/figures/logo.png" else "man/figures/logo-2x.png"
+  image_write(image_read_svg(svg, width = px), out, format = "png")
+  cat("wrote", out, "\n")
+}
 
 square <- function(px) {
   img <- image_read_svg(svg, height = px)
