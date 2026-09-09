@@ -6,13 +6,21 @@ bibentry(
   bibtype  = "Misc",
   header   = "To cite the cfbseedR R package in publications, use:",
   key      = "gilani_cfbseedR",
-  author   = person("Saiem", "Gilani", comment = c(ORCID = "0000-0002-7194-9067")),
+  # All three DESCRIPTION `aut` entries. Carl and Sharpe are credited
+  # because cfbseedR is a direct adaptation of their nflseedR design, which
+  # is exactly why DESCRIPTION lists them as authors rather than ctb.
+  author   = c(
+    person("Saiem", "Gilani", comment = c(ORCID = "0000-0002-7194-9067")),
+    person("Sebastian", "Carl"),
+    person("Lee", "Sharpe")
+  ),
   title    = "cfbseedR: The SportsDataverse's R Package to Simulate and Evaluate College Football Seasons.",
   url      = "https://cfbseedR.sportsdataverse.org/",
   year     = year,
   note     = note,
   textVersion = paste0(
-    "Saiem Gilani (", year, "). cfbseedR: The SportsDataverse's R Package ",
+    "Saiem Gilani, Sebastian Carl, and Lee Sharpe (", year, "). cfbseedR: ",
+    "The SportsDataverse's R Package ",
     "to Simulate and Evaluate College Football Seasons. ", note,
     ". Retrieved from https://cfbseedR.sportsdataverse.org/"
   ),

@@ -172,7 +172,7 @@ BibTex Citation
 
 ``` bibtex
 @misc{gilani_cfbseedR,
-  author = {Saiem Gilani},
+  author = {Saiem Gilani and Sebastian Carl and Lee Sharpe},
   title = {cfbseedR: The SportsDataverse's R Package to Simulate and Evaluate College Football Seasons.},
   url = {https://cfbseedR.sportsdataverse.org/},
   year = {2026}
