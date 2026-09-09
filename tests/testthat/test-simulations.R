@@ -209,3 +209,27 @@ test_that("a PLAYED game against an unlisted team is still allowed", {
   # And the simulation actually produced results rather than a season of NAs.
   expect_true(all(sim$overall$wins > 0))
 })
+
+test_that("cfb_simulations() rejects an NA team name in an unplayed game", {
+  skip_on_cran()
+
+  # `standings_validate_games()` checks that the team columns exist and that
+  # results are not NA, but never that the team names themselves are named. An
+  # NA team has no rating, so it propagates NAs exactly like an unlisted one.
+  games <- cfb_games_example
+  teams <- cfb_teams_example
+
+  nameless <- games[1, ]
+  nameless$week <- 4L
+  nameless$away_team <- NA_character_
+  nameless$result <- NA_real_
+  games <- rbind(games, nameless)
+  games$result[games$week >= 3] <- NA_real_
+
+  expect_error(
+    cfb_simulations(games, teams,
+      simulations = 2, playoff_seeds = 4, chunks = 1, verbosity = "NONE"
+    ),
+    regexp = "must name both teams"
+  )
+})

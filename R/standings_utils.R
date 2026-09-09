@@ -86,11 +86,33 @@ standings_validate_teams <- function(teams, call = rlang::caller_env()) {
 simulations_validate_coverage <- function(games, teams,
                                           call = rlang::caller_env()) {
   pending <- games[is.na(games$result), , drop = FALSE]
-  unlisted <- setdiff(
-    unique(c(pending$home_team, pending$away_team)),
-    teams$team
-  )
-  unlisted <- unlisted[!is.na(unlisted)]
+  pending_teams <- c(pending$home_team, pending$away_team)
+
+  # A missing team NAME is the same failure arriving by a different route, and
+  # nothing upstream stops it: standings_validate_games() checks that the team
+  # columns EXIST and rejects NA results, but never NA teams. Dropping the NAs
+  # from `unlisted` instead - as an earlier revision did, to keep "NA" out of
+  # the message - reported nothing and let the run continue straight into the
+  # NA-propagating path this function exists to close.
+  #
+  # It gets its own message because "add it to `teams`" is not actionable
+  # advice for a value that has no name to add.
+  if (anyNA(pending_teams)) {
+    n_home <- sum(is.na(pending$home_team))
+    n_away <- sum(is.na(pending$away_team))
+    cli::cli_abort(
+      c(
+        "Every game still to be simulated must name both teams.",
+        x = "{n_home + n_away} team name{?s} in unplayed games {?is/are}
+             {.val NA} ({n_home} home, {n_away} away).",
+        i = "An unnamed team has no rating either, so it would fill the rest
+             of the season with {.val NA} results."
+      ),
+      call = call
+    )
+  }
+
+  unlisted <- setdiff(unique(pending_teams), teams$team)
 
   if (length(unlisted) > 0) {
     cli::cli_abort(

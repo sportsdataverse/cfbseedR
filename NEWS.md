@@ -8,7 +8,10 @@
   that `playoff_seeds` exceeded the number of teams. The check is deliberately
   limited to games awaiting a result: a PLAYED game against an unlisted
   opponent remains valid, exactly as it is in `cfb_standings()`, because
-  standings only read results while simulation has to generate them.
+  standings only read results while simulation has to generate them. An
+  unplayed game whose `home_team` or `away_team` is `NA` is rejected the same
+  way and for the same reason - `standings_validate_games()` checks that those
+  columns exist and rejects `NA` results, but never `NA` team names.
 
 # cfbseedR 0.2.0
 
