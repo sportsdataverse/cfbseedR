@@ -6,7 +6,7 @@ bibentry(
   bibtype  = "Misc",
   header   = "To cite the cfbseedR R package in publications, use:",
   key      = "gilani_cfbseedR",
-  author   = person("Saiem", "Gilani"),
+  author   = person("Saiem", "Gilani", comment = c(ORCID = "0000-0002-7194-9067")),
   title    = "cfbseedR: The SportsDataverse's R Package to Simulate and Evaluate College Football Seasons.",
   url      = "https://cfbseedR.sportsdataverse.org/",
   year     = year,

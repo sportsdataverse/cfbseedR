@@ -63,3 +63,10 @@ prefix; the two helpers mirror their nflseedR namesakes.
 - **Never add AI co-author trailers** (Copilot/Claude/etc.) to commits or
   PRs — the human author is the sole attributable contributor.
 - `README.md` is generated from `README.Rmd` — edit the `.Rmd` and re-knit.
+
+## Cheat sheet
+
+There is a printable one-page reference for this package at
+<https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf>, one of [a set covering every SportsDataverse package](https://sportsdataverse.org/cheatsheets).
+Keep it in mind when adding or renaming an exported function: the sheet is a
+hand-built canvas, so a surface change means the sheet needs a revision too.
