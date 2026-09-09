@@ -67,6 +67,73 @@ standings_validate_teams <- function(teams, call = rlang::caller_env()) {
   dplyr::distinct(teams, .data$team, .keep_all = TRUE)
 }
 
+# Cross-check `teams` against the games that still have to be SIMULATED.
+#
+# Deliberately narrower than "every team in `games` must be in `teams`". As
+# documented above, `cfb_standings()` supports unlisted opponents on purpose -
+# a played game against an unlisted FCS team counts toward the listed team's
+# record, and the `cfb_toy_tiebreakers` parity fixture depends on it. That is
+# safe because standings only READ results.
+#
+# Simulation has to GENERATE them, and `cfbseedR_compute_results()` looks each
+# side's rating up by name: an unlisted team yields an NA rating, `rnorm(n, NA,
+# 13)` returns NA, and the NA propagates through every remaining week. The
+# failure is silent or, worse, surfaces much later as an unrelated complaint
+# (`playoff_seeds exceeds the number of teams`) once the empty standings reach
+# seeding. So the requirement is only that both sides of an UNPLAYED game are
+# known - a played game against an unlisted opponent stays as valid here as it
+# is in `cfb_standings()`.
+simulations_validate_coverage <- function(games, teams,
+                                          call = rlang::caller_env()) {
+  pending <- games[is.na(games$result), , drop = FALSE]
+  pending_teams <- c(pending$home_team, pending$away_team)
+
+  # A missing team NAME is the same failure arriving by a different route, and
+  # nothing upstream stops it: standings_validate_games() checks that the team
+  # columns EXIST and rejects NA results, but never NA teams. Dropping the NAs
+  # from `unlisted` instead - as an earlier revision did, to keep "NA" out of
+  # the message - reported nothing and let the run continue straight into the
+  # NA-propagating path this function exists to close.
+  #
+  # It gets its own message because "add it to `teams`" is not actionable
+  # advice for a value that has no name to add.
+  if (anyNA(pending_teams)) {
+    n_home <- sum(is.na(pending$home_team))
+    n_away <- sum(is.na(pending$away_team))
+    cli::cli_abort(
+      c(
+        "Every game still to be simulated must name both teams.",
+        x = "{n_home + n_away} team name{?s} in unplayed games {?is/are}
+             {.val NA} ({n_home} home, {n_away} away).",
+        i = "An unnamed team has no rating either, so it would fill the rest
+             of the season with {.val NA} results."
+      ),
+      call = call
+    )
+  }
+
+  unlisted <- setdiff(unique(pending_teams), teams$team)
+
+  if (length(unlisted) > 0) {
+    cli::cli_abort(
+      c(
+        "Every team in a game still to be simulated must appear in
+         {.arg teams}.",
+        # Pluralise only where a quantity is in scope in the SAME bullet; cli
+        # errors on a bare `{?a/b}` with nothing to count.
+        x = "Missing {length(unlisted)} team{?s}: {.val {unlisted}}.",
+        i = "Simulating a game needs a rating for BOTH sides, so an unlisted
+             team would fill the rest of the season with {.val NA} results.",
+        i = "Add the missing teams to {.arg teams}, or drop their unplayed
+             games from {.arg games}."
+      ),
+      call = call
+    )
+  }
+
+  invisible(games)
+}
+
 # Long format: one row per (game, team perspective). Adapted from
 # nflseedR::standings_double_games(). Carries `pf`/`pa` (points for/against)
 # when `games` has `home_points`/`away_points` - feeds the SEC
