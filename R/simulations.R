@@ -142,6 +142,7 @@ cfb_simulations <- function(games,
     )
   }
   teams <- standings_validate_teams(teams)
+  simulations_validate_coverage(games, teams)
   if (!"neutral" %in% names(games)) games$neutral <- 0L
 
   weeks_to_simulate <- sort(unique(games$week[is.na(games$result)]))

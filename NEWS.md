@@ -1,3 +1,15 @@
+# cfbseedR (development version)
+
+* `cfb_simulations()` now aborts with a clear error when a team appearing in a
+  game that still has to be simulated is missing from `teams`. Previously the
+  missing team produced an `NA` rating, `rnorm()` returned `NA`, and the `NA`
+  propagated through every remaining week - so the run either returned a season
+  in which no team won a game, or failed much later with an unrelated complaint
+  that `playoff_seeds` exceeded the number of teams. The check is deliberately
+  limited to games awaiting a result: a PLAYED game against an unlisted
+  opponent remains valid, exactly as it is in `cfb_standings()`, because
+  standings only read results while simulation has to generate them.
+
 # cfbseedR 0.2.0
 
 2026-season rules refresh (researched against official conference and CFP

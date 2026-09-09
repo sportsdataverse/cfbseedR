@@ -67,6 +67,51 @@ standings_validate_teams <- function(teams, call = rlang::caller_env()) {
   dplyr::distinct(teams, .data$team, .keep_all = TRUE)
 }
 
+# Cross-check `teams` against the games that still have to be SIMULATED.
+#
+# Deliberately narrower than "every team in `games` must be in `teams`". As
+# documented above, `cfb_standings()` supports unlisted opponents on purpose -
+# a played game against an unlisted FCS team counts toward the listed team's
+# record, and the `cfb_toy_tiebreakers` parity fixture depends on it. That is
+# safe because standings only READ results.
+#
+# Simulation has to GENERATE them, and `cfbseedR_compute_results()` looks each
+# side's rating up by name: an unlisted team yields an NA rating, `rnorm(n, NA,
+# 13)` returns NA, and the NA propagates through every remaining week. The
+# failure is silent or, worse, surfaces much later as an unrelated complaint
+# (`playoff_seeds exceeds the number of teams`) once the empty standings reach
+# seeding. So the requirement is only that both sides of an UNPLAYED game are
+# known - a played game against an unlisted opponent stays as valid here as it
+# is in `cfb_standings()`.
+simulations_validate_coverage <- function(games, teams,
+                                          call = rlang::caller_env()) {
+  pending <- games[is.na(games$result), , drop = FALSE]
+  unlisted <- setdiff(
+    unique(c(pending$home_team, pending$away_team)),
+    teams$team
+  )
+  unlisted <- unlisted[!is.na(unlisted)]
+
+  if (length(unlisted) > 0) {
+    cli::cli_abort(
+      c(
+        "Every team in a game still to be simulated must appear in
+         {.arg teams}.",
+        # Pluralise only where a quantity is in scope in the SAME bullet; cli
+        # errors on a bare `{?a/b}` with nothing to count.
+        x = "Missing {length(unlisted)} team{?s}: {.val {unlisted}}.",
+        i = "Simulating a game needs a rating for BOTH sides, so an unlisted
+             team would fill the rest of the season with {.val NA} results.",
+        i = "Add the missing teams to {.arg teams}, or drop their unplayed
+             games from {.arg games}."
+      ),
+      call = call
+    )
+  }
+
+  invisible(games)
+}
+
 # Long format: one row per (game, team perspective). Adapted from
 # nflseedR::standings_double_games(). Carries `pf`/`pa` (points for/against)
 # when `games` has `home_points`/`away_points` - feeds the SEC

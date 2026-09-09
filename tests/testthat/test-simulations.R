@@ -160,3 +160,52 @@ test_that("cfbseedR_compute_results honors the elo argument and week gating", {
   # elo was carried into teams and updated
   expect_true("elo" %in% names(out$teams))
 })
+
+test_that("cfb_simulations() rejects an unlisted team in an unplayed game", {
+  skip_on_cran()
+
+  games <- cfb_games_example
+  teams <- cfb_teams_example
+
+  # An opponent that never appears in `teams` -- the FBS-vs-FCS shape. Without
+  # the guard this silently fills every simulated week with NA results, and
+  # then fails much later with an unrelated complaint about playoff_seeds.
+  ghost <- games[1, ]
+  ghost$week <- 4L
+  ghost$away_team <- "Ghost FCS"
+  ghost$result <- NA_real_
+  games <- rbind(games, ghost)
+  games$result[games$week >= 3] <- NA_real_
+
+  expect_error(
+    cfb_simulations(games, teams,
+      simulations = 2, playoff_seeds = 4, chunks = 1, verbosity = "NONE"
+    ),
+    regexp = "Ghost FCS"
+  )
+})
+
+test_that("a PLAYED game against an unlisted team is still allowed", {
+  skip_on_cran()
+
+  # cfb_standings() supports unlisted opponents on purpose, and the guard must
+  # not take that away: only games still awaiting a result need both sides
+  # rated. A played FCS game keeps counting toward the listed team's record.
+  games <- cfb_games_example
+  teams <- cfb_teams_example
+
+  ghost <- games[1, ]
+  ghost$week <- 1L
+  ghost$away_team <- "Ghost FCS"
+  ghost$result <- 21
+  games <- rbind(games, ghost)
+  games$result[games$week >= 3] <- NA_real_
+
+  expect_no_error(
+    sim <- cfb_simulations(games, teams,
+      simulations = 2, playoff_seeds = 4, chunks = 1, verbosity = "NONE"
+    )
+  )
+  # And the simulation actually produced results rather than a season of NAs.
+  expect_true(all(sim$overall$wins > 0))
+})
