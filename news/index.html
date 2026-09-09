@@ -70,6 +70,11 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="cfbseedr-development-version">cfbseedR (development version)<a class="anchor" aria-label="anchor" href="#cfbseedr-development-version"></a></h2>
+<ul><li>
+<code><a href="../reference/cfb_simulations.html">cfb_simulations()</a></code> now aborts with a clear error when a team appearing in a game that still has to be simulated is missing from <code>teams</code>. Previously the missing team produced an <code>NA</code> rating, <code><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm()</a></code> returned <code>NA</code>, and the <code>NA</code> propagated through every remaining week - so the run either returned a season in which no team won a game, or failed much later with an unrelated complaint that <code>playoff_seeds</code> exceeded the number of teams. The check is deliberately limited to games awaiting a result: a PLAYED game against an unlisted opponent remains valid, exactly as it is in <code><a href="../reference/cfb_standings.html">cfb_standings()</a></code>, because standings only read results while simulation has to generate them. An unplayed game whose <code>home_team</code> or <code>away_team</code> is <code>NA</code> is rejected the same way and for the same reason - <code>standings_validate_games()</code> checks that those columns exist and rejects <code>NA</code> results, but never <code>NA</code> team names.</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="cfbseedr-020">cfbseedR 0.2.0<a class="anchor" aria-label="anchor" href="#cfbseedr-020"></a></h2>
 <p>2026-season rules refresh (researched against official conference and CFP sources, 2026-08-26).</p>
 <ul><li>
