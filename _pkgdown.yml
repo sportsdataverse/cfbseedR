@@ -93,7 +93,7 @@ home:
 
 navbar:
   structure:
-    left: [home, reference, articles, news, network, repo]
+    left: [home, reference, articles, news, network, repo, status]
     right: [search, twitter, github, lightswitch]
   components:
     articles:
@@ -154,6 +154,9 @@ navbar:
       - text: "Node.js Packages"
       - text: sportsdataverse.js
         href: https://js.sportsdataverse.org/
+    status:
+      text: "Data status"
+      href: https://sportsdataverse.org/status
     twitter:
       icon: "fab fa-x-twitter fa-lg"
       aria-label: X (Twitter)

@@ -24,6 +24,9 @@ Lee Sharpe and Sebastian Carl of the
 [nflverse](https://nflverse.nflverse.com), and is part of the
 [SportsDataverse](https://sportsdataverse.org).
 
+Data freshness and pipeline status for every SportsDataverse dataset:
+[sportsdataverse.org/status](https://sportsdataverse.org/status).
+
 ## **Installation**
 
 Install the released version of cfbseedR from CRAN with:
