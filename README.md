@@ -171,7 +171,7 @@ Every SportsDataverse package has one — browse them all at
 To cite the [**`cfbseedR`**](https://cfbseedR.sportsdataverse.org/) R
 package in publications, use:
 
-BibTex Citation
+BibTeX Citation
 
 ``` bibtex
 @misc{gilani_cfbseedR,
