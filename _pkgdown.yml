@@ -138,6 +138,24 @@ navbar:
         href: https://github.com/sportsdataverse/softballR/
       - text: recruitR
         href: https://recruitR.sportsdataverse.org/
+      - text: ggshakeR
+        href: https://abhiamishra.github.io/ggshakeR/
+      - text: usfootballR
+        href: https://usfootballR.sportsdataverse.org/
+      - text: soccerAnimate
+        href: https://github.com/Dato-Futbol/soccerAnimate/
+      - text: chessR
+        href: https://jaseziv.github.io/chessR/
+      - text: mlbplotR
+        href: https://camdenk.github.io/mlbplotR/
+      - text: nwslR
+        href: https://github.com/nwslR/nwslR/
+      - text: puntr
+        href: https://puntalytics.github.io/puntr/
+      - text: cfbseedR
+        href: https://cfbseedR.sportsdataverse.org/
+      - text: sdvplotR
+        href: https://sdvplotR.sportsdataverse.org/
       - text: --------------------------------
       - text: "nflverse"
       - text: nflseedR (the original)
@@ -150,10 +168,20 @@ navbar:
         href: https://py.sportsdataverse.org/
       - text: sportypy
         href: https://sportypy.sportsdataverse.org/
+      - text: sdvplot
+        href: https://sdvplot.sportsdataverse.org/
+      - text: nwslpy
+        href: https://github.com/nwslR/nwslpy/
+      - text: collegebaseball
+        href: https://github.com/nathanblumenfeld/collegebaseball/
       - text: --------------------------------
       - text: "Node.js Packages"
       - text: sportsdataverse.js
         href: https://js.sportsdataverse.org/
+      - text: sdvplot-js
+        href: https://plot.sportsdataverse.org/
+      - text: nfl-nerd
+        href: https://github.com/nntrn/nfl-nerd/
     status:
       text: "Data status"
       href: https://sportsdataverse.org/status
