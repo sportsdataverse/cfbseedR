@@ -207,6 +207,10 @@ Related packages:
 * [sportsdataverse-R](https://r.sportsdataverse.org/) — The SportsDataverse
   R meta-package
 
+[![X Follow](https://img.shields.io/twitter/follow/SportsDataverse?color=blue&label=%40SportsDataverse&logo=x&style=for-the-badge)](https://x.com/SportsDataverse)
+
+[![GitHub stars](https://img.shields.io/github/stars/sportsdataverse/cfbseedR.svg?color=eee&logo=github&style=for-the-badge&label=Star%20cfbseedR&maxAge=2592000)](https://github.com/sportsdataverse/cfbseedR)
+
 <a href="https://github.com/sportsdataverse/cfbseedR/stargazers">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/sportsdataverse/cfbseedR/star-history/star-history-dark.svg">
