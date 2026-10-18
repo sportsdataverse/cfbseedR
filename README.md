@@ -149,6 +149,15 @@ generator) is a direct adaptation of
 Lee Sharpe and Sebastian Carl. Huge thanks to them and the broader
 [nflverse](https://nflverse.nflverse.com) team for the original design.
 
+## Star History
+
+<a href="https://github.com/sportsdataverse/cfbseedR/stargazers">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/sportsdataverse/cfbseedR/star-history/star-history-dark.svg">
+    <img alt="Star history of sportsdataverse/cfbseedR" src="https://raw.githubusercontent.com/sportsdataverse/cfbseedR/star-history/star-history.png" width="600">
+  </picture>
+</a>
+
 ## **Our Authors**
 
   - [Saiem Gilani](https://twitter.com/saiemgilani)
