@@ -17,7 +17,7 @@
 #'   and must not produce ties (`result == 0`) outside the regular season.
 #' @param ... Further arguments passed on to `compute_results`.
 #' @param games A schedule where some results are missing. Defaults to the
-#'   bundled toy season with all results from week 3 onwards blanked.
+#'   bundled toy season with all results from week 3 onward blanked.
 #' @param teams A teams table (`team`, `conference`, optionally `sim`).
 #'   Defaults to the bundled toy teams.
 #'

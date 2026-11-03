@@ -230,7 +230,7 @@ gives identical results to a sequential one. The RNG stream does depend on
 the chunking, though, so the same seed with a different `chunks` gives
 different (equally valid) simulations.
 
-## Summarising a simulation, and checking it
+## Summarizing a simulation, and checking it
 
 `summary()` renders the `overall` table as a gt table grouped by
 conference, with probabilities formatted by `fmt_pct_special()` so a

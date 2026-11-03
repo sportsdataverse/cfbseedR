@@ -17,7 +17,7 @@ and must not produce ties (\code{result == 0}) outside the regular season.}
 \item{...}{Further arguments passed on to \code{compute_results}.}
 
 \item{games}{A schedule where some results are missing. Defaults to the
-bundled toy season with all results from week 3 onwards blanked.}
+bundled toy season with all results from week 3 onward blanked.}
 
 \item{teams}{A teams table (\code{team}, \code{conference}, optionally \code{sim}).
 Defaults to the bundled toy teams.}
