@@ -8,7 +8,6 @@ sim_inputs <- function() {
 }
 
 test_that("exported example data matches the bundled fixtures", {
-  testthat::skip_on_cran()
   csv_games <- utils::read.csv(
     system.file("extdata", "toy_games.csv", package = "cfbseedR"),
     stringsAsFactors = FALSE
@@ -22,7 +21,6 @@ test_that("exported example data matches the bundled fixtures", {
 })
 
 test_that("chunking splits every simulation exactly once", {
-  testthat::skip_on_cran()
   i <- sim_inputs()
   set.seed(4)
   s <- cfb_simulations(i$games, i$teams, simulations = 8, playoff_seeds = 4,
@@ -34,7 +32,6 @@ test_that("chunking splits every simulation exactly once", {
 })
 
 test_that("an uneven split still yields exactly the requested chunk count", {
-  testthat::skip_on_cran()
   i <- sim_inputs()
   # 10 simulations over 6 chunks: slicing by a rounded-up chunk size would
   # quietly produce 5 chunks of 2. Sizes must differ by at most one.
@@ -47,7 +44,6 @@ test_that("an uneven split still yields exactly the requested chunk count", {
 })
 
 test_that("chunks are capped at the simulation count", {
-  testthat::skip_on_cran()
   i <- sim_inputs()
   set.seed(4)
   s <- cfb_simulations(i$games, i$teams, simulations = 3, playoff_seeds = 4,
@@ -57,7 +53,6 @@ test_that("chunks are capped at the simulation count", {
 })
 
 test_that("a seed reproduces the same simulation for fixed chunks", {
-  testthat::skip_on_cran()
   i <- sim_inputs()
   set.seed(11)
   a <- cfb_simulations(i$games, i$teams, simulations = 6, playoff_seeds = 4,
@@ -70,7 +65,6 @@ test_that("a seed reproduces the same simulation for fixed chunks", {
 })
 
 test_that("cfb_simulations rejects a nonsense chunk count", {
-  testthat::skip_on_cran()
   i <- sim_inputs()
   expect_error(
     cfb_simulations(i$games, i$teams, simulations = 4, chunks = 0,
@@ -80,7 +74,6 @@ test_that("cfb_simulations rejects a nonsense chunk count", {
 })
 
 test_that("verbosity is plumbed through and NONE stays silent", {
-  testthat::skip_on_cran()
   i <- sim_inputs()
   set.seed(4)
   expect_silent(
@@ -97,7 +90,6 @@ test_that("verbosity is plumbed through and NONE stays silent", {
 })
 
 test_that("simulations surface their tiebreak notes", {
-  testthat::skip_on_cran()
   i <- sim_inputs()
   set.seed(4)
   s <- cfb_simulations(i$games, i$teams, simulations = 2, playoff_seeds = 4,
@@ -106,7 +98,6 @@ test_that("simulations surface their tiebreak notes", {
 })
 
 test_that("summary() dispatches on cfbseedR_simulation", {
-  testthat::skip_on_cran()
   testthat::skip_if_not_installed("gt")
   testthat::skip_if_not_installed("scales")
   i <- sim_inputs()
@@ -117,7 +108,6 @@ test_that("summary() dispatches on cfbseedR_simulation", {
 })
 
 test_that("fmt_pct_special keeps long-shots and near-locks legible", {
-  testthat::skip_on_cran()
   testthat::skip_if_not_installed("scales")
   expect_equal(
     fmt_pct_special(c(0, 0.0004, 0.123, 0.9994, 1)),
@@ -128,7 +118,6 @@ test_that("fmt_pct_special keeps long-shots and near-locks legible", {
 })
 
 test_that("ranks = 'NONE' skips the rank cascade", {
-  testthat::skip_on_cran()
   games <- cfb_games_example
   st_none <- cfb_standings(games, cfb_teams_example, ranks = "NONE",
                            verbosity = "NONE")

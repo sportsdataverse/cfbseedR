@@ -5,7 +5,6 @@ sim_input <- function() {
 }
 
 test_that("simulation smoke: 50 sims, valid probabilities, deterministic", {
-  testthat::skip_on_cran()
   run <- function() {
     set.seed(37)
     suppressMessages(cfb_simulations(
@@ -60,7 +59,6 @@ test_that("simulation smoke: 50 sims, valid probabilities, deterministic", {
 })
 
 test_that("sim_include = 'REG' skips the playoff simulation", {
-  testthat::skip_on_cran()
   set.seed(1)
   sim <- suppressMessages(cfb_simulations(
     sim_input(), load_toy_teams(),
@@ -73,7 +71,6 @@ test_that("sim_include = 'REG' skips the playoff simulation", {
 })
 
 test_that("static rankings drive the CFP seeding inside simulations", {
-  testthat::skip_on_cran()
   rankings <- data.frame(
     team = c("B1", "A1", "I1", "A3", "A2", "B2", "B3", "A4", "B4"),
     rank = 1:9
@@ -88,7 +85,6 @@ test_that("static rankings drive the CFP seeding inside simulations", {
 })
 
 test_that("cfb_simulations validates its input", {
-  testthat::skip_on_cran()
   games <- load_toy_games()
   teams <- load_toy_teams()
   # nothing to simulate
@@ -111,7 +107,6 @@ test_that("cfb_simulations validates its input", {
 })
 
 test_that("simulations_verify_fct accepts the default and rejects broken functions", {
-  testthat::skip_on_cran()
   expect_true(simulations_verify_fct(cfbseedR_compute_results))
 
   # fills every week at once -> must fail
@@ -139,7 +134,6 @@ test_that("simulations_verify_fct accepts the default and rejects broken functio
 })
 
 test_that("cfbseedR_compute_results honors the elo argument and week gating", {
-  testthat::skip_on_cran()
   games <- sim_input()
   games$sim <- 1
   teams <- load_toy_teams()
@@ -162,8 +156,6 @@ test_that("cfbseedR_compute_results honors the elo argument and week gating", {
 })
 
 test_that("cfb_simulations() rejects an unlisted team in an unplayed game", {
-  skip_on_cran()
-
   games <- cfb_games_example
   teams <- cfb_teams_example
 
@@ -186,8 +178,6 @@ test_that("cfb_simulations() rejects an unlisted team in an unplayed game", {
 })
 
 test_that("a PLAYED game against an unlisted team is still allowed", {
-  skip_on_cran()
-
   # cfb_standings() supports unlisted opponents on purpose, and the guard must
   # not take that away: only games still awaiting a result need both sides
   # rated. A played FCS game keeps counting toward the listed team's record.
@@ -201,18 +191,20 @@ test_that("a PLAYED game against an unlisted team is still allowed", {
   games <- rbind(games, ghost)
   games$result[games$week >= 3] <- NA_real_
 
+  set.seed(4)
   expect_no_error(
     sim <- cfb_simulations(games, teams,
       simulations = 2, playoff_seeds = 4, chunks = 1, verbosity = "NONE"
     )
   )
   # And the simulation actually produced results rather than a season of NAs.
-  expect_true(all(sim$overall$wins > 0))
+  # (Not `all(wins > 0)`: A4, B4 and I1 have no win in the played weeks, so a
+  # team can legitimately go winless across 2 sims and that check was flaky.)
+  expect_false(anyNA(sim$games$result))
+  expect_true(sum(sim$overall$wins) > 0)
 })
 
 test_that("cfb_simulations() rejects an NA team name in an unplayed game", {
-  skip_on_cran()
-
   # `standings_validate_games()` checks that the team columns exist and that
   # results are not NA, but never that the team names themselves are named. An
   # NA team has no rating, so it propagates NAs exactly like an unlisted one.
