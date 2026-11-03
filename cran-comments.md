@@ -32,7 +32,14 @@ Both local checks (with and without Suggests) return Status: OK.
 
 ## R-hub results
 
-Pending.
+R-hub v2 run on 0.3.0 (2026-11-03,
+<https://github.com/sportsdataverse/cfbseedR/actions/runs/41611775535>):
+
+* linux (R-devel): Status: OK
+* windows (R-devel): Status: OK
+* macos (R-devel): Status: OK
+* macos-arm64 (R-devel): Status: OK
+* nosuggests: Status: OK (2 tests skipped because gt/scales are absent)
 
 ## Reverse dependencies
 
