@@ -1,4 +1,4 @@
-# cfbseedR (development version)
+# cfbseedR 0.2.1
 
 * `cfb_simulations()` now aborts with a clear error when a team appearing in a
   game that still has to be simulated is missing from `teams`. Previously the

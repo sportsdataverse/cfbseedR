@@ -1,60 +1,50 @@
-# cfbseedR 0.2.0
+## Update submission
 
-First CRAN submission.
+This is a patch release, 0.2.1, following 0.2.0 (on CRAN since 2026-09-09).
+
+Changes since 0.2.0:
+
+* `cfb_simulations()` now aborts with a clear error when a game that still
+  has to be simulated involves a team missing from `teams`, or has an `NA`
+  team name. Previously this silently produced `NA` results in every
+  remaining week.
+* The `fmt_pct_special()` and `summary.cfbseedR_simulation()` examples are
+  now conditional on their Suggests packages (scales, gt) via `@examplesIf`,
+  so they are skipped cleanly when those packages are not installed.
+* The test suite is no longer skipped on CRAN. All tests are offline, run
+  against the bundled toy season, and take about 15 seconds; tests that
+  need gt or scales call `skip_if_not_installed()`.
+* `Language: en-US` and an `inst/WORDLIST` were added.
 
 ## Test environments
 
-* local Windows 10, R 4.6.1
-* win-builder (R-devel 2026-08-25 r90448, checked 2026-08-27): 1 NOTE, quoted below
-* R-hub v2: linux, windows, macos, macos-arm64 (all R-devel): Status OK, no notes
-* GitHub Actions (R-CMD-check): windows-latest (release),
-  macOS-latest (release), ubuntu-latest (devel, release, oldrel-1)
+* local Windows 10, R 4.6.0 (ucrt): `R CMD check --as-cran --run-donttest`
+* local Windows 10, R 4.6.0, without Suggests
+  (`_R_CHECK_DEPENDS_ONLY_=true`): `R CMD check --as-cran --run-donttest`
+* R-hub v2: linux, windows, macos, macos-arm64 (R-devel), nosuggests
+  (results below)
 
 ## R CMD check results
 
-0 errors | 0 warnings | 1 note
+0 errors | 0 warnings | 0 notes
 
-The note is the standard new-submission note from win-builder:
+Both local checks (with and without Suggests) return Status: OK.
 
-```
-Maintainer: 'Saiem Gilani <saiem.gilani@gmail.com>'
+## R-hub results
 
-New submission
+Pending.
 
-Possibly misspelled words in DESCRIPTION:
-  CFP (14:6)
-  CFP's (16:24)
-  FBS (15:61)
-  pluggable (18:5)
-```
+## Reverse dependencies
 
-All four flagged words are spelled correctly. "CFP" and "FBS" are the
-standard abbreviations for the College Football Playoff and the Football
-Bowl Subdivision; both are expanded on first use in the Description, and
-the flagged occurrences are the later short forms (including the
-possessive "CFP's"). "Pluggable" is used in its ordinary software sense,
-describing the user-supplied results-generator function.
-
-R-hub reports Status: OK on all four platforms with no notes.
+There are no reverse dependencies on CRAN.
 
 ## Comments
 
 * Long-form documentation is published as pkgdown articles at
-  <https://cfbseedR.sportsdataverse.org/> rather than shipped as vignettes,
-  matching the other SportsDataverse packages on CRAN (cfbfastR, hoopR,
-  wehoop, baseballr); the vignettes directory is excluded from the build.
+  <https://cfbseedR.sportsdataverse.org/> rather than shipped as vignettes;
+  the vignettes directory is excluded from the build.
 * All examples and tests run offline against the bundled toy season
-  (exported as `cfb_games_example` / `cfb_teams_example`, also in
-  `inst/extdata/`); no network access is required or attempted.
-* Every example is wrapped in `\donttest{}` and every test calls
-  `testthat::skip_on_cran()`, matching the conventions of the
-  SportsDataverse packages already on CRAN (cfbfastR, hoopR, wehoop,
-  baseballr).
-* The package adapts nflseedR (MIT, Lee Sharpe & Sebastian Carl) to
-  college football; both nflseedR authors are credited in Authors@R.
-* gt and scales are used only by `summary.cfbseedR_simulation()` and
-  `fmt_pct_special()`, are in Suggests, and are reached through
-  `rlang::check_installed()`, so the package works fully without them.
-* furrr/future/progressr back the optional chunked simulation. The default
-  future plan is sequential, so nothing runs in parallel unless the user
-  opts in, and no example or test sets a parallel plan.
+  (`cfb_games_example` / `cfb_teams_example`); no network access is
+  required or attempted.
+* No example or test sets a parallel future plan, so everything runs
+  sequentially.
