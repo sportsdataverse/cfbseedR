@@ -1,6 +1,6 @@
 ## Update submission
 
-This is a patch release, 0.2.1, following 0.2.0 (on CRAN since 2026-09-09).
+This is a minor release, 0.3.0, following 0.2.0 (on CRAN since 2026-09-09).
 
 Changes since 0.2.0:
 
