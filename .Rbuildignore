@@ -30,3 +30,4 @@
 ^.*\.Rcheck$
 ^.*\.tar\.gz$
 ^CRAN-SUBMISSION$
+^\.git$
