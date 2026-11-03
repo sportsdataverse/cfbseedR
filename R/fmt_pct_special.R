@@ -13,7 +13,7 @@
 #'
 #' @return A character vector the same length as `x`.
 #'
-#' @examples
+#' @examplesIf rlang::is_installed("scales")
 #' \donttest{
 #' fmt_pct_special(c(0, 0.0004, 0.123, 0.5, 0.9994, 1))
 #' }

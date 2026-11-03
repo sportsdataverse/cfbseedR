@@ -15,7 +15,7 @@
 #'
 #' @return A `gt_tbl` object.
 #'
-#' @examples
+#' @examplesIf rlang::is_installed(c("gt", "scales"))
 #' \donttest{
 #' games <- cfb_games_example
 #' games$result[games$week >= 3] <- NA

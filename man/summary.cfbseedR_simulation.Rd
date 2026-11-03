@@ -26,6 +26,7 @@ layout is conference-grouped rather than nflseedR's AFC/NFC pair of
 columns, because college conferences are neither two nor equally sized.
 }
 \examples{
+\dontshow{if (rlang::is_installed(c("gt", "scales"))) withAutoprint(\{ # examplesIf}
 \donttest{
 games <- cfb_games_example
 games$result[games$week >= 3] <- NA
@@ -34,7 +35,7 @@ sim <- cfb_simulations(games, cfb_teams_example,
                        simulations = 4, playoff_seeds = 4, chunks = 1)
 summary(sim)
 }
-
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=cfb_simulations]{cfb_simulations()}}, \code{\link[=fmt_pct_special]{fmt_pct_special()}}

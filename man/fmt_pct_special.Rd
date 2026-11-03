@@ -23,10 +23,11 @@ and exact 1 are left as \code{"0\%"} and \code{"100\%"}.
 Adapted from nflseedR's \code{fmt_pct_special()}.
 }
 \examples{
+\dontshow{if (rlang::is_installed("scales")) withAutoprint(\{ # examplesIf}
 \donttest{
 fmt_pct_special(c(0, 0.0004, 0.123, 0.5, 0.9994, 1))
 }
-
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=summary.cfbseedR_simulation]{summary.cfbseedR_simulation()}}
