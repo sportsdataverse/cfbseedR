@@ -69,7 +69,7 @@ summary.cfbseedR_simulation <- function(object, ...) {
   out <- gt::fmt_number(out, columns = "wins", decimals = 1)
   out <- gt::text_transform(
     out,
-    locations = gt::cells_body(columns = gt::all_of(pct_cols)),
+    locations = gt::cells_body(columns = dplyr::all_of(pct_cols)),
     fn = function(x) fmt_pct_special(as.numeric(x))
   )
   out <- gt::tab_header(
