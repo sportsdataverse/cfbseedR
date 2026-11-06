@@ -145,14 +145,12 @@ but the stream differs from a single sequential pass, so results for the
 same seed change if you change \code{chunks}.
 }
 \examples{
-\donttest{
 games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
 teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
 games$result[games$week >= 3] <- NA
 set.seed(4)
 sim <- cfb_simulations(games, teams, simulations = 4, playoff_seeds = 4)
 sim$overall
-}
 
 }
 \seealso{

@@ -25,9 +25,7 @@ used throughout the examples, the vignettes, and as the default input of
 \code{inst/extdata/toy_games.csv}, so it needs no network access.
 }
 \examples{
-\donttest{
 head(cfb_games_example)
-}
 }
 \seealso{
 \link{cfb_teams_example}, \code{\link[=cfb_standings]{cfb_standings()}}, \code{\link[=cfb_simulations]{cfb_simulations()}}

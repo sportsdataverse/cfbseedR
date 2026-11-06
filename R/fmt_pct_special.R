@@ -13,10 +13,8 @@
 #'
 #' @return A character vector the same length as `x`.
 #'
-#' @examplesIf rlang::is_installed("scales")
-#' \donttest{
+#' @examplesIf rlang::is_installed("scales", version = "1.2.0")
 #' fmt_pct_special(c(0, 0.0004, 0.123, 0.5, 0.9994, 1))
-#' }
 #'
 #' @seealso [summary.cfbseedR_simulation()]
 #' @export

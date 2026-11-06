@@ -76,7 +76,7 @@ summary(sim)
 # future::plan("multisession")
 # sim <- cfb_simulations(games, teams, simulations = 10000, chunks = 8)
 
-# Real data via cfbfastR (Suggests; the engine itself needs no cfbfastR)
+# Real data via cfbfastR (install it separately; the engine never needs it)
 # sched <- cfbfastR::load_cfb_schedules(2024)
 # games <- cfb_games_from_schedule(sched)
 ```
@@ -211,9 +211,7 @@ Related packages:
 
 [![GitHub stars](https://img.shields.io/github/stars/sportsdataverse/cfbseedR.svg?color=eee&logo=github&style=for-the-badge&label=Star%20cfbseedR&maxAge=2592000)](https://github.com/sportsdataverse/cfbseedR)
 
-<a href="https://github.com/sportsdataverse/cfbseedR/stargazers">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/sportsdataverse/cfbseedR/star-history/star-history-dark.svg">
-    <img alt="Star history of sportsdataverse/cfbseedR" src="https://raw.githubusercontent.com/sportsdataverse/cfbseedR/star-history/star-history.png" width="600">
-  </picture>
-</a>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/sportsdataverse/cfbseedR/star-history/star-history-dark.svg">
+  <img alt="Star history of sportsdataverse/cfbseedR" src="https://raw.githubusercontent.com/sportsdataverse/cfbseedR/star-history/star-history.png" width="600">
+</picture>

@@ -18,9 +18,7 @@
 #'
 #' @seealso [cfb_teams_example], [cfb_standings()], [cfb_simulations()]
 #' @examples
-#' \donttest{
 #' head(cfb_games_example)
-#' }
 "cfb_games_example"
 
 #' Example Teams of a Toy College Football Season
@@ -38,7 +36,5 @@
 #'
 #' @seealso [cfb_games_example], [cfb_standings()]
 #' @examples
-#' \donttest{
 #' cfb_teams_example
-#' }
 "cfb_teams_example"

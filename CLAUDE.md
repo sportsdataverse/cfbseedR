@@ -84,8 +84,9 @@ one, flag the other.
   `cli::cli_inform()` for messaging (never `stop()`/`message()`).
 - testthat edition 3; tests are offline against the bundled toy fixtures
   (`inst/extdata/toy_games.csv` / `toy_teams.csv`). 142+ tests must pass.
-- roxygen2 with markdown; `@return` blocks carry column tables; simulation
-  examples wrapped in `\donttest{}`. Run `devtools::document()` — never
+- roxygen2 with markdown; `@return` blocks carry column tables; examples
+  run in the plain check (offline, under 5 s each; `\donttest{}` only for
+  slow or networked ones). Run `devtools::document()` — never
   hand-edit `man/` or `NAMESPACE`.
 - Vignettes under `vignettes/` are `.Rbuildignore`d (pkgdown articles);
   they must stay runnable offline (toy data inline; `eval = FALSE` for

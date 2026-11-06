@@ -48,7 +48,6 @@ a simulated postseason tie is re-decided by the win probability with a
 in the CFB schema).
 }
 \examples{
-\donttest{
 games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
 teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
 games$result[games$week >= 3] <- NA
@@ -57,7 +56,6 @@ games$sim <- 1
 out <- cfbseedR_compute_results(teams, games, week_num = 3)
 out$games[out$games$week == 3, ]
 
-}
 }
 \seealso{
 \code{\link[=cfb_simulations]{cfb_simulations()}}, \code{\link[=simulations_verify_fct]{simulations_verify_fct()}}

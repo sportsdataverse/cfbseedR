@@ -15,15 +15,13 @@
 #'
 #' @return A `gt_tbl` object.
 #'
-#' @examplesIf rlang::is_installed(c("gt", "scales"))
-#' \donttest{
+#' @examplesIf rlang::is_installed(c("gt", "scales"), version = c("0.9.0", "1.2.0"))
 #' games <- cfb_games_example
 #' games$result[games$week >= 3] <- NA
 #' set.seed(4)
 #' sim <- cfb_simulations(games, cfb_teams_example,
 #'                        simulations = 4, playoff_seeds = 4, chunks = 1)
 #' summary(sim)
-#' }
 #'
 #' @seealso [cfb_simulations()], [fmt_pct_special()]
 #' @export
@@ -71,7 +69,7 @@ summary.cfbseedR_simulation <- function(object, ...) {
   out <- gt::fmt_number(out, columns = "wins", decimals = 1)
   out <- gt::text_transform(
     out,
-    locations = gt::cells_body(columns = gt::all_of(pct_cols)),
+    locations = gt::cells_body(columns = dplyr::all_of(pct_cols)),
     fn = function(x) fmt_pct_special(as.numeric(x))
   )
   out <- gt::tab_header(
