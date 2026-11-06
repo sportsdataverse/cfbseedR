@@ -46,6 +46,7 @@ Suggests:
 Encoding: UTF-8
 Language: en-US
 Roxygen: list(markdown = TRUE)
+Config/Needs/website: cfbfastR
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.1.0
 LazyData: true
