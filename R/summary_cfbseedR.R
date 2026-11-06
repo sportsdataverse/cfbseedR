@@ -15,7 +15,7 @@
 #'
 #' @return A `gt_tbl` object.
 #'
-#' @examplesIf rlang::is_installed(c("gt", "scales"))
+#' @examplesIf rlang::is_installed(c("gt", "scales"), version = c("0.9.0", "1.2.0"))
 #' games <- cfb_games_example
 #' games$result[games$week >= 3] <- NA
 #' set.seed(4)
