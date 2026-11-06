@@ -76,7 +76,7 @@ summary(sim)
 # future::plan("multisession")
 # sim <- cfb_simulations(games, teams, simulations = 10000, chunks = 8)
 
-# Real data via cfbfastR (Suggests; the engine itself needs no cfbfastR)
+# Real data via cfbfastR (install it separately; the engine never needs it)
 # sched <- cfbfastR::load_cfb_schedules(2024)
 # games <- cfb_games_from_schedule(sched)
 ```

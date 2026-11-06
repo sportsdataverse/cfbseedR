@@ -69,7 +69,7 @@ summary(sim)
 # future::plan("multisession")
 # sim <- cfb_simulations(games, teams, simulations = 10000, chunks = 8)
 
-# Real data via cfbfastR (Suggests; the engine itself needs no cfbfastR)
+# Real data via cfbfastR (install it separately; the engine never needs it)
 # sched <- cfbfastR::load_cfb_schedules(2024)
 # games <- cfb_games_from_schedule(sched)
 ```
@@ -156,14 +156,18 @@ Lee Sharpe and Sebastian Carl. Huge thanks to them and the broader
     <a href="https://github.com/saiemgilani" target="blank"><img src="https://img.shields.io/github/followers/saiemgilani?color=eee&logo=Github&style=for-the-badge" alt="@saiemgilani" /></a>
 
 <!-- cheatsheet-section -->
+
 ## **Cheat sheet**
 
-A printable one-page reference covering **cfbplotR, cfb4th and cfbseedR** — the function families, the loaders, and what each one returns.
+A printable one-page reference covering **cfbplotR, cfb4th and
+cfbseedR** — the function families, the loaders, and what each one
+returns.
 
-📄 **[Download the cfbseedR cheat sheet (PDF)](https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf)**
+📄 **[Download the cfbseedR cheat sheet
+(PDF)](https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf)**
 
-Free to download, print and hand out; light and dark, US Letter landscape.
-Every SportsDataverse package has one — browse them all at
+Free to download, print and hand out; light and dark, US Letter
+landscape. Every SportsDataverse package has one — browse them all at
 **[sportsdataverse.org/cheatsheets](https://sportsdataverse.org/cheatsheets)**.
 
 ## **Citations**
@@ -204,13 +208,14 @@ Related packages:
   - [sportsdataverse-R](https://r.sportsdataverse.org/) — The
     SportsDataverse R meta-package
 
-[![X Follow](https://img.shields.io/twitter/follow/SportsDataverse?color=blue&label=%40SportsDataverse&logo=x&style=for-the-badge)](https://x.com/SportsDataverse)
+[![X
+Follow](https://img.shields.io/twitter/follow/SportsDataverse?color=blue&label=%40SportsDataverse&logo=x&style=for-the-badge)](https://x.com/SportsDataverse)
 
-[![GitHub stars](https://img.shields.io/github/stars/sportsdataverse/cfbseedR.svg?color=eee&logo=github&style=for-the-badge&label=Star%20cfbseedR&maxAge=2592000)](https://github.com/sportsdataverse/cfbseedR)
+[![GitHub
+stars](https://img.shields.io/github/stars/sportsdataverse/cfbseedR.svg?color=eee&logo=github&style=for-the-badge&label=Star%20cfbseedR&maxAge=2592000)](https://github.com/sportsdataverse/cfbseedR)
 
 <a href="https://github.com/sportsdataverse/cfbseedR/stargazers">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/sportsdataverse/cfbseedR/star-history/star-history-dark.svg">
-    <img alt="Star history of sportsdataverse/cfbseedR" src="https://raw.githubusercontent.com/sportsdataverse/cfbseedR/star-history/star-history.png" width="600">
-  </picture>
-</a>
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/sportsdataverse/cfbseedR/star-history/star-history-dark.svg">
+<img alt="Star history of sportsdataverse/cfbseedR" src="https://raw.githubusercontent.com/sportsdataverse/cfbseedR/star-history/star-history.png" width="600">
+</picture> </a>
