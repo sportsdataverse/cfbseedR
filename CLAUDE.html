@@ -141,7 +141,7 @@
 <h2 id="conventions">Conventions<a class="anchor" aria-label="anchor" href="#conventions"></a></h2>
 <ul><li>Tidyverse style: snake_case, 2-space indent, <strong>native pipe <code>|&gt;</code></strong> (not <code>%&gt;%</code>), <code>.data</code> pronoun in dplyr verbs, <code><a href="https://cli.r-lib.org/reference/cli_abort.html" class="external-link">cli::cli_abort()</a></code> / <code><a href="https://cli.r-lib.org/reference/cli_abort.html" class="external-link">cli::cli_inform()</a></code> for messaging (never <code><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop()</a></code>/<code><a href="https://rdrr.io/r/base/message.html" class="external-link">message()</a></code>).</li>
 <li>testthat edition 3; tests are offline against the bundled toy fixtures (<code>inst/extdata/toy_games.csv</code> / <code>toy_teams.csv</code>). 142+ tests must pass.</li>
-<li>roxygen2 with markdown; <code>@return</code> blocks carry column tables; simulation examples wrapped in <code>\donttest{}</code>. Run <code>devtools::document()</code> — never hand-edit <code>man/</code> or <code>NAMESPACE</code>.</li>
+<li>roxygen2 with markdown; <code>@return</code> blocks carry column tables; examples run in the plain check (offline, under 5 s each; <code>\donttest{}</code> only for slow or networked ones). Run <code>devtools::document()</code> — never hand-edit <code>man/</code> or <code>NAMESPACE</code>.</li>
 <li>Vignettes under <code>vignettes/</code> are <code>.Rbuildignore</code>d (pkgdown articles); they must stay runnable offline (toy data inline; <code>eval = FALSE</code> for cfbfastR network chunks).</li>
 <li>R CMD check must stay 0 errors / 0 warnings.</li>
 </ul></div>
