@@ -16,14 +16,12 @@
 #' @return A `gt_tbl` object.
 #'
 #' @examplesIf rlang::is_installed(c("gt", "scales"))
-#' \donttest{
 #' games <- cfb_games_example
 #' games$result[games$week >= 3] <- NA
 #' set.seed(4)
 #' sim <- cfb_simulations(games, cfb_teams_example,
 #'                        simulations = 4, playoff_seeds = 4, chunks = 1)
 #' summary(sim)
-#' }
 #'
 #' @seealso [cfb_simulations()], [fmt_pct_special()]
 #' @export

@@ -77,14 +77,12 @@
 #' | `sim_params` | list | The simulation parameters (number of simulations, seeds, depth, etc.). |
 #'
 #' @examples
-#' \donttest{
 #' games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
 #' teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
 #' games$result[games$week >= 3] <- NA
 #' set.seed(4)
 #' sim <- cfb_simulations(games, teams, simulations = 4, playoff_seeds = 4)
 #' sim$overall
-#' }
 #'
 #' @seealso [cfb_standings()], [cfb_playoff_seeds()],
 #'   [cfbseedR_compute_results()], [simulations_verify_fct()],

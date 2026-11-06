@@ -20,9 +20,7 @@ across two conferences plus one independent. Same data as
 \code{inst/extdata/toy_teams.csv}.
 }
 \examples{
-\donttest{
 cfb_teams_example
-}
 }
 \seealso{
 \link{cfb_games_example}, \code{\link[=cfb_standings]{cfb_standings()}}

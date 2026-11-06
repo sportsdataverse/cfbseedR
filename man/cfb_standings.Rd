@@ -196,7 +196,6 @@ game (the cascade only orders them - see the design brief).
 }
 }
 \examples{
-\donttest{
 games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
 teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
 standings <- cfb_standings(games, teams, tiebreaker_depth = "POINTS",
@@ -211,7 +210,6 @@ standings2 <- cfb_standings(games, teams,
                             verbosity = "NONE")
 attr(standings2, "tiebreak_notes")
 
-}
 }
 \seealso{
 \code{\link[=cfb_playoff_seeds]{cfb_playoff_seeds()}}, \code{\link[=cfb_simulations]{cfb_simulations()}},
