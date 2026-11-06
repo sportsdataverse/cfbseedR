@@ -44,8 +44,8 @@ prefix; the two helpers mirror their nflseedR namesakes.
   `%>%`), `.data` pronoun inside dplyr verbs.
 - Messaging via `cli::cli_abort()` / `cli::cli_inform()` — not
   `stop()` / `warning()` / `message()`.
-- roxygen2 markdown docs with `@return` column tables; simulation examples
-  in `\donttest{}`. Run `devtools::document()`; never hand-edit `man/` or
+- roxygen2 markdown docs with `@return` column tables; examples run
+  outside `\donttest{}` (offline, under 5 s each). Run `devtools::document()`; never hand-edit `man/` or
   `NAMESPACE`.
 
 ## Testing
