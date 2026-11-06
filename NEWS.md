@@ -12,6 +12,18 @@
   unplayed game whose `home_team` or `away_team` is `NA` is rejected the same
   way and for the same reason - `standings_validate_games()` checks that those
   columns exist and rejects `NA` results, but never `NA` team names.
+* The test suite now runs on CRAN, reversing the 0.2.0 change that skipped
+  every test there. All tests are offline against the bundled toy season;
+  the ones that need gt or scales call `skip_if_not_installed()`.
+* Examples are no longer wrapped in `\donttest{}`: they are all offline and
+  fast, so CRAN's regular example run now exercises them. The
+  `fmt_pct_special()` and `summary.cfbseedR_simulation()` examples run only
+  when their Suggests packages (scales, gt) are installed, via `@examplesIf`.
+* cfbfastR is no longer listed in Suggests. No code, test or example used it;
+  `cfb_games_from_schedule()` still accepts its `load_cfb_schedules()` output.
+* DESCRIPTION declares `Language: en-US`, and an `inst/WORDLIST` was added for
+  spell checking.
+* The citation year is pinned to 2026 instead of following the current date.
 
 # cfbseedR 0.2.0
 
