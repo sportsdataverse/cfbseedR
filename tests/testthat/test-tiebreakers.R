@@ -114,3 +114,78 @@ test_that("registry rungs record skip notes when optional inputs are absent", {
   expect_true(any(grepl("total_wins FCS cap not applied", notes)))
   expect_true(any(grepl("analytics_rating skipped", notes)))
 })
+
+# `.pick_winner()` takes the doubled conference-REG game frame (one row per
+# team per game: team/opp/outcome). `pairs` are c(winner, loser).
+tie_cg <- function(...) {
+  do.call(rbind, lapply(list(...), function(p) {
+    data.frame(team = c(p[[1]], p[[2]]), opp = c(p[[2]], p[[1]]),
+               outcome = c(1, 0))
+  }))
+}
+
+tie_rungs <- list(
+  list(kind = "h2h"),
+  list(kind = "record_vs_common"),
+  list(kind = "sov")
+)
+
+tie_pick <- function(tied, cg, sov) {
+  metrics <- lapply(setNames(nm = c("A", "B", "C", "D")),
+                    function(tm) list(sov = sov[[tm]]))
+  .pick_winner(tied, metrics, cg, tie_rungs, depth = 3L,
+               ctx = list(conf_name = "Delta", conf_pct_by_team = c()),
+               notes_env = new.env(parent = emptyenv()))
+}
+
+test_that("an elimination restarts the cascade instead of descending it", {
+  # A, B, C are level head-to-head (each 1-1: A beat B, B beat C, C beat A),
+  # and against the common opponent D, A lost while B and C won - so common
+  # opponents cut the tie to {B, C}. The published procedure repeats from
+  # rung 1 on the survivors, which is the two-team rule: B beat C, so B.
+  # Descending the same rung list instead reads SOV next, where C is better.
+  cg <- tie_cg(c("A", "B"), c("B", "C"), c("C", "A"),
+               c("B", "D"), c("C", "D"), c("D", "A"))
+  expect_identical(tie_pick(c("A", "B", "C"), cg,
+                            list(A = 0.5, B = 0.5, C = 0.9, D = 0.1)), "B")
+})
+
+test_that("a 4-team tie cut to three re-tests the survivors from rung 1", {
+  # A, B, C, D are tied; head-to-head seeds nobody yet (A beat B and C but
+  # lost to D, and B, C, D never played each other, so no team beat
+  # everything it played). Common opponent E eliminates D (A, B, C beat E,
+  # D lost), leaving {A, B, C} - and on THOSE three A's wins over B and C
+  # are a "defeated all" head-to-head, so the restarted rung 1 seeds A.
+  # Descending instead reaches SOV, where C is better.
+  cg <- tie_cg(c("A", "B"), c("A", "C"), c("D", "A"),
+               c("A", "E"), c("B", "E"), c("C", "E"), c("E", "D"))
+  expect_identical(tie_pick(c("A", "B", "C", "D"), cg,
+                            list(A = 0.5, B = 0.5, C = 0.9, D = 0.5)), "A")
+})
+
+test_that("cfb_standings() restarts an eliminated generic tie at the 2-team rule", {
+  # Unregistered conference (generic cascade). F is clear at 4-1; A, B and C
+  # are 3-2 and level head-to-head (A beat B, B beat C, C beat A). Records vs
+  # the common opponent H (the only team all three played) put A out (A lost
+  # to H, B and C beat it), leaving {B, C}: the two-team rule gives it to B,
+  # which beat C. Descending would read SOV (level) and then SOS, where C is
+  # stronger, so the bug ranks C first.
+  games <- data.frame(
+    sim = 1, week = seq_len(20), game_type = "REG",
+    home_team = c("A", "C", "A", "A", "H", "B", "B", "E", "B", "C",
+                  "F", "C", "D", "F", "D", "H", "F", "E", "F", "G"),
+    away_team = c("B", "A", "F", "G", "A", "C", "D", "B", "H", "E",
+                  "C", "H", "E", "D", "G", "D", "E", "G", "G", "H"),
+    result = rep(7, 20), neutral = 0
+  )
+  teams <- data.frame(team = c("A", "B", "C", "D", "E", "F", "G", "H"),
+                      conference = "Zeta")
+  st <- cfb_standings(games, teams, tiebreaker_depth = "POINTS",
+                      verbosity = "NONE")
+  ranks <- setNames(st$conf_rank, st$team)
+
+  expect_equal(ranks[["F"]], 1L) # 4-1 sits alone at the top
+  expect_equal(ranks[["B"]], 2L) # beat C head-to-head
+  expect_equal(ranks[["C"]], 3L)
+  expect_equal(ranks[["A"]], 4L)
+})

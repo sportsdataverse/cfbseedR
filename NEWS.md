@@ -1,5 +1,18 @@
 # cfbseedR 0.3.0
 
+* Multi-team tiebreakers now restart from the first rung whenever a rung
+  eliminates a team, instead of continuing down the rung list with the
+  survivors. The Big 12's published policy says "the multiple-team
+  tiebreaker will repeat the tie-breaking procedure" after a team is seeded,
+  and that a tie "reduced to two teams" gets the two-team procedure; the SEC
+  restarts the same way. When a record-vs-common-opponents rung drops a third
+  team and leaves two level, the pair's head-to-head now decides. Previously
+  the cascade kept descending: e.g. a Big 12 field of Utah (clear), BYU,
+  Arizona and Texas Tech dropped Texas Tech on common opponents but then
+  handed the berth to Arizona on its Utah win, even though BYU had beaten
+  Arizona and the two-team procedure gives it to BYU. A rung that keeps every
+  candidate still advances as before.
+
 * `cfb_simulations()` now aborts with a clear error when a team appearing in a
   game that still has to be simulated is missing from `teams`. Previously the
   missing team produced an `NA` rating, `rnorm()` returned `NA`, and the `NA`

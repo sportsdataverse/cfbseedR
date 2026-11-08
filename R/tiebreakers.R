@@ -5,7 +5,10 @@
 # `_apply_record_vs_common` / `_apply_record_vs_common_desc` / `_apply_rung`,
 # `_pick_winner` / `_order_tied` / `_add_conf_ranks`) so both engines produce
 # byte-identical standings on the shared cross-language parity fixture
-# (`tests/testthat/fixtures/cfb_toy_tiebreakers/`).
+# (`tests/testthat/fixtures/cfb_toy_tiebreakers/`). One deliberate lead: a
+# rung that ELIMINATES teams sends the survivors back to rung 1 in both
+# engines only once sportsdataverse/sportsdataverse-py#1130 lands - sdv-py
+# 0.2.0 still advances after an elimination.
 #
 # A "rung" is a named list `list(kind = ..., <params>)`. A conference's
 # tiebreaker procedure is a plain list of rungs; `.pick_winner()` /
@@ -36,11 +39,18 @@
 #   `record_vs_common` / `opp_conf_win_pct` in practice. Upgrade path: add
 #   an explicit "confirmed-last" branch in `.apply_h2h()` if a real fixture
 #   ever needs it.
-# * After each team is seeded/eliminated, the tie restarts from rung 1 with
-#   the remaining set (`.order_tied()`); reducing to two candidates simply
-#   re-enters the same rung list (all registry conferences use ONE rung
-#   list for both the 2-team and 3+-team cases, matching the official SEC
-#   text and the Python port).
+# * After each team is seeded or eliminated, the multiple-team tiebreaker
+#   RESTARTS from rung 1 on the remaining set (`.pick_winner()` /
+#   `.order_tied()`). The Big 12's published policy: "After one team has an
+#   advantage and is 'seeded,' all remaining teams in the multiple-team
+#   tiebreaker will repeat the tie-breaking procedure. If at any point the
+#   multiple-team tie is reduced to two teams, the two-team tie-breaking
+#   procedure will be applied." The SEC's published procedure likewise
+#   restarts whenever a team wins a tie outright or is eliminated by the
+#   others, so a rung that ELIMINATES teams sends the survivors back to rung
+#   1 (a rung that keeps every candidate just advances). Descending the
+#   rung list on the survivors instead would apply comparisons the policy
+#   never reaches once the set is reduced to two.
 # * Rungs whose optional input is absent (per-game points, an FBS/FCS
 #   `division` flag on `teams`, analytics ratings) are skipped
 #   deterministically; each skip is recorded once in the `tiebreak_notes`
@@ -398,14 +408,22 @@ CONFERENCE_TIEBREAKERS <- list(
 
 # Reduce a tied set through `rungs`; a trailing `coin_toss` rung always
 # resolves whatever remains (both the generic cascade and every registry
-# cascade end with one).
+# cascade end with one). An elimination restarts the procedure at rung 1:
+# termination is safe because every rung returns a subset, so a restart
+# requires a strict size decrease (bounded by tie size - 1) and a no-op rung
+# advances.
 .pick_winner <- function(tied, metrics, cg, rungs, depth, ctx, notes_env) {
   cands <- sort(tied)
-  for (rung in rungs) {
-    if (length(cands) <= 1L) break
+  i <- 1L
+  while (i <= length(rungs) && length(cands) > 1L) {
+    rung <- rungs[[i]]
     min_depth <- rung$min_depth
-    if (!is.null(min_depth) && depth < min_depth) next
+    if (!is.null(min_depth) && depth < min_depth) { i <- i + 1L; next }
+    before <- length(cands)
     cands <- .apply_rung(cands, rung, metrics, cg, ctx, notes_env)
+    # Every elimination restarts the procedure on the survivors: their
+    # head-to-heads and common opponents are not the ones just tested.
+    i <- if (length(cands) < before) 1L else i + 1L
   }
   if (length(cands) > 1L) return(sample(sort(cands), 1L))
   cands[[1L]]
