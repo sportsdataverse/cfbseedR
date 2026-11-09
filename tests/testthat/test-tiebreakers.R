@@ -210,3 +210,17 @@ test_that("2025 ACC five-way tie at 6-2 sends Duke, as the ACC ruled", {
 test_that("2025 SEC four-way tie at 7-1 seeds Alabama, then Georgia", {
   expect_identical(title_ties_top2("SEC"), c("Alabama", "Georgia"))
 })
+
+test_that("2026 Big 12 descent skips opponents not every tied team played", {
+  # Real 2026 Big 12 games through week 10 (fixtures/cfb_2026_big12_partial):
+  # the loose reading seeds TCU first of Cincinnati / Iowa State / TCU / West
+  # Virginia and Kansas first of Colorado / Kansas / Kansas State on an
+  # opponent tier not all tied teams played; common-only leaves both ties
+  # level through the descent and opponents' conference win % orders them.
+  games <- read.csv(test_path("fixtures", "cfb_2026_big12_partial", "games.csv"))
+  teams <- read.csv(test_path("fixtures", "cfb_2026_big12_partial", "teams.csv"))
+  st <- cfb_standings(games, teams, verbosity = "NONE")
+  ranks <- setNames(st$conf_rank, st$team)
+  expect_equal(unname(ranks[c("Iowa State", "West Virginia", "Cincinnati", "TCU")]), 10:13)
+  expect_equal(unname(ranks[c("Colorado", "Kansas State", "Kansas")]), 14:16)
+})
