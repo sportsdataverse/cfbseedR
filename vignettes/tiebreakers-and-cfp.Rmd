@@ -56,7 +56,7 @@ show <- function(x, title, subtitle = NULL) {
 ```{r rules}
 rules <- data.frame(
   Conference = c("SEC", "Big Ten", "Big 12", "ACC (2026+)", "American",
-                 "Conference USA", "MAC", "Mountain West", "Sun Belt",
+                 "Conference USA (2025+)", "MAC (2025+)", "Mountain West", "Sun Belt",
                  "Pac-12 (re-formed)"),
   Format = c(rep("single table", 8), "two divisions", "single table"),
   `After win pct` = c(
@@ -65,8 +65,8 @@ rules <- data.frame(
     "h2h -> common -> descent -> opp win% -> capped wins -> analytics -> draw",
     "candidate pool (wins OR losses) -> h2h -> SportSource SSR -> draw",
     "h2h -> CFP-ranked final week -> metric composite -> common -> draw",
-    "h2h -> CFP-ranked final week -> composite -> APR -> draw",
-    "h2h -> common opponents -> SportSource rating -> draw",
+    "h2h -> common -> descent -> computer-ranking composite -> opp win% -> draw",
+    "h2h -> common -> SportSource rating -> descent -> opp win% -> draw",
     "metric composite -> h2h -> draw",
     "h2h -> div win% -> descent -> common -> CFP clause -> composite -> draw",
     "no published procedure: generic fallback"
