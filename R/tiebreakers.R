@@ -29,8 +29,8 @@
 #   descent rung (`record_vs_common_desc`), regardless of its `mode` label
 #   (`"order_of_finish"` vs `"next_highest"` - both dispatch through the
 #   same `.apply_record_vs_common_desc()`; the label is documentation only,
-#   mirroring the Python implementation exactly). The SEC, Big Ten, ACC and
-#   Big 12 rungs set `common_only = TRUE`: their policies compare "common
+#   mirroring the Python implementation exactly). The SEC, Big Ten, ACC,
+#   Big 12, MAC and CUSA rungs set `common_only = TRUE`: their policies compare "common
 #   conference opponents played by all other teams involved in the tie", so
 #   only opponents every tied team played are descended through. ponytail:
 #   the SEC's head-to-head split of a tied opponent pair and the ACC's "with
@@ -81,7 +81,7 @@ B12_FCS_CAP <- 1L
   list(kind = "coin_toss", min_depth = 0L)
 )
 
-# Big Ten / ACC / MAC share one official template: head-to-head, common
+# Big Ten / ACC / MAC (2024) share one official template: head-to-head, common
 # opponents, order-of-finish descent, pooled opponents' conference win pct,
 # an external analytics rating, then a draw.
 .p5_template <- list(
@@ -106,13 +106,19 @@ B12_FCS_CAP <- 1L
   list(kind = "coin_toss")
 )
 
-# MAC official procedure (confirmed by the conference's published 2025
-# scenarios): head-to-head / defeated-all, record vs common conference
-# opponents, then the SportSource Analytics Team Rating Score.
-.mac_official <- list(
+# MAC 2024 (getsomemaction.com/news/2024/9/18/mac-announces-new-football-tiebreaker-policies.aspx;
+# the linked full PDF, now gone, is quoted step for step by ESPN on 2024-11-06):
+# the shared template, with SportSource after order of finish and opponents'
+# win pct. MAC 2025 (getsomemaction.com/sports/2025/11/12/FB_1112255434.aspx)
+# moves the SportSource Analytics Team Rating Score up to follow record vs
+# common opponents.
+.mac_2025 <- list(
   list(kind = "h2h"),
   list(kind = "record_vs_common"),
   list(kind = "analytics_rating"),
+  list(kind = "record_vs_common_desc", mode = "order_of_finish", grouped_ties = TRUE,
+       common_only = TRUE),
+  list(kind = "opp_conf_win_pct"),
   list(kind = "coin_toss")
 )
 
@@ -130,17 +136,35 @@ B12_FCS_CAP <- 1L
   list(kind = "coin_toss")
 )
 
-# Conference USA (policy revised 2024): head-to-head; CFP-ranked final-week
-# clause; metric composite (Connelly SP+ / SportSource / ESPN SOR / KPI);
-# multi-year Academic Progress Rate (via `tiebreaker_data$apr`). The
-# official policy's intermediate SportSource+KPI-only composite is not
-# modeled separately (fold it into the composite you supply); the final
-# fallback is a draw, as published.
-.cusa_official <- list(
+# Conference USA 2024 (the policy PDF as first posted on 2024-09-19, archived
+# 2024-11-11): head-to-head; CFP-ranked final-week clause; metric composite
+# (Connelly SP+ / SportSource / ESPN SOR / KPI); multi-year Academic Progress
+# Rate (via `tiebreaker_data$apr`); draw. Its SportSource+KPI-only composite
+# step is folded into the composite you supply.
+.cusa_2024 <- list(
   list(kind = "h2h"),
   list(kind = "cfp_ranked_final_week"),
   list(kind = "analytics_rating"),
   list(kind = "apr"),
+  list(kind = "coin_toss")
+)
+
+# Conference USA 2025 (the handbook text that replaced the PDF at the same
+# URL, created 2025-08-28): head-to-head, record vs common conference
+# opponents, record vs common opponents from the top of the standings down (a
+# tied group of opponents taken collectively), average computer ranking
+# (supply it via `tiebreaker_data$analytics_ratings`), opponents' combined
+# conference win pct, coin toss. ponytail: its "unequal number of games
+# against the tied group -> advance" clause is not separate code: with
+# `common_only` every tied team played every team in the group, so counts
+# differ only for an opponent met twice in the regular season.
+.cusa_2025 <- list(
+  list(kind = "h2h"),
+  list(kind = "record_vs_common"),
+  list(kind = "record_vs_common_desc", mode = "order_of_finish", grouped_ties = TRUE,
+       common_only = TRUE),
+  list(kind = "analytics_rating"),
+  list(kind = "opp_conf_win_pct"),
   list(kind = "coin_toss")
 )
 
@@ -194,8 +218,14 @@ CONFERENCE_TIEBREAKERS <- list(
     list(from = 0L, rungs = .p5_template),
     list(from = 2026L, rungs = .acc_2026, pool = "wins_or_losses")
   ),
-  "MAC" = list(list(from = 0L, rungs = .mac_official)),
-  "Mid-American" = list(list(from = 0L, rungs = .mac_official)), # cfbfastR naming
+  "MAC" = list(
+    list(from = 0L, rungs = .p5_template),
+    list(from = 2025L, rungs = .mac_2025)
+  ),
+  "Mid-American" = list( # cfbfastR naming
+    list(from = 0L, rungs = .p5_template),
+    list(from = 2025L, rungs = .mac_2025)
+  ),
   "Big 12" = list(list(from = 0L, rungs = list(
     list(kind = "h2h"),
     list(kind = "record_vs_common"),
@@ -208,7 +238,10 @@ CONFERENCE_TIEBREAKERS <- list(
   ))),
   "American Athletic" = list(list(from = 0L, rungs = .american_official)),
   "American" = list(list(from = 0L, rungs = .american_official)),
-  "Conference USA" = list(list(from = 0L, rungs = .cusa_official)),
+  "Conference USA" = list(
+    list(from = 0L, rungs = .cusa_2024),
+    list(from = 2025L, rungs = .cusa_2025)
+  ),
   "Mountain West" = list(list(from = 0L, rungs = .mw_official)),
   "Sun Belt" = list(list(from = 0L, rungs = .sunbelt_official))
 )
@@ -297,7 +330,7 @@ CONFERENCE_TIEBREAKERS <- list(
 # Descend the conference standings (best to worst) comparing vs each common
 # opponent, or tied GROUP of opponents compared collectively (the Big 12
 # grouped-ties rule, adopted for every registry descent rung).
-# `common_only` (the SEC, Big Ten, ACC and Big 12 rungs) descends only over
+# `common_only` (the SEC, Big Ten, ACC, Big 12, MAC and CUSA rungs) descends only over
 # opponents that EVERY tied team played - the Big Ten and Big 12 policies say
 # "common conference opponents played by all other teams involved in the
 # tie". Without it a tier counts once each tied team played any one of its

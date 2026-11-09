@@ -75,7 +75,7 @@
 #'   a data frame with columns `team` and `rank` (feeds the
 #'   `cfp_ranked_final_week` clause used by the American, CUSA, and Sun
 #'   Belt), and `apr`, a data frame with columns `team` and `apr`
-#'   (multi-year Academic Progress Rate, the CUSA policy's late fallback).
+#'   (multi-year Academic Progress Rate, the CUSA 2024 policy's late fallback).
 #'   A missing input -> that rung is skipped (noted).
 #' @param verbosity One of `"MIN"` (default), `"MAX"`, or `"NONE"`.
 #'   `"MAX"` logs every tied group as it's broken.
@@ -101,8 +101,12 @@
 #' applies from its first season: with a `season` id column, the ACC's
 #' all-new 2026 policy (head-to-head, then SportSource Team Success
 #' Ranking, then a draw, with the alternate-game-count candidate-pool rule)
-#' applies from 2026 while earlier seasons keep the 2024 cascade; plain
-#' `sim` ids resolve to the current rules. The SEC/Big Ten/Big 12 2024
+#' applies from 2026 while earlier seasons keep the 2024 cascade. The MAC's
+#' 2025 order (SportSource right after common opponents, then order of
+#' finish, then opponents' win pct) and Conference USA's 2025 policy (common
+#' opponents, their top-down descent, average computer ranking, opponents'
+#' win pct) likewise apply from 2025, with their 2024 procedures before
+#' that. Plain `sim` ids resolve to the current rules. The SEC/Big Ten/Big 12 2024
 #' procedures are ported from sdv-py's `cfb_standings.py`, and both engines
 #' return the same conference ranks (sdv-py 0.2.0 still advances to the next
 #' rung after a partial elimination; sdv-py releases after
@@ -114,7 +118,7 @@
 #' `R/tiebreakers.R`), `record_vs_common`, `record_vs_common_desc` (descend
 #' the standings from best to worst, comparing a tied GROUP of common
 #' opponents collectively - the Big 12 rule, adopted for every registry
-#' descent rung; the SEC, Big Ten, ACC and Big 12 rungs descend only over
+#' descent rung; the SEC, Big Ten, ACC, Big 12, MAC and CUSA rungs descend only over
 #' opponents every tied team played, as their policies require "common
 #' conference opponents played by all other teams involved in the tie", while
 #' the Sun Belt's "next highest position" rung does not), `opp_conf_win_pct` (pooled opponents' conference win pct -
