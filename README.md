@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# **cfbseedR** <a href='https://cfbseedR.sportsdataverse.org'><img src="man/figures/logo.png" align="right" width="120" /></a>
+# **cfbseedR** <a href='https://cfbseedR.sportsdataverse.org'><img alt="cfbseedR hex logo" src="man/figures/logo.png" align="right" width="120" /></a>
 
 <!-- badges: start -->
 
@@ -15,7 +15,7 @@
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg?style=for-the-badge&logo=github)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/sportsdataverse/cfbseedR/blob/main/LICENSE.md)
 [![Contributors](https://img.shields.io/github/contributors/sportsdataverse/cfbseedR?style=for-the-badge)](https://github.com/sportsdataverse/cfbseedR/graphs/contributors)
-[![GitHub stars](https://img.shields.io/github/stars/sportsdataverse/cfbseedR?style=for-the-badge&logo=github)](https://github.com/sportsdataverse/cfbseedR/stargazers)
+[![GitHub stars](https://img.shields.io/github/stars/sportsdataverse/cfbseedR?style=for-the-badge&logo=github)](https://github.com/sportsdataverse/cfbseedR)
 [![X Follow](https://img.shields.io/twitter/follow/SportsDataverse?color=blue&label=%40SportsDataverse&logo=x&style=for-the-badge)](https://x.com/SportsDataverse)
 
 <!-- badges: end -->
@@ -52,7 +52,9 @@ You can install the development version of [**`cfbseedR`**](https://github.com/s
 ```r
 if (!requireNamespace("pak", quietly = TRUE)) install.packages("pak")
 pak::pak("sportsdataverse/cfbseedR")
-# or: remotes::install_github("sportsdataverse/cfbseedR")
+# or, with remotes:
+# if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")
+# remotes::install_github("sportsdataverse/cfbseedR")
 ```
 
 ## **Quick start**
