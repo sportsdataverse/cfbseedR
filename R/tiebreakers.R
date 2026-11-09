@@ -5,10 +5,9 @@
 # `_apply_record_vs_common` / `_apply_record_vs_common_desc` / `_apply_rung`,
 # `_pick_winner` / `_order_tied` / `_add_conf_ranks`) so both engines produce
 # byte-identical standings on the shared cross-language parity fixture
-# (`tests/testthat/fixtures/cfb_toy_tiebreakers/`). One deliberate lead: a
-# rung that ELIMINATES teams sends the survivors back to rung 1 in both
-# engines only once sportsdataverse/sportsdataverse-py#1130 lands - sdv-py
-# 0.2.0 still advances after an elimination.
+# (`tests/testthat/fixtures/cfb_toy_tiebreakers/`). A rung that ELIMINATES
+# teams sends the survivors back to rung 1 in both engines (sdv-py since
+# sportsdataverse/sportsdataverse-py#1130; sdv-py 0.2.0 still advanced).
 #
 # A "rung" is a named list `list(kind = ..., <params>)`. A conference's
 # tiebreaker procedure is a plain list of rungs; `.pick_winner()` /
@@ -30,7 +29,16 @@
 #   descent rung (`record_vs_common_desc`), regardless of its `mode` label
 #   (`"order_of_finish"` vs `"next_highest"` - both dispatch through the
 #   same `.apply_record_vs_common_desc()`; the label is documentation only,
-#   mirroring the Python implementation exactly).
+#   mirroring the Python implementation exactly). The SEC, Big Ten, ACC and
+#   Big 12 rungs set `common_only = TRUE`: their policies compare "common
+#   conference opponents played by all other teams involved in the tie", so
+#   only opponents every tied team played are descended through. ponytail:
+#   the SEC's head-to-head split of a tied opponent pair and the ACC's "with
+#   ties broken" opponent order are read as the collective group (only two
+#   2014 ACC ranks would move across the completed 2014-2026 seasons), and
+#   the Sun Belt / American / Mountain West "continue down the tiebreaker
+#   until two remain" restart is not modeled (no completed season ranks
+#   differently under it).
 # * Multi-team combined head-to-head applies only when every tied pair
 #   played each other; otherwise only "defeated-all" elimination applies
 #   (seeding the team that beat every other tied team it played).
@@ -79,7 +87,8 @@ B12_FCS_CAP <- 1L
 .p5_template <- list(
   list(kind = "h2h"),
   list(kind = "record_vs_common"),
-  list(kind = "record_vs_common_desc", mode = "order_of_finish", grouped_ties = TRUE),
+  list(kind = "record_vs_common_desc", mode = "order_of_finish", grouped_ties = TRUE,
+       common_only = TRUE),
   list(kind = "opp_conf_win_pct"),
   list(kind = "analytics_rating"),
   list(kind = "coin_toss")
@@ -174,7 +183,8 @@ CONFERENCE_TIEBREAKERS <- list(
   "SEC" = list(list(from = 0L, rungs = list(
     list(kind = "h2h"),
     list(kind = "record_vs_common"),
-    list(kind = "record_vs_common_desc", mode = "order_of_finish", grouped_ties = TRUE),
+    list(kind = "record_vs_common_desc", mode = "order_of_finish", grouped_ties = TRUE,
+         common_only = TRUE),
     list(kind = "opp_conf_win_pct"),
     list(kind = "capped_scoring_margin", off_cap = SEC_OFF_CAP, def_cap = SEC_DEF_CAP),
     list(kind = "coin_toss")
@@ -189,7 +199,8 @@ CONFERENCE_TIEBREAKERS <- list(
   "Big 12" = list(list(from = 0L, rungs = list(
     list(kind = "h2h"),
     list(kind = "record_vs_common"),
-    list(kind = "record_vs_common_desc", mode = "next_highest", grouped_ties = TRUE),
+    list(kind = "record_vs_common_desc", mode = "next_highest", grouped_ties = TRUE,
+         common_only = TRUE),
     list(kind = "opp_conf_win_pct"),
     list(kind = "total_wins", fcs_cap = B12_FCS_CAP),
     list(kind = "analytics_rating"),
@@ -286,8 +297,21 @@ CONFERENCE_TIEBREAKERS <- list(
 # Descend the conference standings (best to worst) comparing vs each common
 # opponent, or tied GROUP of opponents compared collectively (the Big 12
 # grouped-ties rule, adopted for every registry descent rung).
-.apply_record_vs_common_desc <- function(cands, cg, conf_pct_by_team) {
+# `common_only` (the SEC, Big Ten, ACC and Big 12 rungs) descends only over
+# opponents that EVERY tied team played - the Big Ten and Big 12 policies say
+# "common conference opponents played by all other teams involved in the
+# tie". Without it a tier counts once each tied team played any one of its
+# teams, which cut the real 2025 ACC five-way tie to Duke / Georgia Tech
+# where the ACC ruled the step could not separate the five. The Sun Belt's
+# "next highest position" rung keeps the looser reading
+# (sportsdataverse/cfbseedR#14).
+.apply_record_vs_common_desc <- function(cands, cg, conf_pct_by_team,
+                                         common_only = FALSE) {
   others <- setdiff(names(conf_pct_by_team), cands)
+  if (common_only) {
+    opp_sets <- lapply(cands, function(t) unique(cg$opp[cg$team == t]))
+    others <- intersect(others, Reduce(intersect, opp_sets))
+  }
   if (length(others) == 0L) return(cands)
   pcts <- round(conf_pct_by_team[others], 9)
   for (p in sort(unique(pcts), decreasing = TRUE)) {
@@ -311,7 +335,8 @@ CONFERENCE_TIEBREAKERS <- list(
   if (kind == "h2h") return(.apply_h2h(cands, cg, isTRUE(rung$generic)))
   if (kind == "record_vs_common") return(.apply_record_vs_common(cands, cg))
   if (kind == "record_vs_common_desc") {
-    return(.apply_record_vs_common_desc(cands, cg, ctx$conf_pct_by_team))
+    return(.apply_record_vs_common_desc(cands, cg, ctx$conf_pct_by_team,
+                                        isTRUE(rung$common_only)))
   }
   if (kind == "sov") {
     return(.keep_max(cands, vapply(cands, function(c) metrics[[c]]$sov, numeric(1))))

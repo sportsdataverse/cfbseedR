@@ -1,5 +1,15 @@
 # cfbseedR 0.3.0
 
+* The SEC, Big Ten, ACC and Big 12 "record against common opponents in order
+  of finish" tiebreaker now compares only opponents that every tied team
+  played, as those conferences' published policies require ("common
+  conference opponents played by all other teams involved in the tie").
+  Before, a tier of tied opponents counted once each tied team had played any
+  one team in it. The real 2025 ACC berth now goes to Duke (it went to
+  Georgia Tech) and the real 2025 SEC pairing is Alabama then Georgia (it was
+  Georgia then Ole Miss), matching the actual title games. The Sun Belt's
+  "next highest position" rung is unchanged (#14).
+
 * Multi-team tiebreakers now restart from the first rung whenever a rung
   eliminates a team, instead of continuing down the rung list with the
   survivors. The Big 12's published policy says "the multiple-team
