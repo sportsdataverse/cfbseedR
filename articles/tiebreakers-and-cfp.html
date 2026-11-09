@@ -172,7 +172,7 @@ how to point the same code at a real season through cfbfastR.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rules</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  Conference <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SEC"</span>, <span class="st">"Big Ten"</span>, <span class="st">"Big 12"</span>, <span class="st">"ACC (2026+)"</span>, <span class="st">"American"</span>,</span>
-<span>                 <span class="st">"Conference USA"</span>, <span class="st">"MAC"</span>, <span class="st">"Mountain West"</span>, <span class="st">"Sun Belt"</span>,</span>
+<span>                 <span class="st">"Conference USA (2025+)"</span>, <span class="st">"MAC (2025+)"</span>, <span class="st">"Mountain West"</span>, <span class="st">"Sun Belt"</span>,</span>
 <span>                 <span class="st">"Pac-12 (re-formed)"</span><span class="op">)</span>,</span>
 <span>  Format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"single table"</span>, <span class="fl">8</span><span class="op">)</span>, <span class="st">"two divisions"</span>, <span class="st">"single table"</span><span class="op">)</span>,</span>
 <span>  `After win pct` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
@@ -181,8 +181,8 @@ how to point the same code at a real season through cfbfastR.</p>
 <span>    <span class="st">"h2h -&gt; common -&gt; descent -&gt; opp win% -&gt; capped wins -&gt; analytics -&gt; draw"</span>,</span>
 <span>    <span class="st">"candidate pool (wins OR losses) -&gt; h2h -&gt; SportSource SSR -&gt; draw"</span>,</span>
 <span>    <span class="st">"h2h -&gt; CFP-ranked final week -&gt; metric composite -&gt; common -&gt; draw"</span>,</span>
-<span>    <span class="st">"h2h -&gt; CFP-ranked final week -&gt; composite -&gt; APR -&gt; draw"</span>,</span>
-<span>    <span class="st">"h2h -&gt; common opponents -&gt; SportSource rating -&gt; draw"</span>,</span>
+<span>    <span class="st">"h2h -&gt; common -&gt; descent -&gt; computer-ranking composite -&gt; opp win% -&gt; draw"</span>,</span>
+<span>    <span class="st">"h2h -&gt; common -&gt; SportSource rating -&gt; descent -&gt; opp win% -&gt; draw"</span>,</span>
 <span>    <span class="st">"metric composite -&gt; h2h -&gt; draw"</span>,</span>
 <span>    <span class="st">"h2h -&gt; div win% -&gt; descent -&gt; common -&gt; CFP clause -&gt; composite -&gt; draw"</span>,</span>
 <span>    <span class="st">"no published procedure: generic fallback"</span></span>
@@ -681,14 +681,14 @@ how to point the same code at a real season through cfbfastR.</p>
 <td headers="After-win-pct" class="gt_row gt_left">h2h -&gt; CFP-ranked final week -&gt; metric composite -&gt; common -&gt; draw</td>
 </tr>
 <tr>
-<td headers="Conference" class="gt_row gt_left">Conference USA</td>
+<td headers="Conference" class="gt_row gt_left">Conference USA (2025+)</td>
 <td headers="Format" class="gt_row gt_left">single table</td>
-<td headers="After-win-pct" class="gt_row gt_left">h2h -&gt; CFP-ranked final week -&gt; composite -&gt; APR -&gt; draw</td>
+<td headers="After-win-pct" class="gt_row gt_left">h2h -&gt; common -&gt; descent -&gt; computer-ranking composite -&gt; opp win% -&gt; draw</td>
 </tr>
 <tr>
-<td headers="Conference" class="gt_row gt_left">MAC</td>
+<td headers="Conference" class="gt_row gt_left">MAC (2025+)</td>
 <td headers="Format" class="gt_row gt_left">single table</td>
-<td headers="After-win-pct" class="gt_row gt_left">h2h -&gt; common opponents -&gt; SportSource rating -&gt; draw</td>
+<td headers="After-win-pct" class="gt_row gt_left">h2h -&gt; common -&gt; SportSource rating -&gt; descent -&gt; opp win% -&gt; draw</td>
 </tr>
 <tr>
 <td headers="Conference" class="gt_row gt_left">Mountain West</td>
@@ -3935,7 +3935,7 @@ fact:</p>
 <span>  tiebreaker_data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    analytics_ratings <span class="op">=</span> <span class="va">my_composite</span>,  <span class="co"># SportSource SSR, SP+, SOR, KPI...</span></span>
 <span>    cfp_rankings <span class="op">=</span> <span class="va">latest_cfp</span>,         <span class="co"># the committee's published top 25</span></span>
-<span>    apr <span class="op">=</span> <span class="va">multi_year_apr</span>               <span class="co"># the CUSA policy's late fallback</span></span>
+<span>    apr <span class="op">=</span> <span class="va">multi_year_apr</span>               <span class="co"># the CUSA 2024 policy's late fallback</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">st</span>, <span class="st">"tiebreak_notes"</span><span class="op">)</span></span></code></pre></div>
