@@ -189,3 +189,23 @@ test_that("cfb_standings() restarts an eliminated generic tie at the 2-team rule
   expect_equal(ranks[["C"]], 3L)
   expect_equal(ranks[["A"]], 4L)
 })
+
+# Real 2025 ACC + SEC conference games (fixtures/cfb_2025_title_ties/README.md):
+# the order-of-finish descent compares only opponents every tied team played.
+title_ties_top2 <- function(conference) {
+  games <- read.csv(test_path("fixtures", "cfb_2025_title_ties", "games.csv"))
+  teams <- read.csv(test_path("fixtures", "cfb_2025_title_ties", "teams.csv"))
+  st <- cfb_standings(games, teams, verbosity = "NONE")
+  st <- st[st$conference == conference, ]
+  c(st$team[st$conf_rank == 1L], st$team[st$conf_rank == 2L])
+}
+
+test_that("2025 ACC five-way tie at 6-2 sends Duke, as the ACC ruled", {
+  # No opponent was common to all of Duke, Georgia Tech, Miami, Pitt and SMU,
+  # so the descent cannot separate them; opponents' conference win % does.
+  expect_identical(title_ties_top2("ACC"), c("Virginia", "Duke"))
+})
+
+test_that("2025 SEC four-way tie at 7-1 seeds Alabama, then Georgia", {
+  expect_identical(title_ties_top2("SEC"), c("Alabama", "Georgia"))
+})
