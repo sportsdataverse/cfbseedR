@@ -224,3 +224,70 @@ test_that("2026 Big 12 descent skips opponents not every tied team played", {
   expect_equal(unname(ranks[c("Iowa State", "West Virginia", "Cincinnati", "TCU")]), 10:13)
   expect_equal(unname(ranks[c("Colorado", "Kansas State", "Kansas")]), 14:16)
 })
+
+# Real MAC (2023, 2025, 2026) and Conference USA (2025, 2026) conference games
+# (fixtures/cfb_mac_cusa_ties/README.md): the dated epochs of #16 / #17. No
+# ratings are supplied, so each tie is settled by a games-based rung; each
+# check runs several seeds because the replaced cascades left these ties to a
+# coin toss.
+mac_cusa_ranks <- function(season, seed, as_season = NULL) {
+  games <- read.csv(test_path("fixtures", "cfb_mac_cusa_ties", "games.csv"))
+  teams <- read.csv(test_path("fixtures", "cfb_mac_cusa_ties", "teams.csv"))
+  games <- games[games$season == season, ]
+  teams <- teams[teams$season == season, c("team", "conference")]
+  if (!is.null(as_season)) games$season <- as_season
+  set.seed(seed)
+  st <- cfb_standings(games, teams, verbosity = "NONE")
+  list(ranks = setNames(st$conf_rank, st$team), notes = attr(st, "tiebreak_notes"))
+}
+
+test_that("2023 MAC order of finish puts Northern Illinois over Bowling Green in both epochs", {
+  # opponents' win pct would pick Bowling Green; without ratings the 2024
+  # cascade (2023 games) and the 2025 order (same games keyed 2025) agree
+  for (as_season in list(NULL, 2025L)) for (seed in 1:3) {
+    r <- mac_cusa_ranks(2023, seed, as_season)$ranks
+    expect_equal(unname(r[c("Northern Illinois", "Bowling Green")]), c(4L, 5L))
+  }
+})
+
+test_that("2025 MAC order of finish puts Toledo over Ohio", {
+  for (seed in 1:5) {
+    r <- mac_cusa_ranks(2025, seed)$ranks
+    expect_equal(unname(r[c("Toledo", "Ohio")]), c(3L, 4L))
+  }
+})
+
+test_that("2026 MAC opponents' win pct seeds Buffalo", {
+  for (seed in 1:5) {
+    r <- mac_cusa_ranks(2026, seed)$ranks
+    expect_equal(unname(r[c("Buffalo", "Toledo", "Western Michigan")]), 2:4)
+    expect_equal(unname(r[c("Central Michigan", "Massachusetts", "Kent State", "Ball State")]),
+                 c(7L, 9L, 10L, 11L))
+  }
+})
+
+test_that("2025 CUSA common opponents order FIU, Louisiana Tech, Missouri State", {
+  for (seed in 1:5) {
+    r <- mac_cusa_ranks(2025, seed)$ranks
+    expect_equal(unname(r[c("Florida International", "Louisiana Tech", "Missouri State")]), 4:6)
+  }
+})
+
+test_that("2026 CUSA opponents' win pct then the descent put Kennesaw State first", {
+  # six teams level on record: opponents' conference win pct leaves FIU and
+  # Kennesaw State, and the common-opponent descent puts Kennesaw State first
+  for (seed in 1:5) {
+    r <- mac_cusa_ranks(2026, seed)$ranks
+    expect_equal(unname(r[c("Kennesaw State", "Florida International")]), c(4L, 5L))
+    expect_equal(unname(r[c("Western Kentucky", "Missouri State")]), c(8L, 9L))
+  }
+})
+
+test_that("CUSA epoch switches by season", {
+  # the same 2025 games keyed as 2024 take the 2024 cascade (CFP clause, APR)
+  n25 <- mac_cusa_ranks(2025, 1)$notes
+  n24 <- mac_cusa_ranks(2025, 1, as_season = 2024L)$notes
+  expect_false(any(startsWith(n25, "Conference USA: apr skipped")))
+  expect_true(any(startsWith(n24, "Conference USA: apr skipped")))
+  expect_true(any(startsWith(n24, "Conference USA: cfp_ranked_final_week skipped")))
+})

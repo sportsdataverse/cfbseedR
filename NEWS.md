@@ -1,5 +1,16 @@
 # cfbseedR 0.3.0
 
+* The MAC and Conference USA tiebreakers are now dated epochs that follow
+  the published procedures. The MAC uses its 2024 order (common opponents,
+  order of finish, opponents' win pct, then SportSource) through 2024, and
+  from 2025 puts SportSource right after common opponents, then order of
+  finish and opponents' combined conference win pct before the draw; the old
+  entry stopped at SportSource and went to a draw (#16). Conference USA keeps
+  its 2024 cascade (CFP clause, composite, APR) through 2024 and from 2025
+  uses record vs common opponents, a common-opponent descent, the average
+  computer ranking and opponents' combined conference win pct before the coin
+  toss (#17).
+
 * The SEC, Big Ten, ACC and Big 12 "record against common opponents in order
   of finish" tiebreaker now compares only opponents that every tied team
   played, as those conferences' published policies require ("common

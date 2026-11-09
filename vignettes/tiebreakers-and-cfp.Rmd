@@ -279,7 +279,7 @@ st <- cfb_standings(
   tiebreaker_data = list(
     analytics_ratings = my_composite,  # SportSource SSR, SP+, SOR, KPI...
     cfp_rankings = latest_cfp,         # the committee's published top 25
-    apr = multi_year_apr               # the CUSA policy's late fallback
+    apr = multi_year_apr               # the CUSA 2024 policy's late fallback
   )
 )
 attr(st, "tiebreak_notes")

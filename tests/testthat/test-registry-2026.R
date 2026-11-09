@@ -142,3 +142,18 @@ test_that("cfp_ranked_final_week advances a ranked winner and falls through on a
     attr(st_loss, "tiebreak_notes")
   )))
 })
+
+test_that("MAC registry epochs: 2024 reads opponents' win pct first, 2025 SportSource", {
+  teams <- data.frame(team = c("A", "B", "C", "D", "E"), conference = "MAC")
+  ratings <- data.frame(team = c("A", "B", "C"), rating = c(1, 2, 0.5))
+  rank_in <- function(season) {
+    st <- cfb_standings(acc_epoch_games(season), teams, verbosity = "NONE",
+      tiebreaker_data = list(analytics_ratings = ratings)
+    )
+    setNames(st$conf_rank, st$team)
+  }
+  # 2024: common opponents tie, order of finish ties, opponents' win pct: A
+  expect_equal(unname(rank_in(2024)[c("A", "B")]), c(1L, 2L))
+  # 2025: SportSource comes right after common opponents: B
+  expect_equal(unname(rank_in(2025)[c("A", "B")]), c(2L, 1L))
+})
