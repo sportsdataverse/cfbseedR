@@ -201,8 +201,9 @@ title_ties_top2 <- function(conference) {
 }
 
 test_that("2025 ACC five-way tie at 6-2 sends Duke, as the ACC ruled", {
-  # No opponent was common to all of Duke, Georgia Tech, Miami, Pitt and SMU,
-  # so the descent cannot separate them; opponents' conference win % does.
+  # Syracuse is the only opponent all of Duke, Georgia Tech, Miami, Pitt and
+  # SMU played, and all five beat it, so the descent cannot separate them;
+  # opponents' conference win % does.
   expect_identical(title_ties_top2("ACC"), c("Virginia", "Duke"))
 })
 
