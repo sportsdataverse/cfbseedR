@@ -14,7 +14,7 @@ for a title-game berth that the order-of-finish descent rung has to handle:
 Both engines must give these pairs in this order: sdv-py's
 `tests/cfb/test_cfb_standings.py::TestCommonOpponentDescent` and this
 package's `tests/testthat/test-tiebreakers.R`. Background: sportsdataverse/cfbseedR#14 and
-sportsdataverse/sportsdataverse-py#1140. The files are byte-identical to sdv-py's `tests/fixtures/seedr/cfb_2025_title_ties/`.
+sportsdataverse/sportsdataverse-py#1140. The CSVs are byte-identical to sdv-py's `tests/fixtures/seedr/cfb_2025_title_ties/`.
 
 ## Provenance
 
