@@ -103,9 +103,13 @@
 #' Ranking, then a draw, with the alternate-game-count candidate-pool rule)
 #' applies from 2026 while earlier seasons keep the 2024 cascade; plain
 #' `sim` ids resolve to the current rules. The SEC/Big Ten/Big 12 2024
-#' procedures are ported verbatim from sdv-py's `cfb_standings.py` so both
-#' engines produce identical output on the shared cross-language parity
-#' fixture. Rung primitives: `h2h` (multi-team combined
+#' procedures are ported from sdv-py's `cfb_standings.py`. One deliberate
+#' difference while that port catches up: a rung that eliminates teams restarts
+#' the cascade at rung 1 here, while sdv-py 0.2.0 advances to the next rung, so
+#' the two engines return different conference ranks for a tie that is only
+#' partially eliminated. sportsdataverse/sportsdataverse-py#1130 brings Python
+#' onto the same rule; everywhere else - including the shared cross-language
+#' parity fixture - the engines agree. Rung primitives: `h2h` (multi-team combined
 #' head-to-head, applied only when every tied pair played; otherwise only
 #' "defeated-all" elimination - the symmetric "lost-to-all" elimination is
 #' intentionally not modeled, a documented simplification, see
