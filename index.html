@@ -121,12 +121,14 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header">
-<img src="logo.svg" class="logo" alt=""><h1 id="cfbseedr-">cfbseedR 
+<img src="logo.svg" class="logo" alt=""><h1 id="cfbseedr-">
+<strong>cfbseedR</strong> 
 <a class="anchor" aria-label="anchor" href="#cfbseedr-"></a>
 </h1>
 </div>
 <!-- badges: start -->
 
+<!-- badges: end -->
 <p>Functions to efficiently simulate and evaluate college football seasons: standings with a documented tiebreaker cascade, conference champions, College Football Playoff (CFP) seeding, and week-by-week season simulation with a pluggable results generator.</p>
 <p>cfbseedR is <strong>adapted from <a href="https://nflseedr.com" class="external-link">nflseedR</a> (MIT)</strong> by Lee Sharpe and Sebastian Carl of the <a href="https://nflverse.nflverse.com" class="external-link">nflverse</a>, and is part of the <a href="https://sportsdataverse.org" class="external-link">SportsDataverse</a>.</p>
 <p>Data freshness and pipeline status for every SportsDataverse dataset: <a href="https://sportsdataverse.org/status" class="external-link">sportsdataverse.org/status</a>.</p>
@@ -134,19 +136,25 @@
 <h2 id="installation">
 <strong>Installation</strong><a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>Install the released version of cfbseedR from CRAN with:</p>
+<p>You can install the CRAN version of <a href="https://CRAN.R-project.org/package=cfbseedR" class="external-link"><strong><code>cfbseedR</code></strong></a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"cfbseedR"</span><span class="op">)</span></span></code></pre></div>
-<p>Or install the development version from <a href="https://github.com/sportsdataverse/cfbseedR" class="external-link">GitHub</a> with:</p>
+<p>You can install the latest build from <a href="https://sportsdataverse.r-universe.dev/cfbseedR" class="external-link">R-universe</a> with:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"sportsdataverse/cfbseedR"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"cfbseedR"</span>, repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"https://sportsdataverse.r-universe.dev"</span>, <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"repos"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>You can install the development version of <a href="https://github.com/sportsdataverse/cfbseedR/" class="external-link"><strong><code>cfbseedR</code></strong></a> from GitHub with:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"pak"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"pak"</span><span class="op">)</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"sportsdataverse/cfbseedR"</span><span class="op">)</span></span>
+<span><span class="co"># or, with remotes:</span></span>
+<span><span class="co"># if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")</span></span>
+<span><span class="co"># remotes::install_github("sportsdataverse/cfbseedR")</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="quickstart">
-<strong>Quickstart</strong><a class="anchor" aria-label="anchor" href="#quickstart"></a>
+<h2 id="quick-start">
+<strong>Quick start</strong><a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://cfbseedR.sportsdataverse.org">cfbseedR</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Bundled toy season (9 teams, 2 conferences + 1 independent)</span></span>
@@ -218,44 +226,26 @@
 <p>The architecture (standings init → conference ranks → seeds; week-loop simulation with pluggable <code>compute_results</code>; ELO-based default results generator) is a direct adaptation of <a href="https://github.com/nflverse/nflseedR" class="external-link">nflseedR</a> (MIT), Copyright (c) Lee Sharpe and Sebastian Carl. Huge thanks to them and the broader <a href="https://nflverse.nflverse.com" class="external-link">nflverse</a> team for the original design.</p>
 </div>
 <div class="section level2">
-<h2 id="our-authors">
-<strong>Our Authors</strong><a class="anchor" aria-label="anchor" href="#our-authors"></a>
+<h2 id="documentation">
+<strong>Documentation</strong><a class="anchor" aria-label="anchor" href="#documentation"></a>
 </h2>
 <ul>
-<li>
-<a href="https://twitter.com/saiemgilani" class="external-link">Saiem Gilani</a> <a href="https://twitter.com/saiemgilani" target="blank" class="external-link"><img src="https://img.shields.io/twitter/follow/saiemgilani?color=blue&amp;label=%40saiemgilani&amp;logo=twitter&amp;style=for-the-badge" alt="@saiemgilani"></a> <a href="https://github.com/saiemgilani" target="blank" class="external-link"><img src="https://img.shields.io/github/followers/saiemgilani?color=eee&amp;logo=Github&amp;style=for-the-badge" alt="@saiemgilani"></a>
-</li>
+<li><a href="https://cfbseedR.sportsdataverse.org/">Package site</a></li>
+<li><a href="https://cfbseedR.sportsdataverse.org/reference/index.html">Function reference</a></li>
+<li>Articles:
+<ul>
+<li><a href="https://cfbseedR.sportsdataverse.org/articles/getting-started.html">Getting started with cfbseedR</a></li>
+<li><a href="https://cfbseedR.sportsdataverse.org/articles/simulating-seasons.html">Simulating seasons</a></li>
+<li><a href="https://cfbseedR.sportsdataverse.org/articles/tiebreakers-and-cfp.html">Cookbook: tiebreakers &amp; the CFP, past / present / future</a></li>
 </ul>
-<!-- cheatsheet-section -->
+</li>
+<li><a href="https://cfbseedR.sportsdataverse.org/news/index.html">NEWS / changelog</a></li>
+</ul>
 </div>
 <div class="section level2">
-<h2 id="cheat-sheet">
-<strong>Cheat sheet</strong><a class="anchor" aria-label="anchor" href="#cheat-sheet"></a>
+<h2 id="companion-packages">
+<strong>Companion packages</strong><a class="anchor" aria-label="anchor" href="#companion-packages"></a>
 </h2>
-<p>A printable one-page reference covering <strong>cfbplotR, cfb4th and cfbseedR</strong> — the function families, the loaders, and what each one returns.</p>
-<p>📄 <strong><a href="https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf" class="external-link">Download the cfbseedR cheat sheet (PDF)</a></strong></p>
-<p>Free to download, print and hand out; light and dark, US Letter landscape. Every SportsDataverse package has one — browse them all at <strong><a href="https://sportsdataverse.org/cheatsheets" class="external-link">sportsdataverse.org/cheatsheets</a></strong>.</p>
-</div>
-<div class="section level2">
-<h2 id="citations">
-<strong>Citations</strong><a class="anchor" aria-label="anchor" href="#citations"></a>
-</h2>
-<p>To cite the <a href="https://cfbseedR.sportsdataverse.org/"><strong><code>cfbseedR</code></strong></a> R package in publications, use:</p>
-<p>BibTeX Citation</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="va">@misc</span>{<span class="ot">gilani_cfbseedR</span>,</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="dt">author</span> = {Saiem Gilani and Sebastian Carl and Lee Sharpe},</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="dt">title</span> = {cfbseedR: The SportsDataverse's R Package to Simulate and Evaluate College Football Seasons.},</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="dt">url</span> = {https://cfbseedR.sportsdataverse.org/},</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="dt">year</span> = {2026}</span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>}</span></code></pre></div>
-<p>If you use the season-simulation methodology, please also cite <a href="https://nflseedr.com" class="external-link">nflseedR</a> by Sebastian Carl and Lee Sharpe.</p>
-</div>
-<div class="section level2">
-<h2 id="follow-the-sportsdataverse">
-<strong>Follow the SportsDataverse</strong><a class="anchor" aria-label="anchor" href="#follow-the-sportsdataverse"></a>
-</h2>
-<p>cfbseedR is part of the <a href="https://sportsdataverse.org" class="external-link">SportsDataverse</a>.</p>
-<p>Related packages:</p>
 <ul>
 <li>
 <a href="https://cfbfastR.sportsdataverse.org/" class="external-link">cfbfastR</a> — College football play-by-play, schedules, rosters (feeds <code><a href="reference/cfb_games_from_schedule.html">cfb_games_from_schedule()</a></code>)</li>
@@ -270,9 +260,130 @@
 <li>
 <a href="https://r.sportsdataverse.org/" class="external-link">sportsdataverse-R</a> — The SportsDataverse R meta-package</li>
 </ul>
+</div>
+<div class="section level2">
+<h2 id="the-sportsdataverse">
+<strong>The SportsDataverse</strong><a class="anchor" aria-label="anchor" href="#the-sportsdataverse"></a>
+</h2>
+<p><a href="https://cfbseedR.sportsdataverse.org/"><strong><code>cfbseedR</code></strong></a> is part of the <a href="https://sportsdataverse.org/" class="external-link">SportsDataverse</a>, a set of open-source packages for sports data.</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr>
+<th>Package</th>
+<th>Sport / Scope</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><a href="https://cfbfastR.sportsdataverse.org/" class="external-link"><strong>cfbfastR</strong></a></td>
+<td>College football</td>
+</tr>
+<tr>
+<td><a href="https://hoopR.sportsdataverse.org/" class="external-link"><strong>hoopR</strong></a></td>
+<td>Men’s basketball (NBA and NCAA)</td>
+</tr>
+<tr>
+<td><a href="https://wehoop.sportsdataverse.org/" class="external-link"><strong>wehoop</strong></a></td>
+<td>Women’s basketball (WNBA and NCAA)</td>
+</tr>
+<tr>
+<td><a href="https://fastRhockey.sportsdataverse.org/" class="external-link"><strong>fastRhockey</strong></a></td>
+<td>Hockey (NHL and PWHL)</td>
+</tr>
+<tr>
+<td><a href="https://billpetti.github.io/baseballr/" class="external-link"><strong>baseballr</strong></a></td>
+<td>Baseball (MLB, MiLB, NCAA)</td>
+</tr>
+<tr>
+<td><a href="https://github.com/sportsdataverse/softballR" class="external-link"><strong>softballR</strong></a></td>
+<td>College softball</td>
+</tr>
+<tr>
+<td><a href="https://oddsapiR.sportsdataverse.org/" class="external-link"><strong>oddsapiR</strong></a></td>
+<td>Sports betting odds</td>
+</tr>
+<tr>
+<td><a href="https://recruitR.sportsdataverse.org/" class="external-link"><strong>recruitR</strong></a></td>
+<td>College football recruiting</td>
+</tr>
+<tr>
+<td><a href="https://usfootballR.sportsdataverse.org/" class="external-link"><strong>usfootballR</strong></a></td>
+<td>US soccer</td>
+</tr>
+<tr>
+<td>
+<a href="https://cfbseedR.sportsdataverse.org/"><strong>cfbseedR</strong></a> · <a href="https://cfb4th.sportsdataverse.org/" class="external-link"><strong>cfb4th</strong></a>
+</td>
+<td>CFB playoff simulation · fourth-down decisions</td>
+</tr>
+<tr>
+<td>
+<a href="https://cfbplotR.sportsdataverse.org/" class="external-link"><strong>cfbplotR</strong></a> · <a href="https://sdvplotR.sportsdataverse.org/" class="external-link"><strong>sdvplotR</strong></a> · <a href="https://sportyR.sportsdataverse.org/" class="external-link"><strong>sportyR</strong></a>
+</td>
+<td>Logos, colors, tables · playing surfaces</td>
+</tr>
+<tr>
+<td><a href="https://r.sportsdataverse.org/" class="external-link"><strong>sportsdataverse-R</strong></a></td>
+<td>Umbrella R metapackage</td>
+</tr>
+<tr>
+<td>
+<a href="https://py.sportsdataverse.org/" class="external-link"><strong>sportsdataverse-py</strong></a> · <a href="https://js.sportsdataverse.org/" class="external-link"><strong>sportsdataverse.js</strong></a>
+</td>
+<td>Python and Node.js</td>
+</tr>
+</tbody>
+</table>
+<p>See the full ecosystem at <a href="https://sportsdataverse.org/" class="external-link">sportsdataverse.org</a>.</p>
+</div>
+<div class="section level2">
+<h2 id="follow-the-sportsdataverse-on-x-and-star-this-repo">
+<strong>Follow the <a href="https://x.com/SportsDataverse" class="external-link">SportsDataverse</a> on X and star this repo</strong><a class="anchor" aria-label="anchor" href="#follow-the-sportsdataverse-on-x-and-star-this-repo"></a>
+</h2>
 <p><a href="https://x.com/SportsDataverse" class="external-link"><img src="https://img.shields.io/twitter/follow/SportsDataverse?color=blue&amp;label=%40SportsDataverse&amp;logo=x&amp;style=for-the-badge" alt="X Follow"></a></p>
 <p><a href="https://github.com/sportsdataverse/cfbseedR" class="external-link"><img src="https://img.shields.io/github/stars/sportsdataverse/cfbseedR.svg?color=eee&amp;logo=github&amp;style=for-the-badge&amp;label=Star%20cfbseedR&amp;maxAge=2592000" alt="GitHub stars"></a></p>
 <p><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/sportsdataverse/cfbseedR/star-history/star-history-dark.svg"><img alt="Star history of sportsdataverse/cfbseedR" src="https://raw.githubusercontent.com/sportsdataverse/cfbseedR/star-history/star-history.png" width="600"></picture></p>
+</div>
+<div class="section level2">
+<h2 id="our-authors">
+<strong>Our Authors</strong><a class="anchor" aria-label="anchor" href="#our-authors"></a>
+</h2>
+<ul>
+<li><p><a href="https://x.com/saiemgilani" class="external-link">Saiem Gilani</a> <a href="https://x.com/saiemgilani" target="blank" class="external-link"><img src="https://img.shields.io/twitter/follow/saiemgilani?color=blue&amp;label=%40saiemgilani&amp;logo=x&amp;style=for-the-badge" alt="@saiemgilani"></a> <a href="https://github.com/saiemgilani" target="blank" class="external-link"><img src="https://img.shields.io/github/followers/saiemgilani?color=eee&amp;logo=Github&amp;style=for-the-badge" alt="@saiemgilani"></a></p></li>
+<li><p><a href="https://x.com/mrcaseb" class="external-link">Sebastian Carl</a> <a href="https://x.com/mrcaseb" target="blank" class="external-link"><img src="https://img.shields.io/twitter/follow/mrcaseb?color=blue&amp;label=%40mrcaseb&amp;logo=x&amp;style=for-the-badge" alt="@mrcaseb"></a> <a href="https://github.com/mrcaseb" target="blank" class="external-link"><img src="https://img.shields.io/github/followers/mrcaseb?color=eee&amp;logo=Github&amp;style=for-the-badge" alt="@mrcaseb"></a></p></li>
+<li><p>Lee Sharpe</p></li>
+</ul>
+<!-- cheatsheet-section -->
+</div>
+<div class="section level2">
+<h2 id="cheat-sheet">
+<strong>Cheat sheet</strong><a class="anchor" aria-label="anchor" href="#cheat-sheet"></a>
+</h2>
+<p>A printable one-page reference for <strong><code>cfbseedR</code></strong>, shared with <strong><code>cfbplotR</code></strong> and <strong><code>cfb4th</code></strong>.</p>
+<p>📄 <strong><a href="https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf" class="external-link">Download the cfbplotR / cfb4th / cfbseedR cheat sheet (PDF)</a></strong></p>
+<p>Free to download, print and hand out; light and dark, US Letter landscape. Every SportsDataverse package has one — browse them all at <strong><a href="https://sportsdataverse.org/cheatsheets" class="external-link">sportsdataverse.org/cheatsheets</a></strong>.</p>
+</div>
+<div class="section level2">
+<h2 id="citations">
+<strong>Citations</strong><a class="anchor" aria-label="anchor" href="#citations"></a>
+</h2>
+<p>To cite the <a href="https://cfbseedR.sportsdataverse.org/"><strong><code>cfbseedR</code></strong></a> R package in publications, use:</p>
+<p>BibTeX Citation</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="va">@misc</span>{<span class="ot">gilani_cfbseedR</span>,</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="dt">author</span> = {Saiem Gilani and Sebastian Carl and Lee Sharpe},</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="dt">title</span> = {cfbseedR: The SportsDataverse's R Package to Simulate and Evaluate College Football Seasons.},</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="dt">url</span> = {https://cfbseedR.sportsdataverse.org/},</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="dt">year</span> = {2026}</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>}</span></code></pre></div>
+<p>If you use the season-simulation methodology, please also cite <a href="https://nflseedr.com" class="external-link">nflseedR</a> by Sebastian Carl and Lee Sharpe.</p>
+</div>
+<div class="section level2">
+<h2 id="license">
+<strong>License</strong><a class="anchor" aria-label="anchor" href="#license"></a>
+</h2>
+<p><a href="https://cfbseedR.sportsdataverse.org/"><strong><code>cfbseedR</code></strong></a> is released under the <a href="https://github.com/sportsdataverse/cfbseedR/blob/main/LICENSE.md" class="external-link">MIT License</a>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -316,11 +427,18 @@
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
+<li><a href="https://CRAN.R-project.org/package=cfbseedR" class="external-link"><img src="https://img.shields.io/badge/dynamic/json?style=for-the-badge&amp;color=success&amp;label=CRAN%20version&amp;prefix=v&amp;query=%24.Version&amp;url=https%3A%2F%2Fcrandb.r-pkg.org%2FcfbseedR" alt="CRAN version"></a></li>
+<li><a href="https://CRAN.R-project.org/package=cfbseedR" class="external-link"><img src="https://img.shields.io/badge/dynamic/json?style=for-the-badge&amp;color=success&amp;label=Downloads&amp;query=%24%5B0%5D.downloads&amp;url=https%3A%2F%2Fcranlogs.r-pkg.org%2Fdownloads%2Ftotal%2F2021-01-01%3Alast-day%2FcfbseedR" alt="CRAN downloads"></a></li>
+<li><a href="https://sportsdataverse.r-universe.dev/cfbseedR" class="external-link"><img src="https://img.shields.io/badge/dynamic/json?style=for-the-badge&amp;color=success&amp;label=r-universe&amp;prefix=v&amp;query=%24.Version&amp;url=https%3A%2F%2Fsportsdataverse.r-universe.dev%2Fapi%2Fpackages%2FcfbseedR" alt="R-universe"></a></li>
 <li><a href="https://github.com/sportsdataverse/cfbseedR/" class="external-link"><img src="https://img.shields.io/github/r-package/v/sportsdataverse/cfbseedR?label=cfbseedR&amp;logo=R&amp;style=for-the-badge" alt="Version-Number"></a></li>
 <li><a href="https://github.com/sportsdataverse/cfbseedR/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://img.shields.io/github/actions/workflow/status/sportsdataverse/cfbseedR/R-CMD-check.yaml?branch=main&amp;label=R-CMD-Check&amp;logo=R&amp;logoColor=white&amp;style=for-the-badge" alt="R-CMD-check"></a></li>
+<li><a href="https://app.codecov.io/gh/sportsdataverse/cfbseedR" class="external-link"><img src="https://img.shields.io/codecov/c/github/sportsdataverse/cfbseedR?logo=codecov&amp;style=for-the-badge" alt="Codecov"></a></li>
+<li><a href="https://github.com/sportsdataverse/cfbseedR/actions/workflows/pkgdown.yaml" class="external-link"><img src="https://img.shields.io/github/actions/workflow/status/sportsdataverse/cfbseedR/pkgdown.yaml?branch=main&amp;label=pkgdown&amp;logo=github&amp;style=for-the-badge" alt="pkgdown"></a></li>
 <li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg?style=for-the-badge&amp;logo=github" alt="Lifecycle: experimental"></a></li>
 <li><a href="https://github.com/sportsdataverse/cfbseedR/blob/main/LICENSE.md" class="external-link"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="License: MIT"></a></li>
 <li><a href="https://github.com/sportsdataverse/cfbseedR/graphs/contributors" class="external-link"><img src="https://img.shields.io/github/contributors/sportsdataverse/cfbseedR?style=for-the-badge" alt="Contributors"></a></li>
+<li><a href="https://github.com/sportsdataverse/cfbseedR" class="external-link"><img src="https://img.shields.io/github/stars/sportsdataverse/cfbseedR?style=for-the-badge&amp;logo=github" alt="GitHub stars"></a></li>
+<li><a href="https://x.com/SportsDataverse" class="external-link"><img src="https://img.shields.io/twitter/follow/SportsDataverse?color=blue&amp;label=%40SportsDataverse&amp;logo=x&amp;style=for-the-badge" alt="X Follow"></a></li>
 </ul>
 </div>
 
