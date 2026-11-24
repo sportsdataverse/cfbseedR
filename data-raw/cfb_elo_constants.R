@@ -28,6 +28,9 @@
 #    generator computes, using CFBD's pregame ELO (a 538-style dynamic ELO,
 #    the same family as cfbseedR's) as the rating:
 #      resid_g = margin_g - (elo_diff_g + 25 * hfa * home_g) / 25
+#    with the generator's x1.2 on the whole ELO difference for non-REG games
+#    (postseason, and conference championship games - picked out as
+#    cfb_games_from_schedule() does, by "championship" in the notes).
 #    margin_sd = sqrt(mean(resid^2)), SE ~ margin_sd / sqrt(2 n). This is
 #    the predictive noise a simulator needs: it includes the error of a
 #    pregame rating, not just game-to-game noise around a season-long
@@ -46,6 +49,11 @@ g <- sched[
 ]
 g$margin <- g$home_points - g$away_points
 g$home <- as.numeric(!(g$neutral_site %in% TRUE))
+# The generator's postseason multiplier applies to every non-REG game.
+g$post_mult <- ifelse(
+  g$season_type != "regular" | grepl("championship", g$notes, ignore.case = TRUE),
+  1.2, 1
+)
 
 fit_season <- function(d) {
   teams <- sort(unique(c(d$home_team, d$away_team)))
@@ -81,7 +89,7 @@ massey_sigma <- sqrt(sum(pool$rss) / sum(pool$df))
 ge <- g[!(g$season %in% pool_exclude) &
   !is.na(g$home_pregame_elo) & !is.na(g$away_pregame_elo), ]
 ge$elo_diff <- ge$home_pregame_elo - ge$away_pregame_elo
-resid <- ge$margin - (ge$elo_diff + 25 * hfa * ge$home) / 25
+resid <- ge$margin - ge$post_mult * (ge$elo_diff + 25 * hfa * ge$home) / 25
 margin_sd <- sqrt(mean(resid^2))
 margin_sd_se <- margin_sd / sqrt(2 * length(resid))
 conf <- ge$conference_game %in% TRUE
@@ -90,7 +98,8 @@ free <- summary(stats::lm(margin ~ 0 + home + elo_diff, data = ge))
 
 by_season$pregame_elo_sd <- vapply(by_season$season, function(s) {
   d <- g[g$season == s & !is.na(g$home_pregame_elo) & !is.na(g$away_pregame_elo), ]
-  r <- d$margin - (d$home_pregame_elo - d$away_pregame_elo + 25 * hfa * d$home) / 25
+  r <- d$margin -
+    d$post_mult * (d$home_pregame_elo - d$away_pregame_elo + 25 * hfa * d$home) / 25
   sqrt(mean(r^2))
 }, numeric(1))
 

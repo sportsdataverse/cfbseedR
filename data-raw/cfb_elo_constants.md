@@ -16,15 +16,18 @@ Source of the `home_field` and `margin_sd` defaults of
 | Quantity | Value | SE | Default |
 |---|---|---|---|
 | Home-field advantage (Massey, within season) | 2.376 pts | 0.168 (between-season SD 0.442) | `home_field = 59.4` ELO (= 25 x 2.376) |
-| Margin SD around the generator's estimate (CFBD pregame ELO) | 16.724 pts | 0.128 | `margin_sd = 16.7` |
+| Margin SD around the generator's estimate (CFBD pregame ELO) | 16.734 pts | 0.128 | `margin_sd = 16.7` |
 
 Replaced: nflseedR's NFL values, `home_field = 20` (0.8 pt) and
 `margin_sd = 13`.
 
 ## Checks
 
-- Conference games only: margin SD 16.235 (n = 5,823), home-field from the
+- Conference games only: margin SD 16.234 (n = 5,823), home-field from the
   pregame-ELO regression 2.52 (SE 0.22), in line with the Massey 2.38.
+- Postseason and conference championship games (492 pooled) use the
+  generator's x1.2 on the ELO difference in the margin SD residual, as the
+  generator does; without it the SD is 16.724.
 - Game-noise floor (in-sample Massey residual SD, df 7,113): 14.424. The
   default is the larger predictive value because a simulator draws around
   a pregame rating, not around a season-long fitted one.
@@ -35,7 +38,7 @@ Replaced: nflseedR's NFL values, `home_field = 20` (0.8 pt) and
   underrates the home team; restricted to conference games it falls to
   2.52.
 - Per season, the home-field estimate ranges 1.74-3.08 outside 2020 (0.76
-  in 2020); the margin SD ranges 16.2-17.4.
+  in 2020); the margin SD ranges 16.2-17.5.
 
 ## Pooled output (verbatim)
 
@@ -44,8 +47,8 @@ seasons 2014-2025, pooled excludes 2020
 FBS-vs-FBS games: 9085 fitted, 8551 pooled (7865 true-home)
 hfa        = 2.376 pts (SE 0.168; between-season SD 0.442)
 home_field = 25 * hfa = 59.4 ELO
-margin_sd  = 16.724 pts (SE 0.128; n 8551 games with pregame ELO)
-  conference games only: 16.235 (n 5823)
+margin_sd  = 16.734 pts (SE 0.128; n 8551 games with pregame ELO)
+  conference games only: 16.234 (n 5823)
   in-sample Massey residual SD (game-noise floor): 14.424 (df 7113)
   free fit margin ~ home + elo_diff: home 3.337 (SE 0.189), pts per ELO 0.0423 (SE 0.0006; 1/25 = 0.0400)
 ```

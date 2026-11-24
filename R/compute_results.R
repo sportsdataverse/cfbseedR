@@ -70,7 +70,7 @@ cfbseedR_compute_results <- function(teams, games, week_num, ...,
   # FBS-vs-FBS games 2014-2025 (2020 left out; 8,551 games), recorded in
   # data-raw/cfb_elo_constants.md:
   #   home_field = 25 * 2.376 pts (Massey within-season home edge, SE 0.168)
-  #   margin_sd  = 16.724 pts (SD of margins around the pregame-ELO
+  #   margin_sd  = 16.734 pts (SD of margins around the pregame-ELO
   #                estimate this function computes, SE 0.128)
   # They replace nflseedR's NFL values (20 ELO = 0.8 pt, sd 13).
   # round away from zero (nflseedR round_out)
