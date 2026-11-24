@@ -127,9 +127,9 @@ results generator, after `nflseedR_compute_results()`) and
 * **Official per-conference tiebreakers, season-scoped.** The SEC, Big
   Ten, Big 12, ACC (including its all-new 2026 policy with the
   alternate-game-count candidate-pool rule), MAC, American, Conference
-  USA, Mountain West, and Sun Belt procedures are registered as dated
-  epochs; unregistered conferences (e.g. the re-formed Pac-12, which has
-  not published a procedure) use a documented generic cascade.
+  USA, Mountain West, Sun Belt, and re-formed Pac-12 (2026) procedures are
+  registered as dated epochs; unregistered conferences use a documented
+  generic cascade.
 * **CFP 12-team straight seeding** via `cfb_playoff_seeds()`, with a
   season-keyed `autobid` policy: `"2026"` (default) puts the ACC / Big 12 /
   Big Ten / SEC champions in regardless of ranking, plus the

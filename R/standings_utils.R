@@ -450,7 +450,8 @@ standings_add_conf_ranks <- function(standings, dg, depth, verbosity,
         ctx <- list(
           conf_name = conf_name,
           conf_pct_by_team = pct_by_team,
-          division_absent = division_absent
+          division_absent = division_absent,
+          two_team_rungs = rules$two_team
         )
         pct_rounded <- setNames(round(pct_by_team[team_set], 9), team_set)
         # ACC 2026 candidate-pool rule: teams that played an alternate

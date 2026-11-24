@@ -291,3 +291,76 @@ test_that("CUSA epoch switches by season", {
   expect_true(any(startsWith(n24, "Conference USA: apr skipped")))
   expect_true(any(startsWith(n24, "Conference USA: cfp_ranked_final_week skipped")))
 })
+
+# Pac-12 2026 (published 2026-09-03): separate two-team and multiple-team
+# procedures; a tie reduced to two switches to the two-team one.
+pac12_pick <- function(tied, cg, pct, cfp_rank = list(), two_team = TRUE) {
+  rules <- .conf_rules("Pac-12", 2026)
+  teams <- names(pct)
+  metrics <- lapply(setNames(nm = teams), function(tm) list(
+    opp_wp_pooled = 0.5, analytics_rating = NA_real_,
+    cfp_rank = if (is.null(cfp_rank[[tm]])) NA_real_ else cfp_rank[[tm]]
+  ))
+  notes <- new.env(parent = emptyenv())
+  notes$notes <- character(0)
+  .pick_winner(tied, metrics, cg, rules$rungs, depth = 3L,
+               ctx = list(conf_name = "Pac-12", conf_pct_by_team = pct,
+                          two_team_rungs = if (two_team) rules$two_team),
+               notes_env = notes)
+}
+
+test_that("Pac-12 epochs: generic before 2026, separate two-team list from 2026", {
+  expect_identical(.conf_rules("Pac-12", 2025)$rungs, .generic_cascade)
+  expect_null(.conf_rules("Pac-12", 2025)$two_team)
+  r26 <- .conf_rules("Pac-12", 2026)
+  expect_identical(
+    vapply(r26$rungs, `[[`, "", "kind"),
+    c("h2h", "record_vs_common", "record_vs_common_desc", "opp_conf_win_pct",
+      "analytics_rating", "coin_toss")
+  )
+  expect_identical(
+    vapply(r26$two_team, `[[`, "", "kind"),
+    c("h2h", "record_vs_common_desc", "record_vs_common", "cfp_ranking",
+      "analytics_rating", "coin_toss")
+  )
+  expect_identical(.conf_rules("Pac-12", NA), r26) # plain sim ids: current rules
+})
+
+test_that("Pac-12 two-team ties read the standings descent before all common opponents", {
+  # X and Y never met. Against the common opponents X is 1-2 and Y 2-1, but
+  # against the highest-placed one (P) X won and Y lost. The two-team
+  # procedure descends first, so X; the multiple-team order would give Y.
+  cg <- tie_cg(c("X", "P"), c("Q", "X"), c("R", "X"),
+               c("P", "Y"), c("Y", "Q"), c("Y", "R"))
+  pct <- c(X = 0.5, Y = 0.5, P = 0.9, Q = 0.3, R = 0.2)
+  expect_identical(pac12_pick(c("X", "Y"), cg, pct), "X")
+  expect_identical(pac12_pick(c("X", "Y"), cg, pct, two_team = FALSE), "Y")
+})
+
+test_that("cfb_standings() applies the Pac-12 2026 procedure by season", {
+  # A, B, C are 2-1. A beat B and C, but B and C never met, so not every
+  # tied team played the others: from 2026 head-to-head is skipped, A falls
+  # to the common opponent D (A lost to it, B and C beat it), and the B-C
+  # pair goes to the two-team procedure, where only the CFP ranking splits
+  # them (C ranked). Then A beats B head-to-head. Before 2026 the generic
+  # cascade's head-to-head seeds A (2-0 against B and C).
+  games <- data.frame(
+    week = 1:8, game_type = "REG",
+    home_team = c("A", "A", "D", "B", "C", "B", "C", "E"),
+    away_team = c("B", "C", "A", "D", "D", "E", "E", "D"),
+    result = 7, neutral = 0
+  )
+  teams <- data.frame(team = c("A", "B", "C", "D", "E"), conference = "Pac-12")
+  ranks <- function(season, ...) {
+    games$season <- season
+    st <- cfb_standings(games, teams, verbosity = "NONE", ...)
+    list(order = st$team[order(st$conf_rank)], notes = attr(st, "tiebreak_notes"))
+  }
+  cfp <- list(cfp_rankings = data.frame(team = "C", rank = 20))
+
+  expect_identical(ranks(2026, tiebreaker_data = cfp)$order[1:3], c("C", "A", "B"))
+  expect_identical(ranks(2025, tiebreaker_data = cfp)$order[1], "A")
+  # Without the CFP ranking the rung is skipped (noted) and the coin decides.
+  set.seed(1)
+  expect_true(any(grepl("Pac-12: cfp_ranking skipped", ranks(2026)$notes)))
+})

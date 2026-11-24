@@ -57,6 +57,19 @@
   plain `sim` ids keep the current `"2026"` rule. Seeds for pre-2026
   `season`-keyed input change.
 
+* The re-formed Pac-12 now has its published 2026 tiebreaker procedure
+  (Pac-12 release of 2026-09-03) as a dated epoch from 2026; before 2026 it
+  keeps the generic cascade. The procedure has separate lists for two teams
+  and for three or more, and a tie reduced to two moves to the two-team
+  list. Three or more teams: head-to-head (only when every tied team played
+  the others), record vs all common conference opponents, record vs the
+  next-highest common opponent down the standings, opponents' combined
+  conference win pct, SportSource rating, coin toss. Two teams:
+  head-to-head, the standings descent, common opponents, the CFP ranking of
+  the Tuesday before week 13 (a new `cfp_ranking` rung fed by
+  `tiebreaker_data$cfp_rankings`), SportSource rating, coin toss. Pac-12
+  ranks for 2026 and for plain `sim` ids change.
+
 ## Bug fixes
 
 * `cfb_simulations()` now aborts with a clear error when a team appearing in a

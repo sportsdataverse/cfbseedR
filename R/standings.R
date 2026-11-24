@@ -75,11 +75,12 @@
 #'   official registry rungs. Supported: `analytics_ratings`, a data frame
 #'   with columns `team` and `rating` (feeds the SportSource-style rating /
 #'   metric-composite rungs used by the Big Ten, Big 12, ACC, MAC,
-#'   American, CUSA, Mountain West, and Sun Belt - supply your own
+#'   American, CUSA, Mountain West, Sun Belt and Pac-12 - supply your own
 #'   composite of the conference's published metrics), and `cfp_rankings`,
 #'   a data frame with columns `team` and `rank` (feeds the
 #'   `cfp_ranked_final_week` clause used by the American, CUSA, and Sun
-#'   Belt), and `apr`, a data frame with columns `team` and `apr`
+#'   Belt, and the Pac-12's two-team `cfp_ranking` rung, which uses the CFP
+#'   ranking released the Tuesday before week 13), and `apr`, a data frame with columns `team` and `apr`
 #'   (multi-year Academic Progress Rate, the CUSA 2024 policy's late fallback).
 #'   A missing input -> that rung is skipped (noted).
 #' @param verbosity One of `"MIN"` (default), `"MAX"`, or `"NONE"`.
@@ -89,9 +90,9 @@
 #' Conference ranks are seeded by conference win percentage; ties within a
 #' tier are broken by a documented cascade. **Registered conferences** (SEC,
 #' Big Ten, Big 12, ACC, MAC, American, Conference USA, Mountain West, Sun
-#' Belt) use their **official procedures** (see "Official per-conference
-#' tiebreakers" below); every other conference - including the re-formed
-#' Pac-12, which has not published a procedure - uses the **generic
+#' Belt, and the re-formed Pac-12 from 2026) use their **official
+#' procedures** (see "Official per-conference tiebreakers" below); every
+#' other conference, and the Pac-12 before 2026, uses the **generic
 #' fallback**: head-to-head record among the tied teams, record vs. common
 #' conference opponents (minimum one), conference-scoped strength of
 #' victory, conference-scoped strength of schedule, conference point
@@ -111,7 +112,14 @@
 #' finish, then opponents' win pct) and Conference USA's 2025 policy (common
 #' opponents, their top-down descent, average computer ranking, opponents'
 #' win pct) likewise apply from 2025, with their 2024 procedures before
-#' that. Plain `sim` ids resolve to the current rules. The SEC/Big Ten/Big 12 2024
+#' that. The re-formed Pac-12's 2026 procedure (published 2026-09-03) has
+#' separate two-team and multiple-team lists, and a tie reduced to two
+#' switches to the two-team list: multiple teams go head-to-head (only when
+#' every tied team played the others), common opponents, the standings
+#' descent, opponents' win pct, SportSource, coin toss; two teams go
+#' head-to-head, the standings descent, common opponents, the CFP ranking of
+#' the Tuesday before week 13, SportSource, coin toss. Plain `sim` ids
+#' resolve to the current rules. The SEC/Big Ten/Big 12 2024
 #' procedures are ported from sdv-py's `cfb_standings.py`, and both engines
 #' return the same conference ranks (sdv-py 0.2.0 still advances to the next
 #' rung after a partial elimination; sdv-py releases after
@@ -138,7 +146,9 @@
 #' SportSource for the American, CUSA, and Mountain West),
 #' `cfp_ranked_final_week` (American/CUSA/Sun Belt: the best-ranked tied
 #' team advances if it won its final conference game, else the clause falls
-#' through; needs `tiebreaker_data$cfp_rankings`), `div_pct` (Sun Belt:
+#' through; needs `tiebreaker_data$cfp_rankings`), `cfp_ranking` (Pac-12
+#' two-team: the best-ranked tied team advances; needs
+#' `tiebreaker_data$cfp_rankings`), `div_pct` (Sun Belt:
 #' win pct vs same-division opponents; needs `teams$conf_division`), and
 #' `coin_toss`. After each team is
 #' seeded/eliminated the procedure restarts from the first rung with the
