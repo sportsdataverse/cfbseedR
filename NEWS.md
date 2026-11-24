@@ -96,6 +96,9 @@
   when their Suggests packages (scales, gt) are installed, via `@examplesIf`.
 * cfbfastR is no longer listed in Suggests. No code, test or example used it;
   `cfb_games_from_schedule()` still accepts its `load_cfb_schedules()` output.
+  knitr and rmarkdown moved out of Suggests for the same reason (there are
+  no package vignettes; they only knit README.Rmd and the pkgdown articles),
+  and the unused high-resolution logo is no longer shipped.
 * DESCRIPTION declares `Language: en-US`, and an `inst/WORDLIST` was added for
   spell checking.
 * The citation year is pinned to 2026 instead of following the current date.
