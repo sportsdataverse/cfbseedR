@@ -54,9 +54,10 @@ NEWS.md.
   `_R_CHECK_CRAN_INCOMING_REMOTE_=true`
 * GitHub Actions (R-CMD-check workflow): macos-latest (release),
   windows-latest (release), ubuntu-latest (devel, release, oldrel-1)
-* win-builder (devel and release): submitted 2026-11-24, results pending
-* R-hub v2 (linux, windows, macos, macos-arm64, nosuggests): dispatched
-  2026-11-24, results pending
+* win-builder (devel and release): not yet run (win-builder unreachable
+  2026-11-24); to be run before submission
+* R-hub v2 (linux, windows, macos, macos-arm64 R-devel, nosuggests):
+  all OK, 2026-11-24
 
 ## R CMD check results
 
