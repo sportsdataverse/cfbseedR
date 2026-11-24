@@ -110,3 +110,62 @@ test_that("cfb_playoff_seeds validates its inputs", {
     regexp = "conf_champ"
   )
 })
+
+test_that("cfb_standings(playoff_seeds =) passes autobid through and keys it by season", {
+  # Rankings that push both toy champions (A1, B1) outside a 4-team field:
+  # the 2025 rule (5 best champions guaranteed) seeds them, the 2026 rule
+  # (P4 champs + best G6 team; Alpha/Beta are neither) does not.
+  rankings <- data.frame(
+    team = c("I1", "A3", "A2", "B2", "B3", "A1", "B1", "A4", "B4"),
+    rank = 1:9
+  )
+  seeds_of <- function(x) setNames(x$seed, x$team)[sort(x$team)]
+  season_games <- function(season) {
+    g <- load_toy_games()
+    g$sim <- NULL
+    g$season <- season
+    g
+  }
+  base <- cfb_standings(season_games(2025), load_toy_teams(), verbosity = "NONE")
+  rule <- function(autobid) {
+    seeds_of(cfb_playoff_seeds(base, rankings = rankings, playoff_seeds = 4,
+                               autobid = autobid))
+  }
+  expect_false(identical(rule("2025"), rule("2026"))) # the fixture separates them
+  seeded <- function(games, ...) {
+    seeds_of(cfb_standings(games, load_toy_teams(), playoff_seeds = 4,
+                           rankings = rankings, verbosity = "NONE", ...))
+  }
+
+  # An explicit autobid reaches cfb_playoff_seeds() (it used to be swallowed
+  # by `...`, so every call seeded under the 2026 rule).
+  expect_identical(seeded(season_games(2025), autobid = "2025"), rule("2025"))
+  expect_identical(seeded(season_games(2025), autobid = "2026"), rule("2026"))
+  # Unset, it follows the season: pre-2026 seasons get the 2025 rule, 2026+
+  # and plain `sim` ids (the current rules) get the 2026 rule.
+  expect_identical(seeded(season_games(2025)), rule("2025"))
+  expect_identical(seeded(season_games(2026)), rule("2026"))
+  expect_identical(seeded(load_toy_games()), rule("2026"))
+  expect_error(seeded(season_games(2025), autobid = "2027"), "autobid")
+})
+
+test_that("the Notre Dame clause also matches its ESPN id in an id-keyed table", {
+  # 4-team field: the SEC champion E is ranked 5th, so its automatic bid
+  # bumps the lowest-ranked at-large team. Notre Dame, ranked 4th, keeps its
+  # place through its own clause, so C (3rd) is the one bumped - whether the
+  # table names it "Notre Dame" or keys it by ESPN id "87".
+  seeds_for <- function(nd) {
+    st <- tibble::tibble(
+      sim = 1L, team = c("A", "B", "C", nd, "E"),
+      conference = c("Big Ten", "Big Ten", "ACC", "FBS Independents", "SEC"),
+      conf_champ = c(FALSE, FALSE, FALSE, FALSE, TRUE),
+      win_pct = 0.5, sov = 0, sos = 0, pd = 0
+    )
+    rankings <- data.frame(team = st$team, rank = 1:5)
+    seeded <- cfb_playoff_seeds(st, rankings, playoff_seeds = 4)
+    setNames(seeded$seed, c("A", "B", "C", "ND", "E"))
+  }
+  expect_identical(seeds_for("87"), seeds_for("Notre Dame"))
+  expect_true(is.na(seeds_for("87")[["C"]]))
+  expect_equal(seeds_for("87")[["ND"]], 3L)
+})

@@ -1,5 +1,7 @@
 # cfbseedR 0.3.0
 
+## Changes that alter computed results
+
 * The MAC and Conference USA tiebreakers are now dated epochs that follow
   the published procedures. The MAC uses its 2024 order (common opponents,
   order of finish, opponents' win pct, then SportSource) through 2024, and
@@ -34,6 +36,52 @@
   Arizona and the two-team procedure gives it to BYU. A rung that keeps every
   candidate still advances as before.
 
+* `cfbseedR_compute_results()`, the default simulation generator, now uses
+  college football constants instead of nflseedR's NFL ones. The home-field
+  bonus is 59.4 ELO points (2.38 points of margin; was 20, 0.8 points) and
+  simulated margins are drawn with a standard deviation of 16.7 points (was
+  13). Both were fitted on 8,551 FBS-vs-FBS games from 2014-2025, leaving
+  out 2020 (script and output in `data-raw/cfb_elo_constants.R` and
+  `data-raw/cfb_elo_constants.md`). They are the new arguments `home_field`
+  and `margin_sd`, which `cfb_simulations()` passes through `...`;
+  `home_field = 20, margin_sd = 13` restores the old behaviour. Simulated
+  results for a given seed change.
+
+* `cfb_standings(playoff_seeds = )` gains an `autobid` argument and passes
+  it to `cfb_playoff_seeds()`. Before, an `autobid` given to
+  `cfb_standings()` was silently swallowed by `...`, so every season was
+  seeded under the 2026 rule. Left `NULL` (the default), the rule now
+  follows the season like the tiebreaker registry does: `season`-keyed
+  games before 2026 are seeded under the `"2025"` rule (the 5
+  highest-ranked conference champions) and 2026 onwards under `"2026"`;
+  plain `sim` ids keep the current `"2026"` rule. Seeds for pre-2026
+  `season`-keyed input change.
+
+* The re-formed Pac-12 now has its published 2026 tiebreaker procedure
+  (Pac-12 release of 2026-09-03) as a dated epoch from 2026; before 2026 it
+  keeps the generic cascade. The procedure has separate lists for two teams
+  and for three or more, and a tie reduced to two moves to the two-team
+  list. Three or more teams: head-to-head (only when every tied team played
+  the others), record vs all common conference opponents, record vs the
+  next-highest common opponent down the standings, opponents' combined
+  conference win pct, SportSource rating, coin toss. Two teams:
+  head-to-head, the standings descent, common opponents, the CFP ranking of
+  the Tuesday before week 13 (a new `cfp_ranking` rung fed by
+  `tiebreaker_data$cfp_rankings`), SportSource rating, coin toss. Pac-12
+  ranks for 2026 and for plain `sim` ids change.
+
+* Conference names spelled in full (`"Sun Belt Conference"`,
+  `"Pac-12 Conference"`, `"Southeastern Conference"`, `"CUSA"`, ...) now
+  get their conference's registered tiebreaker procedure, as the short names
+  do and as sdv-py already did; they used to fall through to the generic
+  cascade. `cfb_playoff_seeds()` already accepted these spellings.
+
+## Bug fixes
+
+* The 2026 Notre Dame clause in `cfb_playoff_seeds()` now also recognises
+  Notre Dame by its ESPN team id `"87"`, so a teams table keyed by id no
+  longer loses it silently. sdv-py already matched both.
+
 * `cfb_simulations()` now aborts with a clear error when a team appearing in a
   game that still has to be simulated is missing from `teams`. Previously the
   missing team produced an `NA` rating, `rnorm()` returned `NA`, and the `NA`
@@ -46,6 +94,9 @@
   unplayed game whose `home_team` or `away_team` is `NA` is rejected the same
   way and for the same reason - `standings_validate_games()` checks that those
   columns exist and rejects `NA` results, but never `NA` team names.
+
+## Packaging and CRAN
+
 * The test suite now runs on CRAN, reversing the 0.2.0 change that skipped
   every test there. All tests are offline against the bundled toy season;
   the ones that need gt or scales call `skip_if_not_installed()`.
@@ -55,9 +106,16 @@
   when their Suggests packages (scales, gt) are installed, via `@examplesIf`.
 * cfbfastR is no longer listed in Suggests. No code, test or example used it;
   `cfb_games_from_schedule()` still accepts its `load_cfb_schedules()` output.
+  knitr and rmarkdown moved out of Suggests for the same reason (there are
+  no package vignettes; they only knit README.Rmd and the pkgdown articles),
+  and the unused high-resolution logo is no longer shipped.
 * DESCRIPTION declares `Language: en-US`, and an `inst/WORDLIST` was added for
   spell checking.
 * The citation year is pinned to 2026 instead of following the current date.
+  `citation("cfbseedR")` now lists all three DESCRIPTION authors.
+* Sebastian Carl and Lee Sharpe, the nflseedR authors whose MIT-licensed code
+  cfbseedR adapts, are now listed as copyright holders in DESCRIPTION and
+  LICENSE.
 
 # cfbseedR 0.2.0
 

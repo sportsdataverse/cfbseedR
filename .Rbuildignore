@@ -31,3 +31,5 @@
 ^.*\.tar\.gz$
 ^CRAN-SUBMISSION$
 ^\.git$
+^man/figures/logo-2x\.png$
+^debug\.log$

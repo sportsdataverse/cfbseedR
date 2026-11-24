@@ -225,3 +225,84 @@ test_that("cfb_simulations() rejects an NA team name in an unplayed game", {
     regexp = "must name both teams"
   )
 })
+
+test_that("cfbseedR_compute_results uses the fitted CFB home field and margin noise", {
+  # Defaults fitted by data-raw/cfb_elo_constants.R (not nflseedR's 20 / 13).
+  defaults <- formals(cfbseedR_compute_results)
+  expect_identical(defaults$home_field, 59.4)
+  expect_identical(defaults$margin_sd, 16.7)
+
+  games <- sim_input()
+  games$sim <- 1
+  teams <- load_toy_teams()
+  teams$sim <- 1
+  elo <- setNames(rep(1500, nrow(teams)), teams$team)
+  wk3 <- games$week == 3
+  expect_true(all(games$game_type[wk3] == "REG"))
+
+  # Equal ratings and (almost) no noise: every home margin is the home edge,
+  # 59.4 / 25 = 2.376 points, rounded away from zero.
+  set.seed(1)
+  out <- cfbseedR_compute_results(teams, games, 3, elo = elo, margin_sd = 1e-9)
+  expect_true(all(out$games$result[wk3] == 3L))
+
+  # Both stay overridable; the NFL value 20 is a 0.8-point edge.
+  set.seed(1)
+  nfl <- cfbseedR_compute_results(teams, games, 3,
+    elo = elo, home_field = 20, margin_sd = 1e-9
+  )
+  expect_true(all(nfl$games$result[wk3] == 1L))
+})
+
+test_that("simulations_verify_fct names each broken part of the compute_results contract", {
+  # Generators that break one rule each, built from a correct fill of the week.
+  fill_week <- function(games, week_num, value = 3) {
+    todo <- games$week == week_num & is.na(games$result)
+    games$result[todo] <- value
+    games
+  }
+  breaks <- function(fn) {
+    function(teams, games, week_num, ...) list(teams = teams, games = fn(games, week_num))
+  }
+
+  expect_error(simulations_verify_fct("not a function"), "must be a function")
+  expect_error(
+    simulations_verify_fct(breaks(function(g, w) fill_week(g, w)[-1, ])),
+    "number of rows"
+  )
+  expect_error(
+    simulations_verify_fct(breaks(function(g, w) fill_week(g, w)[, setdiff(names(g), "neutral")])),
+    "removed columns"
+  )
+  expect_error(
+    simulations_verify_fct(breaks(function(g, w) g)),
+    "did not compute all results"
+  )
+  expect_error(
+    simulations_verify_fct(breaks(function(g, w) {
+      g <- fill_week(g, w)
+      g$result <- as.character(g$result)
+      g
+    })),
+    "non-numeric"
+  )
+  # A tie is fine in the regular season but not in the week-15 CONF_CHAMP game.
+  expect_error(
+    simulations_verify_fct(breaks(function(g, w) fill_week(g, w, value = 0))),
+    "tie in a postseason game"
+  )
+  # Week 3 keeps one played result; a generator that rewrites it is caught.
+  games <- cfb_games_example
+  games$result[games$week >= 3] <- NA
+  games$result[which(games$week == 3)[1]] <- 10
+  expect_error(
+    simulations_verify_fct(
+      breaks(function(g, w) {
+        g$result[g$week == w] <- 1
+        g
+      }),
+      games = games
+    ),
+    "overwrote existing results"
+  )
+})

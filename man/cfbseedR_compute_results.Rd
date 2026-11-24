@@ -4,7 +4,14 @@
 \alias{cfbseedR_compute_results}
 \title{Compute CFB Game Results in Season Simulations}
 \usage{
-cfbseedR_compute_results(teams, games, week_num, ...)
+cfbseedR_compute_results(
+  teams,
+  games,
+  week_num,
+  ...,
+  home_field = 59.4,
+  margin_sd = 16.7
+)
 }
 \arguments{
 \item{teams}{A data frame of teams by simulation with at least the
@@ -12,7 +19,7 @@ columns \code{sim} and \code{team}. May carry an \code{elo} column between weeks
 
 \item{games}{A data frame of games with at least \code{sim}, \code{game_type},
 \code{week}, \code{home_team}, \code{away_team}, \code{result}, and optionally \code{neutral}
-(0/1; a home-field ELO bonus of 20 applies when not neutral).}
+(0/1; the \code{home_field} ELO bonus applies when not neutral).}
 
 \item{week_num}{The (numeric) week to simulate. Only games with
 \code{week == week_num & is.na(result)} receive a simulated result.}
@@ -20,6 +27,17 @@ columns \code{sim} and \code{team}. May carry an \code{elo} column between weeks
 \item{...}{Optionally pass \code{elo}, a named vector of initial ELO ratings
 (names = team names). If absent, teams start at random ratings drawn
 from \code{rnorm(1500, 150)}.}
+
+\item{home_field}{Home-field advantage in ELO points, added to the home
+team's rating difference for games that are not neutral. The default,
+59.4, is 2.38 points of margin (the generator divides ELO by 25), fitted
+on 8,551 FBS-vs-FBS games from 2014-2025 (2020 excluded). Before
+cfbseedR 0.3.0 this was nflseedR's NFL value, 20 (0.8 points).}
+
+\item{margin_sd}{Standard deviation, in points, of a simulated margin
+around its ELO estimate. The default, 16.7, is the spread of real FBS
+margins around a pregame-ELO estimate over the same games. Before
+cfbseedR 0.3.0 this was nflseedR's NFL value, 13.}
 }
 \value{
 A list with two elements, as required by the \code{compute_results}
@@ -34,22 +52,29 @@ The default \code{compute_results} function used by \code{\link[=cfb_simulations
 a faithful adaptation of nflseedR's \code{nflseedR_compute_results()} (a
 variant of 538's ELO model, originally coded by Lee Sharpe and rewritten
 by Sebastian Carl): a simple dynamic ELO carried through the \code{teams}
-table, updated each week from (real or simulated) results.
+table, updated each week from (real or simulated) results. The home-field
+bonus and the margin noise are fitted to FBS results (see \code{home_field} and
+\code{margin_sd}); the rest of the ELO machinery keeps nflseedR's constants.
 }
 \details{
-Mechanics (constants identical to nflseedR): ELO difference is
-\code{home - away} plus 20 for true home games, multiplied by 1.2 in the
-postseason (\code{game_type != "REG"}). Win probability is
-\code{1 / (10^(-elo_diff / 400) + 1)}, the margin estimate is \code{elo_diff / 25},
-and simulated margins are drawn from \code{rnorm(mean = estimate, sd = 13)}
-and rounded away from zero. Ties are possible in the regular season only;
+Mechanics: ELO difference is \code{home - away} plus \code{home_field} for true
+home games, multiplied by 1.2 in the postseason (\code{game_type != "REG"}).
+Win probability is \code{1 / (10^(-elo_diff / 400) + 1)}, the margin estimate
+is \code{elo_diff / 25}, and simulated margins are drawn from
+\code{rnorm(mean = estimate, sd = margin_sd)} and rounded away from zero.
+The 400 logistic scale, the 25 ELO points per point of margin, the 1.2
+postseason multiplier and the K = 20 update are nflseedR's; the data
+support the 25 ELO-per-point scale for FBS (a free fit gives 23.6).
+Pass \code{home_field} and \code{margin_sd} through \code{\link[=cfb_simulations]{cfb_simulations()}}'s \code{...} to
+override them, e.g. \verb{home_field = 20, margin_sd = 13} reproduces the
+pre-0.3.0 (NFL) behaviour. Ties are possible in the regular season only;
 a simulated postseason tie is re-decided by the win probability with a
 3-point margin. nflseedR's rest-day adjustment is dropped (no rest data
 in the CFB schema).
 }
 \examples{
-games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
-teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
+games <- cfb_games_example
+teams <- cfb_teams_example
 games$result[games$week >= 3] <- NA
 teams$sim <- 1
 games$sim <- 1

@@ -30,6 +30,11 @@ prefix; the two helpers mirror their nflseedR namesakes.
   P4 champions regardless of ranking + best Group-of-6 team + Notre Dame
   top-12 clause; `"2025"` = 5 highest-ranked conference champions
   guaranteed; seeds strictly in ranking order (no champion bump).
+- Conference tiebreakers are season-scoped epochs (ACC 2026, MAC/CUSA 2025,
+  Pac-12 2026 with its own two-team list); every elimination restarts the
+  cascade at rung 1.
+- `cfbseedR_compute_results()` defaults (`home_field = 59.4`, `margin_sd = 16.7`)
+  are fitted in `data-raw/cfb_elo_constants.R`; keep them equal to sdv-py's.
 - Simulations are chunked and run through `furrr::future_map()`;
   `sims_run_chunk()` must stay self-contained (no shared state) or parallel
   workers break, and a parallel plan must match sequential bit-for-bit for

@@ -25,8 +25,8 @@ Useful links:
 Authors:
 \itemize{
   \item Saiem Gilani \email{saiem.gilani@gmail.com} (\href{https://orcid.org/0000-0002-7194-9067}{ORCID}) [copyright holder]
-  \item Sebastian Carl \email{mrcaseb@gmail.com} (Author of nflseedR, from which cfbseedR is adapted)
-  \item Lee Sharpe (Author of nflseedR, from which cfbseedR is adapted)
+  \item Sebastian Carl \email{mrcaseb@gmail.com} (Author of nflseedR, from which cfbseedR is adapted) [copyright holder]
+  \item Lee Sharpe (Author of nflseedR, from which cfbseedR is adapted) [copyright holder]
 }
 
 }

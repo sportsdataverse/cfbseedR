@@ -12,6 +12,7 @@ cfb_standings(
   tiebreaker_depth = c("SOS", "PRE-SOV", "POINTS", "RANDOM"),
   playoff_seeds = NULL,
   rankings = NULL,
+  autobid = NULL,
   tiebreaker_data = NULL,
   verbosity = c("MIN", "MAX", "NONE")
 )
@@ -81,16 +82,24 @@ always run in full.}
 \code{team} and \code{rank}, passed to \code{\link[=cfb_playoff_seeds]{cfb_playoff_seeds()}}. Ignored when
 \code{playoff_seeds} is \code{NULL}.}
 
+\item{autobid}{CFP automatic-qualifier policy passed to
+\code{\link[=cfb_playoff_seeds]{cfb_playoff_seeds()}}, \code{"2026"} or \code{"2025"}. The default, \code{NULL}, picks
+it by season: with a \code{season} id column, seasons before 2026 use
+\code{"2025"} and 2026 onwards \code{"2026"}; plain \code{sim} ids use the current
+rule, \code{"2026"}. Ignored when \code{playoff_seeds} is \code{NULL}.}
+
 \item{tiebreaker_data}{Optional named list of external inputs for the
 official registry rungs. Supported: \code{analytics_ratings}, a data frame
 with columns \code{team} and \code{rating} (feeds the SportSource-style rating /
 metric-composite rungs used by the Big Ten, Big 12, ACC, MAC,
-American, CUSA, Mountain West, and Sun Belt - supply your own
+American, CUSA, Mountain West, Sun Belt and Pac-12 - supply your own
 composite of the conference's published metrics), and \code{cfp_rankings},
 a data frame with columns \code{team} and \code{rank} (feeds the
 \code{cfp_ranked_final_week} clause used by the American, CUSA, and Sun
-Belt), and \code{apr}, a data frame with columns \code{team} and \code{apr}
-(multi-year Academic Progress Rate, the CUSA 2024 policy's late fallback).
+Belt, and the Pac-12's two-team \code{cfp_ranking} rung, which uses the CFP
+ranking released the Tuesday before week 13), and \code{apr}, a data frame
+with columns \code{team} and \code{apr} (multi-year Academic Progress Rate, the
+CUSA 2024 policy's late fallback).
 A missing input -> that rung is skipped (noted).}
 
 \item{verbosity}{One of \code{"MIN"} (default), \code{"MAX"}, or \code{"NONE"}.
@@ -145,9 +154,9 @@ conference record.
 Conference ranks are seeded by conference win percentage; ties within a
 tier are broken by a documented cascade. \strong{Registered conferences} (SEC,
 Big Ten, Big 12, ACC, MAC, American, Conference USA, Mountain West, Sun
-Belt) use their \strong{official procedures} (see "Official per-conference
-tiebreakers" below); every other conference - including the re-formed
-Pac-12, which has not published a procedure - uses the \strong{generic
+Belt, and the re-formed Pac-12 from 2026) use their \strong{official
+procedures} (see "Official per-conference tiebreakers" below); every
+other conference, and the Pac-12 before 2026, uses the \strong{generic
 fallback}: head-to-head record among the tied teams, record vs. common
 conference opponents (minimum one), conference-scoped strength of
 victory, conference-scoped strength of schedule, conference point
@@ -166,7 +175,14 @@ applies from 2026 while earlier seasons keep the 2024 cascade. The MAC's
 finish, then opponents' win pct) and Conference USA's 2025 policy (common
 opponents, their top-down descent, average computer ranking, opponents'
 win pct) likewise apply from 2025, with their 2024 procedures before
-that. Plain \code{sim} ids resolve to the current rules. The SEC/Big Ten/Big 12 2024
+that. The re-formed Pac-12's 2026 procedure (published 2026-09-03) has
+separate two-team and multiple-team lists, and a tie reduced to two
+switches to the two-team list: multiple teams go head-to-head (only when
+every tied team played the others), common opponents, the standings
+descent, opponents' win pct, SportSource, coin toss; two teams go
+head-to-head, the standings descent, common opponents, the CFP ranking of
+the Tuesday before week 13, SportSource, coin toss. Plain \code{sim} ids
+resolve to the current rules. The SEC/Big Ten/Big 12 2024
 procedures are ported from sdv-py's \code{cfb_standings.py}, and both engines
 return the same conference ranks (sdv-py 0.2.0 still advances to the next
 rung after a partial elimination; sdv-py releases after
@@ -193,7 +209,9 @@ published metric composite, e.g. Connelly SP+ / ESPN SOR / KPI /
 SportSource for the American, CUSA, and Mountain West),
 \code{cfp_ranked_final_week} (American/CUSA/Sun Belt: the best-ranked tied
 team advances if it won its final conference game, else the clause falls
-through; needs \code{tiebreaker_data$cfp_rankings}), \code{div_pct} (Sun Belt:
+through; needs \code{tiebreaker_data$cfp_rankings}), \code{cfp_ranking} (Pac-12
+two-team: the best-ranked tied team advances; needs
+\code{tiebreaker_data$cfp_rankings}), \code{div_pct} (Sun Belt:
 win pct vs same-division opponents; needs \code{teams$conf_division}), and
 \code{coin_toss}. After each team is
 seeded/eliminated the procedure restarts from the first rung with the
@@ -205,8 +223,8 @@ game (the cascade only orders them - see the design brief).
 }
 }
 \examples{
-games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
-teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
+games <- cfb_games_example
+teams <- cfb_teams_example
 standings <- cfb_standings(games, teams, tiebreaker_depth = "POINTS",
                            verbosity = "NONE")
 standings[, c("team", "conference", "conf_rank", "conf_champ")]

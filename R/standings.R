@@ -66,16 +66,23 @@
 #' @param rankings Optional committee-style rankings data frame with columns
 #'   `team` and `rank`, passed to [cfb_playoff_seeds()]. Ignored when
 #'   `playoff_seeds` is `NULL`.
+#' @param autobid CFP automatic-qualifier policy passed to
+#'   [cfb_playoff_seeds()], `"2026"` or `"2025"`. The default, `NULL`, picks
+#'   it by season: with a `season` id column, seasons before 2026 use
+#'   `"2025"` and 2026 onwards `"2026"`; plain `sim` ids use the current
+#'   rule, `"2026"`. Ignored when `playoff_seeds` is `NULL`.
 #' @param tiebreaker_data Optional named list of external inputs for the
 #'   official registry rungs. Supported: `analytics_ratings`, a data frame
 #'   with columns `team` and `rating` (feeds the SportSource-style rating /
 #'   metric-composite rungs used by the Big Ten, Big 12, ACC, MAC,
-#'   American, CUSA, Mountain West, and Sun Belt - supply your own
+#'   American, CUSA, Mountain West, Sun Belt and Pac-12 - supply your own
 #'   composite of the conference's published metrics), and `cfp_rankings`,
 #'   a data frame with columns `team` and `rank` (feeds the
 #'   `cfp_ranked_final_week` clause used by the American, CUSA, and Sun
-#'   Belt), and `apr`, a data frame with columns `team` and `apr`
-#'   (multi-year Academic Progress Rate, the CUSA 2024 policy's late fallback).
+#'   Belt, and the Pac-12's two-team `cfp_ranking` rung, which uses the CFP
+#'   ranking released the Tuesday before week 13), and `apr`, a data frame
+#'   with columns `team` and `apr` (multi-year Academic Progress Rate, the
+#'   CUSA 2024 policy's late fallback).
 #'   A missing input -> that rung is skipped (noted).
 #' @param verbosity One of `"MIN"` (default), `"MAX"`, or `"NONE"`.
 #'   `"MAX"` logs every tied group as it's broken.
@@ -84,9 +91,9 @@
 #' Conference ranks are seeded by conference win percentage; ties within a
 #' tier are broken by a documented cascade. **Registered conferences** (SEC,
 #' Big Ten, Big 12, ACC, MAC, American, Conference USA, Mountain West, Sun
-#' Belt) use their **official procedures** (see "Official per-conference
-#' tiebreakers" below); every other conference - including the re-formed
-#' Pac-12, which has not published a procedure - uses the **generic
+#' Belt, and the re-formed Pac-12 from 2026) use their **official
+#' procedures** (see "Official per-conference tiebreakers" below); every
+#' other conference, and the Pac-12 before 2026, uses the **generic
 #' fallback**: head-to-head record among the tied teams, record vs. common
 #' conference opponents (minimum one), conference-scoped strength of
 #' victory, conference-scoped strength of schedule, conference point
@@ -106,7 +113,14 @@
 #' finish, then opponents' win pct) and Conference USA's 2025 policy (common
 #' opponents, their top-down descent, average computer ranking, opponents'
 #' win pct) likewise apply from 2025, with their 2024 procedures before
-#' that. Plain `sim` ids resolve to the current rules. The SEC/Big Ten/Big 12 2024
+#' that. The re-formed Pac-12's 2026 procedure (published 2026-09-03) has
+#' separate two-team and multiple-team lists, and a tie reduced to two
+#' switches to the two-team list: multiple teams go head-to-head (only when
+#' every tied team played the others), common opponents, the standings
+#' descent, opponents' win pct, SportSource, coin toss; two teams go
+#' head-to-head, the standings descent, common opponents, the CFP ranking of
+#' the Tuesday before week 13, SportSource, coin toss. Plain `sim` ids
+#' resolve to the current rules. The SEC/Big Ten/Big 12 2024
 #' procedures are ported from sdv-py's `cfb_standings.py`, and both engines
 #' return the same conference ranks (sdv-py 0.2.0 still advances to the next
 #' rung after a partial elimination; sdv-py releases after
@@ -133,7 +147,9 @@
 #' SportSource for the American, CUSA, and Mountain West),
 #' `cfp_ranked_final_week` (American/CUSA/Sun Belt: the best-ranked tied
 #' team advances if it won its final conference game, else the clause falls
-#' through; needs `tiebreaker_data$cfp_rankings`), `div_pct` (Sun Belt:
+#' through; needs `tiebreaker_data$cfp_rankings`), `cfp_ranking` (Pac-12
+#' two-team: the best-ranked tied team advances; needs
+#' `tiebreaker_data$cfp_rankings`), `div_pct` (Sun Belt:
 #' win pct vs same-division opponents; needs `teams$conf_division`), and
 #' `coin_toss`. After each team is
 #' seeded/eliminated the procedure restarts from the first rung with the
@@ -178,8 +194,8 @@
 #' | `seed` | integer | CFP seed, only when `playoff_seeds` is not `NULL` (`NA` outside the field). |
 #'
 #' @examples
-#' games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
-#' teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
+#' games <- cfb_games_example
+#' teams <- cfb_teams_example
 #' standings <- cfb_standings(games, teams, tiebreaker_depth = "POINTS",
 #'                            verbosity = "NONE")
 #' standings[, c("team", "conference", "conf_rank", "conf_champ")]
@@ -204,9 +220,11 @@ cfb_standings <- function(games,
                           tiebreaker_depth = c("SOS", "PRE-SOV", "POINTS", "RANDOM"),
                           playoff_seeds = NULL,
                           rankings = NULL,
+                          autobid = NULL,
                           tiebreaker_data = NULL,
                           verbosity = c("MIN", "MAX", "NONE")) {
   ranks <- rlang::arg_match(ranks)
+  if (!is.null(autobid)) autobid <- rlang::arg_match(autobid, c("2026", "2025"))
   tiebreaker_depth <- rlang::arg_match(tiebreaker_depth)
   depth <- switch(tiebreaker_depth,
     "RANDOM" = 0L, "PRE-SOV" = 1L, "SOS" = 2L, "POINTS" = 3L
@@ -258,9 +276,26 @@ cfb_standings <- function(games,
 
   if (!is.null(playoff_seeds)) {
     if (verbosity > 0L) cli::cli_inform("Compute playoff seeds")
-    standings <- cfb_playoff_seeds(
-      standings, rankings = rankings, playoff_seeds = playoff_seeds
-    )
+    # The CFP rule is season-keyed like the tiebreaker registry: an explicit
+    # `autobid` wins, else each season id picks its own rule (the 2026 rule
+    # from 2026), and plain sim ids get the current rule.
+    seed_sims <- function(st) {
+      season <- if (is.null(seasons_by_sim)) NA else seasons_by_sim[[as.character(st$sim[1])]]
+      rule <- if (!is.null(autobid)) {
+        autobid
+      } else if (!is.na(season) && season < 2026) {
+        "2025"
+      } else {
+        "2026"
+      }
+      cfb_playoff_seeds(
+        st, rankings = rankings, playoff_seeds = playoff_seeds, autobid = rule
+      )
+    }
+    standings <- standings |>
+      dplyr::group_split(.data$sim) |>
+      purrr::map(seed_sims) |>
+      purrr::list_rbind()
   }
 
   standings <- standings |>
@@ -283,7 +318,8 @@ cfb_standings <- function(games,
 #'   and SEC champions are in **regardless of ranking**; the highest-ranked
 #'   team from the Group of 6 (American, Conference USA, MAC, Mountain
 #'   West, Pac-12, Sun Belt) is in whether or not it won its conference;
-#'   and Notre Dame is in if ranked inside the top `playoff_seeds`.
+#'   and Notre Dame (team `"Notre Dame"`, or ESPN id `"87"` in an id-keyed
+#'   table) is in if ranked inside the top `playoff_seeds`.
 #' * `autobid = "2025"`: the 5 highest-ranked conference champions are
 #'   guaranteed inclusion (the 2024-2025 rule).
 #'
@@ -319,8 +355,8 @@ cfb_standings <- function(games,
 #' | `seed` | integer | CFP seed in straight-seeding order; `NA` for teams outside the playoff field. |
 #'
 #' @examples
-#' games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
-#' teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
+#' games <- cfb_games_example
+#' teams <- cfb_teams_example
 #' standings <- cfb_standings(games, teams, tiebreaker_depth = "POINTS",
 #'                            verbosity = "NONE")
 #' rankings <- data.frame(team = c("B1", "I1", "A1", "A3"), rank = 1:4)
@@ -392,9 +428,11 @@ cfb_playoff_seeds <- function(standings, rankings = NULL, playoff_seeds = 12L,
       auto <- teams_ordered[teams_ordered %in% champs & conf_of[teams_ordered] %in% p4]
       g6_teams <- teams_ordered[conf_of[teams_ordered] %in% g6]
       if (length(g6_teams) > 0L) auto <- union(auto, g6_teams[1])
-      nd_rank <- rank_vec[match("Notre Dame", st$team)]
+      # Notre Dame by name or by its ESPN team id (id-keyed teams tables).
+      nd <- st$team[st$team %in% c("Notre Dame", "87")][1]
+      nd_rank <- rank_vec[match(nd, st$team)]
       if (!is.na(nd_rank) && nd_rank <= playoff_seeds) {
-        auto <- union(auto, "Notre Dame")
+        auto <- union(auto, nd)
       }
       auto <- head(teams_ordered[teams_ordered %in% auto], playoff_seeds)
     }

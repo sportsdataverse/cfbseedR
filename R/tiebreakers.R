@@ -194,14 +194,54 @@ B12_FCS_CAP <- 1L
   list(kind = "coin_toss")
 )
 
+# Pac-12 2026 (the re-formed conference's first football season; published
+# in the Pac-12 release of 2026-09-03, pac-12.com/news/2026/9/3/
+# pac-12-announces-commercial-and-operational-updates-ahead-of-its-2026-
+# football-season-kickoff.aspx, and repeated in its 2026-11-15 championship
+# scenarios release). It has SEPARATE two-team and multiple-team procedures,
+# and "if the process reduces the tie to two teams, the two-team procedure
+# will then be applied" - the epoch's `two_team` list, which `.pick_winner()`
+# switches to whenever two candidates remain.
+# Multiple teams: combined head-to-head, applied only "if every tied team has
+# played one another" (otherwise "the process moves to the next criterion",
+# so no defeated-all elimination); win pct vs all common conference
+# opponents; record vs the next-highest-placed common opponent down the
+# standings (a tied group taken collectively); opponents' combined
+# conference win pct; SportSource Team Rating Score; coin toss.
+.pac12_2026 <- list(
+  list(kind = "h2h", round_robin_only = TRUE),
+  list(kind = "record_vs_common"),
+  list(kind = "record_vs_common_desc", mode = "next_highest", grouped_ties = TRUE,
+       common_only = TRUE),
+  list(kind = "opp_conf_win_pct"),
+  list(kind = "analytics_rating"),
+  list(kind = "coin_toss")
+)
+# Two teams: head-to-head; the next-highest-placed common opponent descent;
+# win pct vs all common conference opponents; the highest CFP ranking on the
+# Tuesday before week 13 (supply it as `tiebreaker_data$cfp_rankings`);
+# SportSource Team Rating Score; coin toss. ponytail: "common opponent" is
+# read as an opponent both teams played (`common_only`), as the Pac-12's
+# pre-2024 procedure spelled out; the 2026 text does not define it.
+.pac12_2026_two_team <- list(
+  list(kind = "h2h"),
+  list(kind = "record_vs_common_desc", mode = "next_highest", grouped_ties = TRUE,
+       common_only = TRUE),
+  list(kind = "record_vs_common"),
+  list(kind = "cfp_ranking"),
+  list(kind = "analytics_rating"),
+  list(kind = "coin_toss")
+)
+
 #' Official conference tiebreaker procedures (internal registry)
 #'
 #' A named list, one entry per registered conference. Each entry is a list
-#' of EPOCHS `list(from = <first season>, rungs = <rung list>, pool = ...)`;
-#' `.conf_rules()` resolves the epoch with the largest `from` not exceeding
-#' the season being ranked (an unknown season resolves to the CURRENT
-#' rules). Conferences not listed here (e.g. the re-formed Pac-12, which
-#' has not published a procedure) use `.generic_cascade`.
+#' of EPOCHS `list(from = <first season>, rungs = <rung list>, pool = ...,
+#' two_team = ...)`; `.conf_rules()` resolves the epoch with the largest
+#' `from` not exceeding the season being ranked (an unknown season resolves
+#' to the CURRENT rules). An epoch's optional `two_team` rung list replaces
+#' `rungs` whenever exactly two teams remain tied. Conferences not listed
+#' here use `.generic_cascade`, and so does the Pac-12 before 2026.
 #' @noRd
 CONFERENCE_TIEBREAKERS <- list(
   "SEC" = list(list(from = 0L, rungs = list(
@@ -243,21 +283,43 @@ CONFERENCE_TIEBREAKERS <- list(
     list(from = 2025L, rungs = .cusa_2025)
   ),
   "Mountain West" = list(list(from = 0L, rungs = .mw_official)),
+  "Pac-12" = list(
+    list(from = 0L, rungs = .generic_cascade),
+    list(from = 2026L, rungs = .pac12_2026, two_team = .pac12_2026_two_team)
+  ),
   "Sun Belt" = list(list(from = 0L, rungs = .sunbelt_official))
+)
+
+# Full-name / alternate spellings (the ones `cfb_playoff_seeds()` accepts)
+# -> the registered key, so a cfbd-style "Sun Belt Conference" still gets
+# the Sun Belt procedure. Same map as sdv-py's `_CONF_ALIASES`.
+.conf_aliases <- c(
+  "Southeastern Conference" = "SEC",
+  "Big Ten Conference" = "Big Ten",
+  "Atlantic Coast Conference" = "ACC",
+  "Big 12 Conference" = "Big 12",
+  "American Athletic Conference" = "American Athletic",
+  "American Conference" = "American Athletic",
+  "CUSA" = "Conference USA",
+  "Mid-American Conference" = "MAC",
+  "Mountain West Conference" = "Mountain West",
+  "Sun Belt Conference" = "Sun Belt",
+  "Pac-12 Conference" = "Pac-12"
 )
 
 # Resolve a conference's rules for one season: the registered epoch with
 # the largest `from` not exceeding `season` (season NA/unknown = current
 # rules). Unregistered conferences fall back to the generic cascade.
 .conf_rules <- function(conf_name, season = NA) {
-  epochs <- CONFERENCE_TIEBREAKERS[[conf_name]]
+  key <- if (conf_name %in% names(.conf_aliases)) .conf_aliases[[conf_name]] else conf_name
+  epochs <- CONFERENCE_TIEBREAKERS[[key]]
   if (is.null(epochs)) {
     return(list(rungs = .generic_cascade, pool = NULL))
   }
   froms <- vapply(epochs, function(e) e$from, numeric(1))
   cutoff <- if (is.na(season)) max(froms) else max(froms[froms <= season])
   e <- epochs[[which(froms == cutoff)[1]]]
-  list(rungs = e$rungs, pool = e$pool)
+  list(rungs = e$rungs, pool = e$pool, two_team = e$two_team)
 }
 
 # Record (pts, n) of `team` versus `opps` within one (sim, conference) doubled
@@ -279,8 +341,9 @@ CONFERENCE_TIEBREAKERS <- list(
 
 # Head-to-head rung: generic (pre-existing, unchanged) vs registry
 # multi-team semantics (combined h2h only if every tied pair played;
-# otherwise defeated-all elimination only).
-.apply_h2h <- function(cands, cg, generic) {
+# otherwise defeated-all elimination only, or nothing at all with
+# `round_robin_only`, the Pac-12 2026 rule).
+.apply_h2h <- function(cands, cg, generic, round_robin_only = FALSE) {
   if (generic || length(cands) == 2L) {
     pn <- lapply(cands, function(c) .pct_vs(cg, c, setdiff(cands, c)))
     ns <- vapply(pn, function(x) x[2], numeric(1))
@@ -303,6 +366,7 @@ CONFERENCE_TIEBREAKERS <- list(
     }, numeric(1))
     return(.keep_max(cands, vals))
   }
+  if (round_robin_only) return(cands)
   for (c in cands) {
     others <- setdiff(cands, c)
     recs <- lapply(others, function(o) .pct_vs(cg, c, o))
@@ -365,7 +429,9 @@ CONFERENCE_TIEBREAKERS <- list(
 # conference name / conf_pct-by-team / whether `teams$division` is absent.
 .apply_rung <- function(cands, rung, metrics, cg, ctx, notes_env) {
   kind <- rung$kind
-  if (kind == "h2h") return(.apply_h2h(cands, cg, isTRUE(rung$generic)))
+  if (kind == "h2h") {
+    return(.apply_h2h(cands, cg, isTRUE(rung$generic), isTRUE(rung$round_robin_only)))
+  }
   if (kind == "record_vs_common") return(.apply_record_vs_common(cands, cg))
   if (kind == "record_vs_common_desc") {
     return(.apply_record_vs_common_desc(cands, cg, ctx$conf_pct_by_team,
@@ -438,6 +504,19 @@ CONFERENCE_TIEBREAKERS <- list(
     ))
     return(cands)
   }
+  if (kind == "cfp_ranking") {
+    # Best (lowest) committee rank advances; an unranked team ranks behind
+    # every ranked one. Pac-12 2026 two-team step 4.
+    ranks <- vapply(cands, function(c) metrics[[c]]$cfp_rank, numeric(1))
+    if (all(is.na(ranks))) {
+      .note_add(notes_env, sprintf(
+        "%s: cfp_ranking skipped (no tiebreaker_data$cfp_rankings supplied, or no tied team ranked)",
+        ctx$conf_name
+      ))
+      return(cands)
+    }
+    return(.keep_max(cands, -dplyr::coalesce(ranks, Inf)))
+  }
   if (kind == "apr") {
     vals <- vapply(cands, function(c) metrics[[c]]$apr, numeric(1))
     if (anyNA(vals)) {
@@ -473,8 +552,14 @@ CONFERENCE_TIEBREAKERS <- list(
 .pick_winner <- function(tied, metrics, cg, rungs, depth, ctx, notes_env) {
   cands <- sort(tied)
   i <- 1L
-  while (i <= length(rungs) && length(cands) > 1L) {
-    rung <- rungs[[i]]
+  # A conference with a separate two-team procedure (`ctx$two_team_rungs`)
+  # switches to it whenever two teams remain; that only happens after an
+  # elimination, which restarts at rung 1 anyway.
+  active <- function() {
+    if (length(cands) == 2L && !is.null(ctx$two_team_rungs)) ctx$two_team_rungs else rungs
+  }
+  while (i <= length(active()) && length(cands) > 1L) {
+    rung <- active()[[i]]
     min_depth <- rung$min_depth
     if (!is.null(min_depth) && depth < min_depth) { i <- i + 1L; next }
     before <- length(cands)

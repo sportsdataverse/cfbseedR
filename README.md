@@ -5,18 +5,24 @@
 
 <!-- badges: start -->
 
-[![CRAN version](https://img.shields.io/badge/dynamic/json?style=for-the-badge&color=success&label=CRAN%20version&prefix=v&query=%24.Version&url=https%3A%2F%2Fcrandb.r-pkg.org%2FcfbseedR)](https://CRAN.R-project.org/package=cfbseedR)
-[![CRAN downloads](https://img.shields.io/badge/dynamic/json?style=for-the-badge&color=success&label=Downloads&query=%24%5B0%5D.downloads&url=https%3A%2F%2Fcranlogs.r-pkg.org%2Fdownloads%2Ftotal%2F2021-01-01%3Alast-day%2FcfbseedR)](https://CRAN.R-project.org/package=cfbseedR)
+[![CRAN
+version](https://img.shields.io/badge/dynamic/json?style=for-the-badge&color=success&label=CRAN%20version&prefix=v&query=%24.Version&url=https%3A%2F%2Fcrandb.r-pkg.org%2FcfbseedR)](https://CRAN.R-project.org/package=cfbseedR)
+[![CRAN
+downloads](https://img.shields.io/badge/dynamic/json?style=for-the-badge&color=success&label=Downloads&query=%24%5B0%5D.downloads&url=https%3A%2F%2Fcranlogs.r-pkg.org%2Fdownloads%2Ftotal%2F2021-01-01%3Alast-day%2FcfbseedR)](https://CRAN.R-project.org/package=cfbseedR)
 [![R-universe](https://img.shields.io/badge/dynamic/json?style=for-the-badge&color=success&label=r-universe&prefix=v&query=%24.Version&url=https%3A%2F%2Fsportsdataverse.r-universe.dev%2Fapi%2Fpackages%2FcfbseedR)](https://sportsdataverse.r-universe.dev/cfbseedR)
 [![Version-Number](https://img.shields.io/github/r-package/v/sportsdataverse/cfbseedR?label=cfbseedR&logo=R&style=for-the-badge)](https://github.com/sportsdataverse/cfbseedR/)
 [![R-CMD-check](https://img.shields.io/github/actions/workflow/status/sportsdataverse/cfbseedR/R-CMD-check.yaml?branch=main&label=R-CMD-Check&logo=R&logoColor=white&style=for-the-badge)](https://github.com/sportsdataverse/cfbseedR/actions/workflows/R-CMD-check.yaml)
 [![Codecov](https://img.shields.io/codecov/c/github/sportsdataverse/cfbseedR?logo=codecov&style=for-the-badge)](https://app.codecov.io/gh/sportsdataverse/cfbseedR)
 [![pkgdown](https://img.shields.io/github/actions/workflow/status/sportsdataverse/cfbseedR/pkgdown.yaml?branch=main&label=pkgdown&logo=github&style=for-the-badge)](https://github.com/sportsdataverse/cfbseedR/actions/workflows/pkgdown.yaml)
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg?style=for-the-badge&logo=github)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/sportsdataverse/cfbseedR/blob/main/LICENSE.md)
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg?style=for-the-badge&logo=github)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![License:
+MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://github.com/sportsdataverse/cfbseedR/blob/main/LICENSE.md)
 [![Contributors](https://img.shields.io/github/contributors/sportsdataverse/cfbseedR?style=for-the-badge)](https://github.com/sportsdataverse/cfbseedR/graphs/contributors)
-[![GitHub stars](https://img.shields.io/github/stars/sportsdataverse/cfbseedR?style=for-the-badge&logo=github)](https://github.com/sportsdataverse/cfbseedR)
-[![X Follow](https://img.shields.io/twitter/follow/SportsDataverse?color=blue&label=%40SportsDataverse&logo=x&style=for-the-badge)](https://x.com/SportsDataverse)
+[![GitHub
+stars](https://img.shields.io/github/stars/sportsdataverse/cfbseedR?style=for-the-badge&logo=github)](https://github.com/sportsdataverse/cfbseedR)
+[![X
+Follow](https://img.shields.io/twitter/follow/SportsDataverse?color=blue&label=%40SportsDataverse&logo=x&style=for-the-badge)](https://x.com/SportsDataverse)
 
 <!-- badges: end -->
 
@@ -35,21 +41,25 @@ Data freshness and pipeline status for every SportsDataverse dataset:
 
 ## **Installation**
 
-You can install the CRAN version of [**`cfbseedR`**](https://CRAN.R-project.org/package=cfbseedR) with:
+You can install the CRAN version of
+[**`cfbseedR`**](https://CRAN.R-project.org/package=cfbseedR) with:
 
-```r
+``` r
 install.packages("cfbseedR")
 ```
 
-You can install the latest build from [R-universe](https://sportsdataverse.r-universe.dev/cfbseedR) with:
+You can install the latest build from
+[R-universe](https://sportsdataverse.r-universe.dev/cfbseedR) with:
 
-```r
+``` r
 install.packages("cfbseedR", repos = c("https://sportsdataverse.r-universe.dev", getOption("repos")))
 ```
 
-You can install the development version of [**`cfbseedR`**](https://github.com/sportsdataverse/cfbseedR/) from GitHub with:
+You can install the development version of
+[**`cfbseedR`**](https://github.com/sportsdataverse/cfbseedR/) from
+GitHub with:
 
-```r
+``` r
 if (!requireNamespace("pak", quietly = TRUE)) install.packages("pak")
 pak::pak("sportsdataverse/cfbseedR")
 # or, with remotes:
@@ -119,9 +129,9 @@ custom-generator contract checker).
   - **Official per-conference tiebreakers, season-scoped.** The SEC, Big
     Ten, Big 12, ACC (including its all-new 2026 policy with the
     alternate-game-count candidate-pool rule), MAC, American, Conference
-    USA, Mountain West, and Sun Belt procedures are registered as dated
-    epochs; unregistered conferences (e.g. the re-formed Pac-12, which
-    has not published a procedure) use a documented generic cascade.
+    USA, Mountain West, Sun Belt, and re-formed Pac-12 (2026) procedures
+    are registered as dated epochs; unregistered conferences use a
+    documented generic cascade.
   - **CFP 12-team straight seeding** via `cfb_playoff_seeds()`, with a
     season-keyed `autobid` policy: `"2026"` (default) puts the ACC / Big
     12 / Big Ten / SEC champions in regardless of ranking, plus the
@@ -129,7 +139,7 @@ custom-generator contract checker).
     ranked inside the field; `"2025"` keeps the five-best-champions
     rule. The field is seeded strictly by committee rank (`rankings`).
 
-## **Documented simplifications vs. real CFB / nflseedR**
+## **Documented simplifications vs. real CFB / nflseedR**
 
   - External metric composites (SportSource, Connelly SP+, ESPN SOR,
     KPI, APR, CFP rankings) enter the official tiebreakers only through
@@ -165,13 +175,18 @@ Lee Sharpe and Sebastian Carl. Huge thanks to them and the broader
 
 ## **Documentation**
 
-- [Package site](https://cfbseedR.sportsdataverse.org/)
-- [Function reference](https://cfbseedR.sportsdataverse.org/reference/index.html)
-- Articles:
-  - [Getting started with cfbseedR](https://cfbseedR.sportsdataverse.org/articles/getting-started.html)
-  - [Simulating seasons](https://cfbseedR.sportsdataverse.org/articles/simulating-seasons.html)
-  - [Cookbook: tiebreakers & the CFP, past / present / future](https://cfbseedR.sportsdataverse.org/articles/tiebreakers-and-cfp.html)
-- [NEWS / changelog](https://cfbseedR.sportsdataverse.org/news/index.html)
+  - [Package site](https://cfbseedR.sportsdataverse.org/)
+  - [Function
+    reference](https://cfbseedR.sportsdataverse.org/reference/index.html)
+  - Articles:
+      - [Getting started with
+        cfbseedR](https://cfbseedR.sportsdataverse.org/articles/getting-started.html)
+      - [Simulating
+        seasons](https://cfbseedR.sportsdataverse.org/articles/simulating-seasons.html)
+      - [Cookbook: tiebreakers & the CFP, past / present /
+        future](https://cfbseedR.sportsdataverse.org/articles/tiebreakers-and-cfp.html)
+  - [NEWS /
+    changelog](https://cfbseedR.sportsdataverse.org/news/index.html)
 
 ## **Companion packages**
 
@@ -190,26 +205,28 @@ Lee Sharpe and Sebastian Carl. Huge thanks to them and the broader
 
 ## **The SportsDataverse**
 
-[**`cfbseedR`**](https://cfbseedR.sportsdataverse.org/) is part of the [SportsDataverse](https://sportsdataverse.org/), a set of
-open-source packages for sports data.
+[**`cfbseedR`**](https://cfbseedR.sportsdataverse.org/) is part of the
+[SportsDataverse](https://sportsdataverse.org/), a set of open-source
+packages for sports data.
 
-| Package | Sport / Scope |
-|---|---|
-| [**cfbfastR**](https://cfbfastR.sportsdataverse.org/) | College football |
-| [**hoopR**](https://hoopR.sportsdataverse.org/) | Men's basketball (NBA and NCAA) |
-| [**wehoop**](https://wehoop.sportsdataverse.org/) | Women's basketball (WNBA and NCAA) |
-| [**fastRhockey**](https://fastRhockey.sportsdataverse.org/) | Hockey (NHL and PWHL) |
-| [**baseballr**](https://billpetti.github.io/baseballr/) | Baseball (MLB, MiLB, NCAA) |
-| [**softballR**](https://github.com/sportsdataverse/softballR) | College softball |
-| [**oddsapiR**](https://oddsapiR.sportsdataverse.org/) | Sports betting odds |
-| [**recruitR**](https://recruitR.sportsdataverse.org/) | College football recruiting |
-| [**usfootballR**](https://usfootballR.sportsdataverse.org/) | US soccer |
-| [**cfbseedR**](https://cfbseedR.sportsdataverse.org/) · [**cfb4th**](https://cfb4th.sportsdataverse.org/) | CFB playoff simulation · fourth-down decisions |
-| [**cfbplotR**](https://cfbplotR.sportsdataverse.org/) · [**sdvplotR**](https://sdvplotR.sportsdataverse.org/) · [**sportyR**](https://sportyR.sportsdataverse.org/) | Logos, colors, tables · playing surfaces |
-| [**sportsdataverse-R**](https://r.sportsdataverse.org/) | Umbrella R metapackage |
-| [**sportsdataverse-py**](https://py.sportsdataverse.org/) · [**sportsdataverse.js**](https://js.sportsdataverse.org/) | Python and Node.js |
+| Package                                                                                                                                                             | Sport / Scope                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| [**cfbfastR**](https://cfbfastR.sportsdataverse.org/)                                                                                                               | College football                               |
+| [**hoopR**](https://hoopR.sportsdataverse.org/)                                                                                                                     | Men’s basketball (NBA and NCAA)                |
+| [**wehoop**](https://wehoop.sportsdataverse.org/)                                                                                                                   | Women’s basketball (WNBA and NCAA)             |
+| [**fastRhockey**](https://fastRhockey.sportsdataverse.org/)                                                                                                         | Hockey (NHL and PWHL)                          |
+| [**baseballr**](https://billpetti.github.io/baseballr/)                                                                                                             | Baseball (MLB, MiLB, NCAA)                     |
+| [**softballR**](https://github.com/sportsdataverse/softballR)                                                                                                       | College softball                               |
+| [**oddsapiR**](https://oddsapiR.sportsdataverse.org/)                                                                                                               | Sports betting odds                            |
+| [**recruitR**](https://recruitR.sportsdataverse.org/)                                                                                                               | College football recruiting                    |
+| [**usfootballR**](https://usfootballR.sportsdataverse.org/)                                                                                                         | US soccer                                      |
+| [**cfbseedR**](https://cfbseedR.sportsdataverse.org/) · [**cfb4th**](https://cfb4th.sportsdataverse.org/)                                                           | CFB playoff simulation · fourth-down decisions |
+| [**cfbplotR**](https://cfbplotR.sportsdataverse.org/) · [**sdvplotR**](https://sdvplotR.sportsdataverse.org/) · [**sportyR**](https://sportyR.sportsdataverse.org/) | Logos, colors, tables · playing surfaces       |
+| [**sportsdataverse-R**](https://r.sportsdataverse.org/)                                                                                                             | Umbrella R metapackage                         |
+| [**sportsdataverse-py**](https://py.sportsdataverse.org/) · [**sportsdataverse.js**](https://js.sportsdataverse.org/)                                               | Python and Node.js                             |
 
-See the full ecosystem at [sportsdataverse.org](https://sportsdataverse.org/).
+See the full ecosystem at
+[sportsdataverse.org](https://sportsdataverse.org/).
 
 ## **Follow the [SportsDataverse](https://x.com/SportsDataverse) on X and star this repo**
 
@@ -230,22 +247,24 @@ stars](https://img.shields.io/github/stars/sportsdataverse/cfbseedR.svg?color=ee
     <a href="https://x.com/saiemgilani" target="blank"><img src="https://img.shields.io/twitter/follow/saiemgilani?color=blue&label=%40saiemgilani&logo=x&style=for-the-badge" alt="@saiemgilani" /></a>
     <a href="https://github.com/saiemgilani" target="blank"><img src="https://img.shields.io/github/followers/saiemgilani?color=eee&logo=Github&style=for-the-badge" alt="@saiemgilani" /></a>
 
--   [Sebastian Carl](https://x.com/mrcaseb)
-<a href="https://x.com/mrcaseb" target="blank"><img src="https://img.shields.io/twitter/follow/mrcaseb?color=blue&label=%40mrcaseb&logo=x&style=for-the-badge" alt="@mrcaseb" /></a>
-<a href="https://github.com/mrcaseb" target="blank"><img src="https://img.shields.io/github/followers/mrcaseb?color=eee&logo=Github&style=for-the-badge" alt="@mrcaseb" /></a>
+  - [Sebastian Carl](https://x.com/mrcaseb)
+    <a href="https://x.com/mrcaseb" target="blank"><img src="https://img.shields.io/twitter/follow/mrcaseb?color=blue&label=%40mrcaseb&logo=x&style=for-the-badge" alt="@mrcaseb" /></a>
+    <a href="https://github.com/mrcaseb" target="blank"><img src="https://img.shields.io/github/followers/mrcaseb?color=eee&logo=Github&style=for-the-badge" alt="@mrcaseb" /></a>
 
--   Lee Sharpe
+  - Lee Sharpe
 
 <!-- cheatsheet-section -->
 
 ## **Cheat sheet**
 
-A printable one-page reference for **`cfbseedR`**, shared with **`cfbplotR`** and **`cfb4th`**.
+A printable one-page reference for **`cfbseedR`**, shared with
+**`cfbplotR`** and **`cfb4th`**.
 
-📄 **[Download the cfbplotR / cfb4th / cfbseedR cheat sheet (PDF)](https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf)**
+📄 **[Download the cfbplotR / cfb4th / cfbseedR cheat sheet
+(PDF)](https://sportsdataverse.org/cheatsheets/cfbplotR-cfb4th-cfbseedR.pdf)**
 
-Free to download, print and hand out; light and dark, US Letter landscape.
-Every SportsDataverse package has one — browse them all at
+Free to download, print and hand out; light and dark, US Letter
+landscape. Every SportsDataverse package has one — browse them all at
 **[sportsdataverse.org/cheatsheets](https://sportsdataverse.org/cheatsheets)**.
 
 ## **Citations**
@@ -269,4 +288,6 @@ If you use the season-simulation methodology, please also cite
 
 ## **License**
 
-[**`cfbseedR`**](https://cfbseedR.sportsdataverse.org/) is released under the [MIT License](https://github.com/sportsdataverse/cfbseedR/blob/main/LICENSE.md).
+[**`cfbseedR`**](https://cfbseedR.sportsdataverse.org/) is released
+under the [MIT
+License](https://github.com/sportsdataverse/cfbseedR/blob/main/LICENSE.md).

@@ -12,14 +12,14 @@ credit them in DESCRIPTION/README/vignettes when touching attribution.
 - **License:** MIT. **Site:** https://cfbseedR.sportsdataverse.org
 - **Branch:** `main` is default and release branch.
 
-## Exports (6)
+## Exports (7 + 1 S3 method + 2 datasets)
 
 | Function | Role |
 |---|---|
-| `cfb_standings()` | Standings + conference ranks/champions (+ optional seeds) |
+| `cfb_standings()` | Standings + conference ranks/champions (+ optional seeds; `autobid = NULL` keys the CFP rule by season) |
 | `cfb_playoff_seeds()` | CFP 12-team straight seeding, season-keyed `autobid` policy (2026 default) |
 | `cfb_simulations()` | Week-loop season simulator, returns `cfbseedR_simulation` list |
-| `cfbseedR_compute_results()` | Default ELO results generator (nflseedR port) |
+| `cfbseedR_compute_results()` | Default ELO results generator (nflseedR port; CFB-fitted `home_field` / `margin_sd`) |
 | `simulations_verify_fct()` | Contract checker for custom `compute_results` |
 | `cfb_games_from_schedule()` | `cfbfastR::load_cfb_schedules()` → engine games schema |
 | `summary.cfbseedR_simulation()` | S3 gt summary of a simulation (Suggests: gt, scales) |
@@ -46,15 +46,30 @@ Internal engine helpers live in `R/standings_utils.R` (mirrors nflseedR's
   strictly in ranking order — champions are never bumped into the top 4.
   `autobid = "2026"` (default): ACC/Big 12/Big Ten/SEC champions in
   regardless of ranking + the highest-ranked Group-of-6 team (champion not
-  required) + Notre Dame when ranked inside the field. `autobid = "2025"`:
-  the 5 highest-ranked conference champions.
+  required) + Notre Dame (name or ESPN id `"87"`) when ranked inside the
+  field. `autobid = "2025"`: the 5 highest-ranked conference champions.
+  `cfb_standings(playoff_seeds =)` with `autobid = NULL` picks the rule per
+  `season` id (pre-2026 -> `"2025"`), plain `sim` ids get `"2026"`;
+  `cfb_simulations()` takes an explicit `autobid` (default `"2026"`).
 - **Season-scoped tiebreaker registry:** `CONFERENCE_TIEBREAKERS` entries
   are lists of dated epochs resolved per season (`season` ids) or to the
   CURRENT rules (plain `sim` ids). The ACC's 2026 policy (h2h → SportSource
   SSR → draw, wins-or-losses candidate pool, eligibility filter) applies
-  from 2026. External metrics (composites, CFP ranks, APR) enter only via
+  from 2026; the MAC and Conference USA 2025 orders from 2025; the re-formed
+  Pac-12's published 2026 procedure from 2026 (generic cascade before). An
+  epoch may carry a `two_team` rung list (Pac-12 2026), used whenever two
+  teams remain tied. Every elimination restarts the walk at rung 1, and the
+  SEC/Big Ten/ACC/Big 12/MAC/CUSA/Pac-12 descent rungs compare only
+  opponents every tied team played (`common_only`). Full conference names
+  ("Sun Belt Conference", "CUSA", ...) resolve through `.conf_aliases`, the
+  same map as sdv-py's `_CONF_ALIASES`. External metrics (composites, CFP ranks, APR) enter only via
   `tiebreaker_data`; missing inputs skip their rungs with a
   `tiebreak_notes` entry — never invent a metric.
+- **ELO defaults are fitted, not NFL:** `home_field = 59.4` (2.38 pt) and
+  `margin_sd = 16.7`, from `data-raw/cfb_elo_constants.R` (FBS-vs-FBS
+  2014-2025, 2020 excluded; record in `data-raw/cfb_elo_constants.md`).
+  sdv-py's `cfb_compute_results()` uses the same values; refit both
+  together.
 - **Division opt-in:** a `conf_division` column on `teams` is the opt-in
   for division-format ranking (division champs take `conf_rank` 1-2);
   never gate it to a hardcoded conference list.
@@ -83,7 +98,8 @@ one, flag the other.
   `%>%`), `.data` pronoun in dplyr verbs, `cli::cli_abort()` /
   `cli::cli_inform()` for messaging (never `stop()`/`message()`).
 - testthat edition 3; tests are offline against the bundled toy fixtures
-  (`inst/extdata/toy_games.csv` / `toy_teams.csv`). 142+ tests must pass.
+  (`inst/extdata/toy_games.csv` / `toy_teams.csv`). 287+ expectations
+  (66 tests, Nov 2026) must pass.
 - roxygen2 with markdown; `@return` blocks carry column tables; examples
   run in the plain check (offline, under 5 s each; `\donttest{}` only for
   slow or networked ones). Run `devtools::document()` — never
