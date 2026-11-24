@@ -364,3 +364,12 @@ test_that("cfb_standings() applies the Pac-12 2026 procedure by season", {
   set.seed(1)
   expect_true(any(grepl("Pac-12: cfp_ranking skipped", ranks(2026)$notes)))
 })
+
+test_that("full conference names resolve to the registered procedure, as in sdv-py", {
+  expect_identical(.conf_rules("Pac-12 Conference", 2026), .conf_rules("Pac-12", 2026))
+  expect_identical(.conf_rules("Sun Belt Conference", 2026), .conf_rules("Sun Belt", 2026))
+  expect_identical(.conf_rules("CUSA", 2025), .conf_rules("Conference USA", 2025))
+  expect_identical(.conf_rules("Ivy League", 2026)$rungs, .generic_cascade)
+  # Every alias points at a registered conference.
+  expect_true(all(.conf_aliases %in% names(CONFERENCE_TIEBREAKERS)))
+})

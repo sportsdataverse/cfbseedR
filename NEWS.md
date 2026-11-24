@@ -70,6 +70,12 @@
   `tiebreaker_data$cfp_rankings`), SportSource rating, coin toss. Pac-12
   ranks for 2026 and for plain `sim` ids change.
 
+* Conference names spelled in full (`"Sun Belt Conference"`,
+  `"Pac-12 Conference"`, `"Southeastern Conference"`, `"CUSA"`, ...) now
+  get their conference's registered tiebreaker procedure, as the short names
+  do and as sdv-py already did; they used to fall through to the generic
+  cascade. `cfb_playoff_seeds()` already accepted these spellings.
+
 ## Bug fixes
 
 * The 2026 Notre Dame clause in `cfb_playoff_seeds()` now also recognises

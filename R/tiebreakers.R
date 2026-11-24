@@ -290,11 +290,29 @@ CONFERENCE_TIEBREAKERS <- list(
   "Sun Belt" = list(list(from = 0L, rungs = .sunbelt_official))
 )
 
+# Full-name / alternate spellings (the ones `cfb_playoff_seeds()` accepts)
+# -> the registered key, so a cfbd-style "Sun Belt Conference" still gets
+# the Sun Belt procedure. Same map as sdv-py's `_CONF_ALIASES`.
+.conf_aliases <- c(
+  "Southeastern Conference" = "SEC",
+  "Big Ten Conference" = "Big Ten",
+  "Atlantic Coast Conference" = "ACC",
+  "Big 12 Conference" = "Big 12",
+  "American Athletic Conference" = "American Athletic",
+  "American Conference" = "American Athletic",
+  "CUSA" = "Conference USA",
+  "Mid-American Conference" = "MAC",
+  "Mountain West Conference" = "Mountain West",
+  "Sun Belt Conference" = "Sun Belt",
+  "Pac-12 Conference" = "Pac-12"
+)
+
 # Resolve a conference's rules for one season: the registered epoch with
 # the largest `from` not exceeding `season` (season NA/unknown = current
 # rules). Unregistered conferences fall back to the generic cascade.
 .conf_rules <- function(conf_name, season = NA) {
-  epochs <- CONFERENCE_TIEBREAKERS[[conf_name]]
+  key <- if (conf_name %in% names(.conf_aliases)) .conf_aliases[[conf_name]] else conf_name
+  epochs <- CONFERENCE_TIEBREAKERS[[key]]
   if (is.null(epochs)) {
     return(list(rungs = .generic_cascade, pool = NULL))
   }
