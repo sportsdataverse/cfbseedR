@@ -43,7 +43,8 @@ automatic-qualifier policy:
 and SEC champions are in \strong{regardless of ranking}; the highest-ranked
 team from the Group of 6 (American, Conference USA, MAC, Mountain
 West, Pac-12, Sun Belt) is in whether or not it won its conference;
-and Notre Dame is in if ranked inside the top \code{playoff_seeds}.
+and Notre Dame (team \code{"Notre Dame"}, or ESPN id \code{"87"} in an id-keyed
+table) is in if ranked inside the top \code{playoff_seeds}.
 \item \code{autobid = "2025"}: the 5 highest-ranked conference champions are
 guaranteed inclusion (the 2024-2025 rule).
 }

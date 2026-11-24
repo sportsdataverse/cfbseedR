@@ -317,7 +317,8 @@ cfb_standings <- function(games,
 #'   and SEC champions are in **regardless of ranking**; the highest-ranked
 #'   team from the Group of 6 (American, Conference USA, MAC, Mountain
 #'   West, Pac-12, Sun Belt) is in whether or not it won its conference;
-#'   and Notre Dame is in if ranked inside the top `playoff_seeds`.
+#'   and Notre Dame (team `"Notre Dame"`, or ESPN id `"87"` in an id-keyed
+#'   table) is in if ranked inside the top `playoff_seeds`.
 #' * `autobid = "2025"`: the 5 highest-ranked conference champions are
 #'   guaranteed inclusion (the 2024-2025 rule).
 #'
@@ -426,9 +427,11 @@ cfb_playoff_seeds <- function(standings, rankings = NULL, playoff_seeds = 12L,
       auto <- teams_ordered[teams_ordered %in% champs & conf_of[teams_ordered] %in% p4]
       g6_teams <- teams_ordered[conf_of[teams_ordered] %in% g6]
       if (length(g6_teams) > 0L) auto <- union(auto, g6_teams[1])
-      nd_rank <- rank_vec[match("Notre Dame", st$team)]
+      # Notre Dame by name or by its ESPN team id (id-keyed teams tables).
+      nd <- st$team[st$team %in% c("Notre Dame", "87")][1]
+      nd_rank <- rank_vec[match(nd, st$team)]
       if (!is.na(nd_rank) && nd_rank <= playoff_seeds) {
-        auto <- union(auto, "Notre Dame")
+        auto <- union(auto, nd)
       }
       auto <- head(teams_ordered[teams_ordered %in% auto], playoff_seeds)
     }

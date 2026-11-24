@@ -72,6 +72,10 @@
 
 ## Bug fixes
 
+* The 2026 Notre Dame clause in `cfb_playoff_seeds()` now also recognises
+  Notre Dame by its ESPN team id `"87"`, so a teams table keyed by id no
+  longer loses it silently. sdv-py already matched both.
+
 * `cfb_simulations()` now aborts with a clear error when a team appearing in a
   game that still has to be simulated is missing from `teams`. Previously the
   missing team produced an `NA` rating, `rnorm()` returned `NA`, and the `NA`
