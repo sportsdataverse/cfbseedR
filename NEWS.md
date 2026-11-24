@@ -1,5 +1,7 @@
 # cfbseedR 0.3.0
 
+## Changes that alter computed results
+
 * The MAC and Conference USA tiebreakers are now dated epochs that follow
   the published procedures. The MAC uses its 2024 order (common opponents,
   order of finish, opponents' win pct, then SportSource) through 2024, and
@@ -34,6 +36,8 @@
   Arizona and the two-team procedure gives it to BYU. A rung that keeps every
   candidate still advances as before.
 
+## Bug fixes
+
 * `cfb_simulations()` now aborts with a clear error when a team appearing in a
   game that still has to be simulated is missing from `teams`. Previously the
   missing team produced an `NA` rating, `rnorm()` returned `NA`, and the `NA`
@@ -46,6 +50,9 @@
   unplayed game whose `home_team` or `away_team` is `NA` is rejected the same
   way and for the same reason - `standings_validate_games()` checks that those
   columns exist and rejects `NA` results, but never `NA` team names.
+
+## Packaging and CRAN
+
 * The test suite now runs on CRAN, reversing the 0.2.0 change that skipped
   every test there. All tests are offline against the bundled toy season;
   the ones that need gt or scales call `skip_if_not_installed()`.
