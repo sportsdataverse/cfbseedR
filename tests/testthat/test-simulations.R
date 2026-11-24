@@ -225,3 +225,31 @@ test_that("cfb_simulations() rejects an NA team name in an unplayed game", {
     regexp = "must name both teams"
   )
 })
+
+test_that("cfbseedR_compute_results uses the fitted CFB home field and margin noise", {
+  # Defaults fitted by data-raw/cfb_elo_constants.R (not nflseedR's 20 / 13).
+  defaults <- formals(cfbseedR_compute_results)
+  expect_identical(defaults$home_field, 59.4)
+  expect_identical(defaults$margin_sd, 16.7)
+
+  games <- sim_input()
+  games$sim <- 1
+  teams <- load_toy_teams()
+  teams$sim <- 1
+  elo <- setNames(rep(1500, nrow(teams)), teams$team)
+  wk3 <- games$week == 3
+  expect_true(all(games$game_type[wk3] == "REG"))
+
+  # Equal ratings and (almost) no noise: every home margin is the home edge,
+  # 59.4 / 25 = 2.376 points, rounded away from zero.
+  set.seed(1)
+  out <- cfbseedR_compute_results(teams, games, 3, elo = elo, margin_sd = 1e-9)
+  expect_true(all(out$games$result[wk3] == 3L))
+
+  # Both stay overridable; the NFL value 20 is a 0.8-point edge.
+  set.seed(1)
+  nfl <- cfbseedR_compute_results(teams, games, 3,
+    elo = elo, home_field = 20, margin_sd = 1e-9
+  )
+  expect_true(all(nfl$games$result[wk3] == 1L))
+})

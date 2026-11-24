@@ -36,6 +36,17 @@
   Arizona and the two-team procedure gives it to BYU. A rung that keeps every
   candidate still advances as before.
 
+* `cfbseedR_compute_results()`, the default simulation generator, now uses
+  college football constants instead of nflseedR's NFL ones. The home-field
+  bonus is 59.4 ELO points (2.38 points of margin; was 20, 0.8 points) and
+  simulated margins are drawn with a standard deviation of 16.7 points (was
+  13). Both were fitted on 8,551 FBS-vs-FBS games from 2014-2025, leaving
+  out 2020 (script and output in `data-raw/cfb_elo_constants.R` and
+  `data-raw/cfb_elo_constants.md`). They are the new arguments `home_field`
+  and `margin_sd`, which `cfb_simulations()` passes through `...`;
+  `home_field = 20, margin_sd = 13` restores the old behaviour. Simulated
+  results for a given seed change.
+
 ## Bug fixes
 
 * `cfb_simulations()` now aborts with a clear error when a team appearing in a
