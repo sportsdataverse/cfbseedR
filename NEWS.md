@@ -47,6 +47,16 @@
   `home_field = 20, margin_sd = 13` restores the old behaviour. Simulated
   results for a given seed change.
 
+* `cfb_standings(playoff_seeds = )` gains an `autobid` argument and passes
+  it to `cfb_playoff_seeds()`. Before, an `autobid` given to
+  `cfb_standings()` was silently swallowed by `...`, so every season was
+  seeded under the 2026 rule. Left `NULL` (the default), the rule now
+  follows the season like the tiebreaker registry does: `season`-keyed
+  games before 2026 are seeded under the `"2025"` rule (the 5
+  highest-ranked conference champions) and 2026 onwards under `"2026"`;
+  plain `sim` ids keep the current `"2026"` rule. Seeds for pre-2026
+  `season`-keyed input change.
+
 ## Bug fixes
 
 * `cfb_simulations()` now aborts with a clear error when a team appearing in a

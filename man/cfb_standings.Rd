@@ -12,6 +12,7 @@ cfb_standings(
   tiebreaker_depth = c("SOS", "PRE-SOV", "POINTS", "RANDOM"),
   playoff_seeds = NULL,
   rankings = NULL,
+  autobid = NULL,
   tiebreaker_data = NULL,
   verbosity = c("MIN", "MAX", "NONE")
 )
@@ -80,6 +81,12 @@ always run in full.}
 \item{rankings}{Optional committee-style rankings data frame with columns
 \code{team} and \code{rank}, passed to \code{\link[=cfb_playoff_seeds]{cfb_playoff_seeds()}}. Ignored when
 \code{playoff_seeds} is \code{NULL}.}
+
+\item{autobid}{CFP automatic-qualifier policy passed to
+\code{\link[=cfb_playoff_seeds]{cfb_playoff_seeds()}}, \code{"2026"} or \code{"2025"}. The default, \code{NULL}, picks
+it by season: with a \code{season} id column, seasons before 2026 use
+\code{"2025"} and 2026 onwards \code{"2026"}; plain \code{sim} ids use the current
+rule, \code{"2026"}. Ignored when \code{playoff_seeds} is \code{NULL}.}
 
 \item{tiebreaker_data}{Optional named list of external inputs for the
 official registry rungs. Supported: \code{analytics_ratings}, a data frame

@@ -66,6 +66,11 @@
 #' @param rankings Optional committee-style rankings data frame with columns
 #'   `team` and `rank`, passed to [cfb_playoff_seeds()]. Ignored when
 #'   `playoff_seeds` is `NULL`.
+#' @param autobid CFP automatic-qualifier policy passed to
+#'   [cfb_playoff_seeds()], `"2026"` or `"2025"`. The default, `NULL`, picks
+#'   it by season: with a `season` id column, seasons before 2026 use
+#'   `"2025"` and 2026 onwards `"2026"`; plain `sim` ids use the current
+#'   rule, `"2026"`. Ignored when `playoff_seeds` is `NULL`.
 #' @param tiebreaker_data Optional named list of external inputs for the
 #'   official registry rungs. Supported: `analytics_ratings`, a data frame
 #'   with columns `team` and `rating` (feeds the SportSource-style rating /
@@ -204,9 +209,11 @@ cfb_standings <- function(games,
                           tiebreaker_depth = c("SOS", "PRE-SOV", "POINTS", "RANDOM"),
                           playoff_seeds = NULL,
                           rankings = NULL,
+                          autobid = NULL,
                           tiebreaker_data = NULL,
                           verbosity = c("MIN", "MAX", "NONE")) {
   ranks <- rlang::arg_match(ranks)
+  if (!is.null(autobid)) autobid <- rlang::arg_match(autobid, c("2026", "2025"))
   tiebreaker_depth <- rlang::arg_match(tiebreaker_depth)
   depth <- switch(tiebreaker_depth,
     "RANDOM" = 0L, "PRE-SOV" = 1L, "SOS" = 2L, "POINTS" = 3L
@@ -258,9 +265,26 @@ cfb_standings <- function(games,
 
   if (!is.null(playoff_seeds)) {
     if (verbosity > 0L) cli::cli_inform("Compute playoff seeds")
-    standings <- cfb_playoff_seeds(
-      standings, rankings = rankings, playoff_seeds = playoff_seeds
-    )
+    # The CFP rule is season-keyed like the tiebreaker registry: an explicit
+    # `autobid` wins, else each season id picks its own rule (the 2026 rule
+    # from 2026), and plain sim ids get the current rule.
+    seed_sims <- function(st) {
+      season <- if (is.null(seasons_by_sim)) NA else seasons_by_sim[[as.character(st$sim[1])]]
+      rule <- if (!is.null(autobid)) {
+        autobid
+      } else if (!is.na(season) && season < 2026) {
+        "2025"
+      } else {
+        "2026"
+      }
+      cfb_playoff_seeds(
+        st, rankings = rankings, playoff_seeds = playoff_seeds, autobid = rule
+      )
+    }
+    standings <- standings |>
+      dplyr::group_split(.data$sim) |>
+      purrr::map(seed_sims) |>
+      purrr::list_rbind()
   }
 
   standings <- standings |>
