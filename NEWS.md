@@ -99,6 +99,10 @@
 * DESCRIPTION declares `Language: en-US`, and an `inst/WORDLIST` was added for
   spell checking.
 * The citation year is pinned to 2026 instead of following the current date.
+  `citation("cfbseedR")` now lists all three DESCRIPTION authors.
+* Sebastian Carl and Lee Sharpe, the nflseedR authors whose MIT-licensed code
+  cfbseedR adapts, are now listed as copyright holders in DESCRIPTION and
+  LICENSE.
 
 # cfbseedR 0.2.0
 

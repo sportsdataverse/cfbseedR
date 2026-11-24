@@ -4,9 +4,9 @@ Version: 0.3.0
 Authors@R: c(
     person("Saiem", "Gilani", , "saiem.gilani@gmail.com", role = c("cre", "aut", "cph"),
            comment = c(ORCID = "0000-0002-7194-9067")),
-    person("Sebastian", "Carl", , "mrcaseb@gmail.com", role = "aut",
+    person("Sebastian", "Carl", , "mrcaseb@gmail.com", role = c("aut", "cph"),
            comment = "Author of nflseedR, from which cfbseedR is adapted"),
-    person("Lee", "Sharpe", role = "aut",
+    person("Lee", "Sharpe", role = c("aut", "cph"),
            comment = "Author of nflseedR, from which cfbseedR is adapted")
   )
 Description: Simulate college football seasons and compute standings,
