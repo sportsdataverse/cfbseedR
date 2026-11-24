@@ -104,6 +104,9 @@
 <li>
 <code>CONF_CHAMP</code> games count toward the overall record and decide <code>conf_champ</code>, but NOT toward the conference record/rank; matchups are simulated as scheduled.</li>
 <li>CFP straight seeding with season-keyed <code>autobid</code>: <code>"2026"</code> (default) = P4 champions regardless of ranking + best Group-of-6 team + Notre Dame top-12 clause; <code>"2025"</code> = 5 highest-ranked conference champions guaranteed; seeds strictly in ranking order (no champion bump).</li>
+<li>Conference tiebreakers are season-scoped epochs (ACC 2026, MAC/CUSA 2025, Pac-12 2026 with its own two-team list); every elimination restarts the cascade at rung 1.</li>
+<li>
+<code><a href="reference/cfbseedR_compute_results.html">cfbseedR_compute_results()</a></code> defaults (<code>home_field = 59.4</code>, <code>margin_sd = 16.7</code>) are fitted in <code>data-raw/cfb_elo_constants.R</code>; keep them equal to sdv-py’s.</li>
 <li>Simulations are chunked and run through <code><a href="https://furrr.futureverse.org/reference/future_map.html" class="external-link">furrr::future_map()</a></code>; <code>sims_run_chunk()</code> must stay self-contained (no shared state) or parallel workers break, and a parallel plan must match sequential bit-for-bit for a fixed seed and <code>chunks</code>.</li>
 <li>gt and scales are Suggests, reached only via <code><a href="https://rlang.r-lib.org/reference/is_installed.html" class="external-link">rlang::check_installed()</a></code>.</li>
 <li>These rulings are cross-validated against sportsdataverse-py’s CFB standings implementation — keep the two reconcilable.</li>

@@ -5,7 +5,8 @@ autobid = &quot;2026&quot; (default, current rule): the ACC, Big 12, Big Ten
 and SEC champions are in regardless of ranking; the highest-ranked
 team from the Group of 6 (American, Conference USA, MAC, Mountain
 West, Pac-12, Sun Belt) is in whether or not it won its conference;
-and Notre Dame is in if ranked inside the top playoff_seeds.
+and Notre Dame (team &quot;Notre Dame&quot;, or ESPN id &quot;87&quot; in an id-keyed
+table) is in if ranked inside the top playoff_seeds.
 autobid = &quot;2025&quot;: the 5 highest-ranked conference champions are
 guaranteed inclusion (the 2024-2025 rule).
 
@@ -17,7 +18,8 @@ autobid = &quot;2026&quot; (default, current rule): the ACC, Big 12, Big Ten
 and SEC champions are in regardless of ranking; the highest-ranked
 team from the Group of 6 (American, Conference USA, MAC, Mountain
 West, Pac-12, Sun Belt) is in whether or not it won its conference;
-and Notre Dame is in if ranked inside the top playoff_seeds.
+and Notre Dame (team &quot;Notre Dame&quot;, or ESPN id &quot;87&quot; in an id-keyed
+table) is in if ranked inside the top playoff_seeds.
 autobid = &quot;2025&quot;: the 5 highest-ranked conference champions are
 guaranteed inclusion (the 2024-2025 rule).
 
@@ -118,7 +120,8 @@ automatic-qualifier policy:</p><ul><li><p><code>autobid = "2026"</code> (default
 and SEC champions are in <strong>regardless of ranking</strong>; the highest-ranked
 team from the Group of 6 (American, Conference USA, MAC, Mountain
 West, Pac-12, Sun Belt) is in whether or not it won its conference;
-and Notre Dame is in if ranked inside the top <code>playoff_seeds</code>.</p></li>
+and Notre Dame (team <code>"Notre Dame"</code>, or ESPN id <code>"87"</code> in an id-keyed
+table) is in if ranked inside the top <code>playoff_seeds</code>.</p></li>
 <li><p><code>autobid = "2025"</code>: the 5 highest-ranked conference champions are
 guaranteed inclusion (the 2024-2025 rule).</p></li>
 </ul><p>Under both policies seeds are assigned strictly in ranking order
@@ -184,8 +187,8 @@ the nflseedR original: <a href="https://nflseedr.com" class="external-link">http
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">games</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"toy_games.csv"</span>, package <span class="op">=</span> <span class="st">"cfbseedR"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">teams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"toy_teams.csv"</span>, package <span class="op">=</span> <span class="st">"cfbseedR"</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">games</span> <span class="op">&lt;-</span> <span class="va">cfb_games_example</span></span></span>
+<span class="r-in"><span><span class="va">teams</span> <span class="op">&lt;-</span> <span class="va">cfb_teams_example</span></span></span>
 <span class="r-in"><span><span class="va">standings</span> <span class="op">&lt;-</span> <span class="fu"><a href="cfb_standings.html">cfb_standings</a></span><span class="op">(</span><span class="va">games</span>, <span class="va">teams</span>, tiebreaker_depth <span class="op">=</span> <span class="st">"POINTS"</span>,</span></span>
 <span class="r-in"><span>                           verbosity <span class="op">=</span> <span class="st">"NONE"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">rankings</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>team <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"B1"</span>, <span class="st">"I1"</span>, <span class="st">"A1"</span>, <span class="st">"A3"</span><span class="op">)</span>, rank <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span></span></span>

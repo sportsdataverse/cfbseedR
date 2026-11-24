@@ -123,6 +123,7 @@ conference record.</p>
 <span>  tiebreaker_depth <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SOS"</span>, <span class="st">"PRE-SOV"</span>, <span class="st">"POINTS"</span>, <span class="st">"RANDOM"</span><span class="op">)</span>,</span>
 <span>  playoff_seeds <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  rankings <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  autobid <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  tiebreaker_data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verbosity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MIN"</span>, <span class="st">"MAX"</span>, <span class="st">"NONE"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -214,17 +215,27 @@ always run in full.</p></dd>
 <code>playoff_seeds</code> is <code>NULL</code>.</p></dd>
 
 
+<dt id="arg-autobid">autobid<a class="anchor" aria-label="anchor" href="#arg-autobid"></a></dt>
+<dd><p>CFP automatic-qualifier policy passed to
+<code><a href="cfb_playoff_seeds.html">cfb_playoff_seeds()</a></code>, <code>"2026"</code> or <code>"2025"</code>. The default, <code>NULL</code>, picks
+it by season: with a <code>season</code> id column, seasons before 2026 use
+<code>"2025"</code> and 2026 onwards <code>"2026"</code>; plain <code>sim</code> ids use the current
+rule, <code>"2026"</code>. Ignored when <code>playoff_seeds</code> is <code>NULL</code>.</p></dd>
+
+
 <dt id="arg-tiebreaker-data">tiebreaker_data<a class="anchor" aria-label="anchor" href="#arg-tiebreaker-data"></a></dt>
 <dd><p>Optional named list of external inputs for the
 official registry rungs. Supported: <code>analytics_ratings</code>, a data frame
 with columns <code>team</code> and <code>rating</code> (feeds the SportSource-style rating /
 metric-composite rungs used by the Big Ten, Big 12, ACC, MAC,
-American, CUSA, Mountain West, and Sun Belt - supply your own
+American, CUSA, Mountain West, Sun Belt and Pac-12 - supply your own
 composite of the conference's published metrics), and <code>cfp_rankings</code>,
 a data frame with columns <code>team</code> and <code>rank</code> (feeds the
 <code>cfp_ranked_final_week</code> clause used by the American, CUSA, and Sun
-Belt), and <code>apr</code>, a data frame with columns <code>team</code> and <code>apr</code>
-(multi-year Academic Progress Rate, the CUSA 2024 policy's late fallback).
+Belt, and the Pac-12's two-team <code>cfp_ranking</code> rung, which uses the CFP
+ranking released the Tuesday before week 13), and <code>apr</code>, a data frame
+with columns <code>team</code> and <code>apr</code> (multi-year Academic Progress Rate, the
+CUSA 2024 policy's late fallback).
 A missing input -&gt; that rung is skipped (noted).</p></dd>
 
 
@@ -250,9 +261,9 @@ skipped.</p><table class="table table"><tr><td>Column</td><td>Type</td><td>Descr
     <p>Conference ranks are seeded by conference win percentage; ties within a
 tier are broken by a documented cascade. <strong>Registered conferences</strong> (SEC,
 Big Ten, Big 12, ACC, MAC, American, Conference USA, Mountain West, Sun
-Belt) use their <strong>official procedures</strong> (see "Official per-conference
-tiebreakers" below); every other conference - including the re-formed
-Pac-12, which has not published a procedure - uses the <strong>generic
+Belt, and the re-formed Pac-12 from 2026) use their <strong>official
+procedures</strong> (see "Official per-conference tiebreakers" below); every
+other conference, and the Pac-12 before 2026, uses the <strong>generic
 fallback</strong>: head-to-head record among the tied teams, record vs. common
 conference opponents (minimum one), conference-scoped strength of
 victory, conference-scoped strength of schedule, conference point
@@ -272,7 +283,14 @@ applies from 2026 while earlier seasons keep the 2024 cascade. The MAC's
 finish, then opponents' win pct) and Conference USA's 2025 policy (common
 opponents, their top-down descent, average computer ranking, opponents'
 win pct) likewise apply from 2025, with their 2024 procedures before
-that. Plain <code>sim</code> ids resolve to the current rules. The SEC/Big Ten/Big 12 2024
+that. The re-formed Pac-12's 2026 procedure (published 2026-09-03) has
+separate two-team and multiple-team lists, and a tie reduced to two
+switches to the two-team list: multiple teams go head-to-head (only when
+every tied team played the others), common opponents, the standings
+descent, opponents' win pct, SportSource, coin toss; two teams go
+head-to-head, the standings descent, common opponents, the CFP ranking of
+the Tuesday before week 13, SportSource, coin toss. Plain <code>sim</code> ids
+resolve to the current rules. The SEC/Big Ten/Big 12 2024
 procedures are ported from sdv-py's <code>cfb_standings.py</code>, and both engines
 return the same conference ranks (sdv-py 0.2.0 still advances to the next
 rung after a partial elimination; sdv-py releases after
@@ -299,7 +317,9 @@ published metric composite, e.g. Connelly SP+ / ESPN SOR / KPI /
 SportSource for the American, CUSA, and Mountain West),
 <code>cfp_ranked_final_week</code> (American/CUSA/Sun Belt: the best-ranked tied
 team advances if it won its final conference game, else the clause falls
-through; needs <code>tiebreaker_data$cfp_rankings</code>), <code>div_pct</code> (Sun Belt:
+through; needs <code>tiebreaker_data$cfp_rankings</code>), <code>cfp_ranking</code> (Pac-12
+two-team: the best-ranked tied team advances; needs
+<code>tiebreaker_data$cfp_rankings</code>), <code>div_pct</code> (Sun Belt:
 win pct vs same-division opponents; needs <code>teams$conf_division</code>), and
 <code>coin_toss</code>. After each team is
 seeded/eliminated the procedure restarts from the first rung with the
@@ -321,8 +341,8 @@ and <a href="https://cfbfastR.sportsdataverse.org" class="external-link">cfbfast
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">games</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"toy_games.csv"</span>, package <span class="op">=</span> <span class="st">"cfbseedR"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">teams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"toy_teams.csv"</span>, package <span class="op">=</span> <span class="st">"cfbseedR"</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">games</span> <span class="op">&lt;-</span> <span class="va">cfb_games_example</span></span></span>
+<span class="r-in"><span><span class="va">teams</span> <span class="op">&lt;-</span> <span class="va">cfb_teams_example</span></span></span>
 <span class="r-in"><span><span class="va">standings</span> <span class="op">&lt;-</span> <span class="fu">cfb_standings</span><span class="op">(</span><span class="va">games</span>, <span class="va">teams</span>, tiebreaker_depth <span class="op">=</span> <span class="st">"POINTS"</span>,</span></span>
 <span class="r-in"><span>                           verbosity <span class="op">=</span> <span class="st">"NONE"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">standings</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"team"</span>, <span class="st">"conference"</span>, <span class="st">"conf_rank"</span>, <span class="st">"conf_champ"</span><span class="op">)</span><span class="op">]</span></span></span>

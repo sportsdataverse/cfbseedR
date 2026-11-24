@@ -173,7 +173,7 @@ how to point the same code at a real season through cfbfastR.</p>
 <code class="sourceCode R"><span><span class="va">rules</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  Conference <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SEC"</span>, <span class="st">"Big Ten"</span>, <span class="st">"Big 12"</span>, <span class="st">"ACC (2026+)"</span>, <span class="st">"American"</span>,</span>
 <span>                 <span class="st">"Conference USA (2025+)"</span>, <span class="st">"MAC (2025+)"</span>, <span class="st">"Mountain West"</span>, <span class="st">"Sun Belt"</span>,</span>
-<span>                 <span class="st">"Pac-12 (re-formed)"</span><span class="op">)</span>,</span>
+<span>                 <span class="st">"Pac-12 (2026+)"</span><span class="op">)</span>,</span>
 <span>  Format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"single table"</span>, <span class="fl">8</span><span class="op">)</span>, <span class="st">"two divisions"</span>, <span class="st">"single table"</span><span class="op">)</span>,</span>
 <span>  `After win pct` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>    <span class="st">"h2h -&gt; common -&gt; descent -&gt; opp win% -&gt; capped margin (42/48) -&gt; draw"</span>,</span>
@@ -185,7 +185,7 @@ how to point the same code at a real season through cfbfastR.</p>
 <span>    <span class="st">"h2h -&gt; common -&gt; SportSource rating -&gt; descent -&gt; opp win% -&gt; draw"</span>,</span>
 <span>    <span class="st">"metric composite -&gt; h2h -&gt; draw"</span>,</span>
 <span>    <span class="st">"h2h -&gt; div win% -&gt; descent -&gt; common -&gt; CFP clause -&gt; composite -&gt; draw"</span>,</span>
-<span>    <span class="st">"no published procedure: generic fallback"</span></span>
+<span>    <span class="st">"3+: h2h (round robin only) -&gt; common -&gt; descent -&gt; opp win% -&gt; SportSource -&gt; draw; 2: h2h -&gt; descent -&gt; common -&gt; CFP rank -&gt; SportSource -&gt; draw"</span></span>
 <span>  <span class="op">)</span>,</span>
 <span>  check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
@@ -701,9 +701,9 @@ how to point the same code at a real season through cfbfastR.</p>
 <td headers="After-win-pct" class="gt_row gt_left">h2h -&gt; div win% -&gt; descent -&gt; common -&gt; CFP clause -&gt; composite -&gt; draw</td>
 </tr>
 <tr>
-<td headers="Conference" class="gt_row gt_left">Pac-12 (re-formed)</td>
+<td headers="Conference" class="gt_row gt_left">Pac-12 (2026+)</td>
 <td headers="Format" class="gt_row gt_left">single table</td>
-<td headers="After-win-pct" class="gt_row gt_left">no published procedure: generic fallback</td>
+<td headers="After-win-pct" class="gt_row gt_left">3+: h2h (round robin only) -&gt; common -&gt; descent -&gt; opp win% -&gt; SportSource -&gt; draw; 2: h2h -&gt; descent -&gt; common -&gt; CFP rank -&gt; SportSource -&gt; draw</td>
 </tr>
 </tbody>
 </table>
@@ -4426,36 +4426,36 @@ result as a gt table:</p>
 <th colspan="6" class="gt_group_heading" scope="colgroup" id="Alpha">Alpha</th>
     </tr>
 <tr class="gt_row_group_first">
-<td headers="Alpha  team" class="gt_row gt_left">A3</td>
+<td headers="Alpha  team" class="gt_row gt_left">A1</td>
 <td headers="Alpha  wins" class="gt_row gt_center">2.6</td>
-<td headers="Alpha  conf_champ" class="gt_row gt_center">0%</td>
-<td headers="Alpha  playoff" class="gt_row gt_center">98%</td>
-<td headers="Alpha  seed1" class="gt_row gt_center">52%</td>
-<td headers="Alpha  won_natty" class="gt_row gt_center">19%</td>
+<td headers="Alpha  conf_champ" class="gt_row gt_center">56%</td>
+<td headers="Alpha  playoff" class="gt_row gt_center">46%</td>
+<td headers="Alpha  seed1" class="gt_row gt_center">5%</td>
+<td headers="Alpha  won_natty" class="gt_row gt_center">7%</td>
 </tr>
 <tr>
-<td headers="Alpha  team" class="gt_row gt_left">A1</td>
+<td headers="Alpha  team" class="gt_row gt_left">A3</td>
 <td headers="Alpha  wins" class="gt_row gt_center">2.5</td>
-<td headers="Alpha  conf_champ" class="gt_row gt_center">57%</td>
-<td headers="Alpha  playoff" class="gt_row gt_center">42%</td>
-<td headers="Alpha  seed1" class="gt_row gt_center">3%</td>
-<td headers="Alpha  won_natty" class="gt_row gt_center">6%</td>
+<td headers="Alpha  conf_champ" class="gt_row gt_center">0%</td>
+<td headers="Alpha  playoff" class="gt_row gt_center">97%</td>
+<td headers="Alpha  seed1" class="gt_row gt_center">46%</td>
+<td headers="Alpha  won_natty" class="gt_row gt_center">22%</td>
 </tr>
 <tr>
 <td headers="Alpha  team" class="gt_row gt_left">A2</td>
-<td headers="Alpha  wins" class="gt_row gt_center">1.8</td>
-<td headers="Alpha  conf_champ" class="gt_row gt_center">43%</td>
-<td headers="Alpha  playoff" class="gt_row gt_center">33%</td>
+<td headers="Alpha  wins" class="gt_row gt_center">1.9</td>
+<td headers="Alpha  conf_champ" class="gt_row gt_center">44%</td>
+<td headers="Alpha  playoff" class="gt_row gt_center">35%</td>
 <td headers="Alpha  seed1" class="gt_row gt_center">7%</td>
-<td headers="Alpha  won_natty" class="gt_row gt_center">4%</td>
+<td headers="Alpha  won_natty" class="gt_row gt_center">5%</td>
 </tr>
 <tr>
 <td headers="Alpha  team" class="gt_row gt_left">A4</td>
-<td headers="Alpha  wins" class="gt_row gt_center">1.1</td>
+<td headers="Alpha  wins" class="gt_row gt_center">1.0</td>
 <td headers="Alpha  conf_champ" class="gt_row gt_center">0%</td>
-<td headers="Alpha  playoff" class="gt_row gt_center">13%</td>
+<td headers="Alpha  playoff" class="gt_row gt_center">11%</td>
 <td headers="Alpha  seed1" class="gt_row gt_center">0%</td>
-<td headers="Alpha  won_natty" class="gt_row gt_center">6%</td>
+<td headers="Alpha  won_natty" class="gt_row gt_center">3%</td>
 </tr>
 <tr class="gt_group_heading_row">
 <th colspan="6" class="gt_group_heading" scope="colgroup" id="Beta">Beta</th>
@@ -4463,16 +4463,16 @@ result as a gt table:</p>
 <tr class="gt_row_group_first">
 <td headers="Beta  team" class="gt_row gt_left">B1</td>
 <td headers="Beta  wins" class="gt_row gt_center">3.4</td>
-<td headers="Beta  conf_champ" class="gt_row gt_center">38%</td>
-<td headers="Beta  playoff" class="gt_row gt_center">67%</td>
-<td headers="Beta  seed1" class="gt_row gt_center">22%</td>
-<td headers="Beta  won_natty" class="gt_row gt_center">14%</td>
+<td headers="Beta  conf_champ" class="gt_row gt_center">40%</td>
+<td headers="Beta  playoff" class="gt_row gt_center">69%</td>
+<td headers="Beta  seed1" class="gt_row gt_center">23%</td>
+<td headers="Beta  won_natty" class="gt_row gt_center">17%</td>
 </tr>
 <tr>
 <td headers="Beta  team" class="gt_row gt_left">B2</td>
 <td headers="Beta  wins" class="gt_row gt_center">2.3</td>
-<td headers="Beta  conf_champ" class="gt_row gt_center">62%</td>
-<td headers="Beta  playoff" class="gt_row gt_center">60%</td>
+<td headers="Beta  conf_champ" class="gt_row gt_center">60%</td>
+<td headers="Beta  playoff" class="gt_row gt_center">56%</td>
 <td headers="Beta  seed1" class="gt_row gt_center">5%</td>
 <td headers="Beta  won_natty" class="gt_row gt_center">17%</td>
 </tr>
@@ -4480,15 +4480,15 @@ result as a gt table:</p>
 <td headers="Beta  team" class="gt_row gt_left">B3</td>
 <td headers="Beta  wins" class="gt_row gt_center">1.5</td>
 <td headers="Beta  conf_champ" class="gt_row gt_center">0%</td>
-<td headers="Beta  playoff" class="gt_row gt_center">53%</td>
+<td headers="Beta  playoff" class="gt_row gt_center">50%</td>
 <td headers="Beta  seed1" class="gt_row gt_center">2%</td>
-<td headers="Beta  won_natty" class="gt_row gt_center">23%</td>
+<td headers="Beta  won_natty" class="gt_row gt_center">19%</td>
 </tr>
 <tr>
 <td headers="Beta  team" class="gt_row gt_left">B4</td>
-<td headers="Beta  wins" class="gt_row gt_center">0.7</td>
+<td headers="Beta  wins" class="gt_row gt_center">0.8</td>
 <td headers="Beta  conf_champ" class="gt_row gt_center">0%</td>
-<td headers="Beta  playoff" class="gt_row gt_center">2%</td>
+<td headers="Beta  playoff" class="gt_row gt_center">4%</td>
 <td headers="Beta  seed1" class="gt_row gt_center">0%</td>
 <td headers="Beta  won_natty" class="gt_row gt_center">&lt;1%</td>
 </tr>
@@ -4499,9 +4499,9 @@ result as a gt table:</p>
 <td headers="FBS-Independents  team" class="gt_row gt_left">I1</td>
 <td headers="FBS-Independents  wins" class="gt_row gt_center">1.0</td>
 <td headers="FBS-Independents  conf_champ" class="gt_row gt_center">0%</td>
-<td headers="FBS-Independents  playoff" class="gt_row gt_center">32%</td>
-<td headers="FBS-Independents  seed1" class="gt_row gt_center">9%</td>
-<td headers="FBS-Independents  won_natty" class="gt_row gt_center">11%</td>
+<td headers="FBS-Independents  playoff" class="gt_row gt_center">31%</td>
+<td headers="FBS-Independents  seed1" class="gt_row gt_center">11%</td>
+<td headers="FBS-Independents  won_natty" class="gt_row gt_center">10%</td>
 </tr>
 </tbody>
 </table>
