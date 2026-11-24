@@ -17,7 +17,9 @@ NEWS.md.
   Tech to Duke and the SEC pairing to Alabama and Georgia, matching the
   actual title games.
 * The re-formed Pac-12's published 2026 tiebreaker procedure is
-  registered from 2026 (separate two-team and multiple-team lists).
+  registered from 2026 (separate two-team and multiple-team lists), and
+  conference names spelled in full (e.g. "Sun Belt Conference") now get
+  their conference's procedure instead of the generic cascade.
 * `cfb_standings(playoff_seeds = )` now passes a new `autobid` argument to
   `cfb_playoff_seeds()`; left `NULL`, the CFP rule follows the season, so
   pre-2026 seasons are seeded under the 2025 rule. Before, every season was
@@ -76,7 +78,7 @@ in the check directory while building the PDF manual. The package does not
 create it; the GitHub Actions checks of 0.2.0 and of the 0.3.0 development
 version on main report no notes.
 
-Tests: 275 expectations passed, 0 failed, 0 skipped, in 26 s.
+Tests: 287 expectations passed, 0 failed, 0 skipped, in 26 s.
 
 ## Reverse dependencies
 

@@ -60,7 +60,9 @@ Internal engine helpers live in `R/standings_utils.R` (mirrors nflseedR's
   epoch may carry a `two_team` rung list (Pac-12 2026), used whenever two
   teams remain tied. Every elimination restarts the walk at rung 1, and the
   SEC/Big Ten/ACC/Big 12/MAC/CUSA/Pac-12 descent rungs compare only
-  opponents every tied team played (`common_only`). External metrics (composites, CFP ranks, APR) enter only via
+  opponents every tied team played (`common_only`). Full conference names
+  ("Sun Belt Conference", "CUSA", ...) resolve through `.conf_aliases`, the
+  same map as sdv-py's `_CONF_ALIASES`. External metrics (composites, CFP ranks, APR) enter only via
   `tiebreaker_data`; missing inputs skip their rungs with a
   `tiebreak_notes` entry — never invent a metric.
 - **ELO defaults are fitted, not NFL:** `home_field = 59.4` (2.38 pt) and
@@ -96,8 +98,8 @@ one, flag the other.
   `%>%`), `.data` pronoun in dplyr verbs, `cli::cli_abort()` /
   `cli::cli_inform()` for messaging (never `stop()`/`message()`).
 - testthat edition 3; tests are offline against the bundled toy fixtures
-  (`inst/extdata/toy_games.csv` / `toy_teams.csv`). 275+ expectations
-  (64 tests, Nov 2026) must pass.
+  (`inst/extdata/toy_games.csv` / `toy_teams.csv`). 287+ expectations
+  (66 tests, Nov 2026) must pass.
 - roxygen2 with markdown; `@return` blocks carry column tables; examples
   run in the plain check (offline, under 5 s each; `\donttest{}` only for
   slow or networked ones). Run `devtools::document()` — never
