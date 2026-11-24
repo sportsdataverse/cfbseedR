@@ -193,8 +193,8 @@
 #' | `seed` | integer | CFP seed, only when `playoff_seeds` is not `NULL` (`NA` outside the field). |
 #'
 #' @examples
-#' games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
-#' teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
+#' games <- cfb_games_example
+#' teams <- cfb_teams_example
 #' standings <- cfb_standings(games, teams, tiebreaker_depth = "POINTS",
 #'                            verbosity = "NONE")
 #' standings[, c("team", "conference", "conf_rank", "conf_champ")]
@@ -354,8 +354,8 @@ cfb_standings <- function(games,
 #' | `seed` | integer | CFP seed in straight-seeding order; `NA` for teams outside the playoff field. |
 #'
 #' @examples
-#' games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
-#' teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
+#' games <- cfb_games_example
+#' teams <- cfb_teams_example
 #' standings <- cfb_standings(games, teams, tiebreaker_depth = "POINTS",
 #'                            verbosity = "NONE")
 #' rankings <- data.frame(team = c("B1", "I1", "A1", "A3"), rank = 1:4)

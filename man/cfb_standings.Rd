@@ -222,8 +222,8 @@ game (the cascade only orders them - see the design brief).
 }
 }
 \examples{
-games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
-teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
+games <- cfb_games_example
+teams <- cfb_teams_example
 standings <- cfb_standings(games, teams, tiebreaker_depth = "POINTS",
                            verbosity = "NONE")
 standings[, c("team", "conference", "conf_rank", "conf_champ")]

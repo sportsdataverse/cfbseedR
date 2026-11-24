@@ -54,8 +54,8 @@
 #' | `games` | data.frame | The input `games` table with `result` filled for this week's previously missing results (home margin, integer). |
 #'
 #' @examples
-#' games <- read.csv(system.file("extdata", "toy_games.csv", package = "cfbseedR"))
-#' teams <- read.csv(system.file("extdata", "toy_teams.csv", package = "cfbseedR"))
+#' games <- cfb_games_example
+#' teams <- cfb_teams_example
 #' games$result[games$week >= 3] <- NA
 #' teams$sim <- 1
 #' games$sim <- 1
