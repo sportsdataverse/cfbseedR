@@ -80,8 +80,9 @@
 #'   a data frame with columns `team` and `rank` (feeds the
 #'   `cfp_ranked_final_week` clause used by the American, CUSA, and Sun
 #'   Belt, and the Pac-12's two-team `cfp_ranking` rung, which uses the CFP
-#'   ranking released the Tuesday before week 13), and `apr`, a data frame with columns `team` and `apr`
-#'   (multi-year Academic Progress Rate, the CUSA 2024 policy's late fallback).
+#'   ranking released the Tuesday before week 13), and `apr`, a data frame
+#'   with columns `team` and `apr` (multi-year Academic Progress Rate, the
+#'   CUSA 2024 policy's late fallback).
 #'   A missing input -> that rung is skipped (noted).
 #' @param verbosity One of `"MIN"` (default), `"MAX"`, or `"NONE"`.
 #'   `"MAX"` logs every tied group as it's broken.

@@ -97,8 +97,9 @@ composite of the conference's published metrics), and \code{cfp_rankings},
 a data frame with columns \code{team} and \code{rank} (feeds the
 \code{cfp_ranked_final_week} clause used by the American, CUSA, and Sun
 Belt, and the Pac-12's two-team \code{cfp_ranking} rung, which uses the CFP
-ranking released the Tuesday before week 13), and \code{apr}, a data frame with columns \code{team} and \code{apr}
-(multi-year Academic Progress Rate, the CUSA 2024 policy's late fallback).
+ranking released the Tuesday before week 13), and \code{apr}, a data frame
+with columns \code{team} and \code{apr} (multi-year Academic Progress Rate, the
+CUSA 2024 policy's late fallback).
 A missing input -> that rung is skipped (noted).}
 
 \item{verbosity}{One of \code{"MIN"} (default), \code{"MAX"}, or \code{"NONE"}.
