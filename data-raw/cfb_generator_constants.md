@@ -61,19 +61,48 @@ Fit on all pooled seasons; buckets 0-3 / 4-5 / 6-7 / 8-20 games.
 |---|---|---|---|---|
 | `"points"` | 1.0929 / 0.9234 / 1.0305 / 1.0628 | 16.968 / 16.638 / 16.231 / 16.451 | 2.376 | this fit (free home fit 2.517) |
 | `"raw_epa"` | 28.585 / 34.321 / 45.097 / 52.025 | 17.931 / 17.240 / 16.981 / 17.393 | 2.376 | this fit (free home fit 3.207) |
-| `"adj_epa"` | 41.2286 / 49.1525 / 60.1753 / 65.5762 | 17.2358 | 2.6828 | sportsdataverse-py `cfb_prediction_constants`, modern era |
+| `"adj_epa"` | 31.8829 / 37.8903 / 45.1766 / 49.6115 | 17.0386 | 2.7625 | sportsdataverse-py `cfb_prediction_constants`, modern era, as refit in sportsdataverse-py #1300 (main `bcce2e681ee`) |
 
 Home field is fixed at the ELO generator's within-season estimate (2.376,
 `cfb_elo_constants.md`) for `"points"` and `"raw_epa"`: the free walk-forward
 fits (2.5-3.2) are inflated because early-season ratings under-explain team
 strength.
 
-**Adjusted EPA uses sportsdataverse-py's constants, not this fit.** This
-script's own adjustment (a play-weighted ridge, lambda 100 plays) gives
-59.33 / 53.53 / 60.58 / 63.17 points per EPA/play, SD 17.50 / 16.90 / 16.54
-/ 16.95 and a free home fit of 2.71, close to sportsdataverse-py's values. The
-package ships sportsdataverse-py's values so that a rating on that package's
-`adj_net` scale gives the same expected margins in R and Python. A rating
-from a different adjustment should pass its own `scale` and `margin_sd`.
-The comparison row above scores this script's adjustment with its own fitted
-coefficients.
+**Adjusted EPA uses sportsdataverse-py's constants, not this fit.** The two
+adjustments differ, and so do their scales:
+
+| Source | scale 0-3 / 4-5 / 6-7 / 8-20 | margin_sd | home |
+|---|---|---|---|
+| this script (play-weighted ridge, lambda 100 plays) | 59.33 / 53.53 / 60.58 / 63.17 | 17.50 / 16.90 / 16.54 / 16.95 | 2.71 (free fit) |
+| sportsdataverse-py `adj_net` (shipped) | 31.88 / 37.89 / 45.18 / 49.61 | 17.04 | 2.76 |
+
+The package ships sportsdataverse-py's values so that a rating on that
+package's `adj_net` scale gives the same expected margins in R and Python
+(sportsdataverse-py's own walk-forward of those constants is in its
+`cfb_prediction_constants.py`). A rating from another adjustment should pass
+its own `scale` and `margin_sd`. **The adjusted-EPA comparison row above
+scores this script's adjustment with its own fitted coefficients; the shipped
+`"adj_epa"` configuration is not scored here.**
+
+## Caveats
+
+- ELO's row is the shipped margin formula fed CollegeFootballData's pregame
+  ELO, which carries ratings over between seasons and updates them weekly on
+  real results. `cfbseedR_compute_results()` reproduces that only when given
+  carried-over starting ratings through `elo`; without them it starts every
+  team from a random rating.
+- Every score is one week ahead (ratings refreshed with each week's real
+  results). A simulation started at week w predicts weeks w to the end from
+  week-w ratings, a longer horizon this test did not score.
+- The points rating is a current-season ridge least-squares margin rating.
+  SP+ and FPI blend in preseason priors, so they are accepted inputs, not
+  validated ones, and the bucketed `scale` is an attenuation correction for
+  this rating.
+- From six games on, points and ELO differ by -0.02 (6-7) and -0.11 (8-20)
+  MAE, within sampling noise; Brier at 8+ games is 0.1858 (ELO) vs 0.1865.
+  Read them as level. Postseason games sit in the 8-20 bucket with late
+  regular-season weeks and are not scored separately.
+- Only Brier is reported for the win probabilities; no calibration table or
+  `margin_sd` coverage check was run.
+- Bucket 0-3 was fitted on 2-3-game ratings (scoring needs 2 prior games) and
+  is also applied at 0-1 games.
