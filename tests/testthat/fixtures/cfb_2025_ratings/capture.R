@@ -11,7 +11,7 @@
 # recorded, 11-13 games, the top bucket), "half" (games %/% 2, the middle
 # buckets), "quarter" (games %/% 4, the 0-3 bucket) and "missing" (Georgia
 # Southern dropped, so it rates 0 with no count, and Navy's games NA, so
-# Army-Navy has no count and takes the top bucket).
+# Navy's games use the opponent's count).
 pkgload::load_all(quiet = TRUE) # also sources tests/testthat/helper*.R
 dir <- file.path("tests", "testthat", "fixtures", "cfb_2025_ratings")
 ratings <- read.csv(file.path(dir, "ratings.csv"))
