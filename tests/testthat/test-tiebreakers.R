@@ -207,6 +207,15 @@ test_that("2025 ACC five-way tie at 6-2 sends Duke, as the ACC ruled", {
   expect_identical(title_ties_top2("ACC"), c("Virginia", "Duke"))
 })
 
+test_that("2025 title-ties fixture leaves out the non-conference NC State-Virginia game", {
+  games <- read.csv(test_path("fixtures", "cfb_2025_title_ties", "games.csv"))
+  teams <- read.csv(test_path("fixtures", "cfb_2025_title_ties", "teams.csv"))
+  st <- cfb_standings(games, teams, verbosity = "NONE")
+  va <- st[st$team == "Virginia", ]
+  expect_equal(c(va$conf_wins, va$conf_losses), c(7, 1))
+  expect_equal(sum(st$conf_games[st$conference == "ACC"]) / 2, 68)
+})
+
 test_that("2025 SEC four-way tie at 7-1 seeds Alabama, then Georgia", {
   expect_identical(title_ties_top2("SEC"), c("Alabama", "Georgia"))
 })
