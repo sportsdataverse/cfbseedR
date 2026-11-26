@@ -6,32 +6,37 @@
 # sdv-py's cfb_ratings_compute_results() parity test reads the same three
 # CSVs, so rerun it only when the defaults change on purpose.
 #
-# Every rating type is computed twice: with the `games` column as recorded
-# (end of the regular season, 11-13 games, so the top bucket) and with
-# `games %/% 2` (5-6 games, the middle buckets), so the bucket lookup is
-# covered too. `games_div` says which.
-pkgload::load_all(quiet = TRUE)
+# Every rating type is computed under four variants of the `games` column
+# (ratings_fixture_variant() in tests/testthat/helper.R): "full" (as
+# recorded, 11-13 games, the top bucket), "half" (games %/% 2, the middle
+# buckets), "quarter" (games %/% 4, the 0-3 bucket) and "missing" (Georgia
+# Southern dropped, so it rates 0 with no count, and Navy's games NA, so
+# Army-Navy has no count and takes the top bucket).
+pkgload::load_all(quiet = TRUE) # also sources tests/testthat/helper*.R
 dir <- file.path("tests", "testthat", "fixtures", "cfb_2025_ratings")
 ratings <- read.csv(file.path(dir, "ratings.csv"))
 games <- read.csv(file.path(dir, "games.csv"))
 
 grid <- expand.grid(
-  rating_type = c("points", "adj_epa", "raw_epa"), games_div = c(1L, 2L),
+  variant = c("full", "half", "quarter", "missing"),
+  rating_type = c("points", "adj_epa", "raw_epa"),
   stringsAsFactors = FALSE
 )
 out <- do.call(rbind, lapply(seq_len(nrow(grid)), function(i) {
   type <- grid$rating_type[i]
-  div <- grid$games_div[i]
+  variant <- grid$variant[i]
   m <- ratings_expected_margin(
     games$home_team, games$away_team, games$neutral,
-    ratings = data.frame(team = ratings$team, rating = ratings[[type]], games = ratings$games %/% div),
+    ratings = ratings_fixture_variant(ratings, type, variant),
     rating_type = type
   )
   data.frame(
-    rating_type = type, games_div = div, week = games$week,
+    rating_type = type, variant = variant, week = games$week,
     game_type = games$game_type, home_team = games$home_team,
     away_team = games$away_team, neutral = games$neutral,
-    expected = round(m$expected, 10), margin_sd = round(m$margin_sd, 10)
+    expected = sprintf("%.10f", m$expected), margin_sd = sprintf("%.10f", m$margin_sd)
   )
 }))
-write.csv(out, file.path(dir, "expected.csv"), row.names = FALSE)
+con <- file(file.path(dir, "expected.csv"), open = "wb") # LF line endings on every OS
+utils::write.csv(out, con, row.names = FALSE, quote = FALSE)
+close(con)

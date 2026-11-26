@@ -73,6 +73,19 @@ test_that("bucketed scale and margin_sd use the less-observed team's games", {
   expect_equal(m$expected, c(1, 0, 0, 0))
   expect_equal(m$margin_sd, c(11, 13, 13, 14))
 
+  # a count between buckets takes the lower one; below every bucket the bottom
+  gap <- ratings_expected_margin(
+    c("A", "A"), c("B", "B"), neutral = c(1, 1),
+    ratings = data.frame(team = c("A", "B"), rating = c(1, 0), games = c(3.5, 9)),
+    scale = c("0-3" = 1, "6-20" = 4), home_field = 0, margin_sd = c("2-3" = 11, "6-20" = 14)
+  )
+  expect_equal(gap$expected, c(1, 1))
+  low <- ratings_expected_margin(
+    "A", "B", 1, ratings = data.frame(team = c("A", "B"), rating = c(1, 0), games = c(1, 9)),
+    scale = 1, home_field = 0, margin_sd = c("2-3" = 11, "6-20" = 14)
+  )
+  expect_equal(low$margin_sd, 11)
+
   # without a games column every game takes the top bucket
   m2 <- ratings_expected_margin(
     "A", "B", 1, ratings = ratings[c("team", "rating")],
@@ -87,8 +100,8 @@ test_that("defaults follow rating_type", {
   adj <- ratings_expected_margin("A", "B", 0, ratings = r, rating_type = "adj_epa")
   raw <- ratings_expected_margin("A", "B", 0, ratings = r, rating_type = "raw_epa")
   expect_equal(pts$expected, 1.0628 * 0.1 + 2.376)
-  expect_equal(adj$expected, 65.5762 * 0.1 + 2.6828)
-  expect_equal(c(adj$margin_sd, raw$margin_sd), c(17.2358, 17.3931))
+  expect_equal(adj$expected, 49.6115 * 0.1 + 2.7625)
+  expect_equal(c(adj$margin_sd, raw$margin_sd), c(17.0386, 17.3931))
 })
 
 test_that("bad ratings or buckets abort with a clear message", {
@@ -105,6 +118,15 @@ test_that("bad ratings or buckets abort with a clear message", {
   expect_error(
     cfbseedR_ratings_compute_results(teams, games, 3, ratings = toy_ratings(), rating_type = "elo"),
     "rating_type"
+  )
+  na_rating <- toy_ratings()
+  na_rating$rating[1] <- NA
+  expect_error(cfbseedR_ratings_compute_results(teams, games, 3, ratings = na_rating), "NA")
+  chr_games <- transform(toy_ratings(), games = "8")
+  expect_error(cfbseedR_ratings_compute_results(teams, games, 3, ratings = chr_games), "non-negative")
+  expect_error(
+    cfbseedR_ratings_compute_results(teams, games, 3, ratings = toy_ratings(), margin_sd = -1),
+    "at least 0"
   )
 })
 
@@ -129,11 +151,11 @@ test_that("expected margins match the 2025 fixture (shared with sdv-py)", {
   games <- read.csv(file.path(dir, "games.csv"))
   expected <- read.csv(file.path(dir, "expected.csv"))
   for (type in c("points", "adj_epa", "raw_epa")) {
-    for (div in 1:2) {
-      want <- expected[expected$rating_type == type & expected$games_div == div, ]
+    for (variant in c("full", "half", "quarter", "missing")) {
+      want <- expected[expected$rating_type == type & expected$variant == variant, ]
       m <- ratings_expected_margin(
         games$home_team, games$away_team, games$neutral,
-        ratings = data.frame(team = ratings$team, rating = ratings[[type]], games = ratings$games %/% div),
+        ratings = ratings_fixture_variant(ratings, type, variant),
         rating_type = type
       )
       expect_identical(want$home_team, games$home_team)

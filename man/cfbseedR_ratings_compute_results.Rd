@@ -31,16 +31,17 @@ columns \code{sim} and \code{team}. May carry an \code{elo} column between weeks
 \code{\link[=cfb_simulations]{cfb_simulations()}} passes to every \code{compute_results} function.}
 
 \item{ratings}{A data frame with one row per team: \code{team} (character,
-matching the team names in \code{games}), \code{rating} (numeric, on the scale of
-\code{rating_type}), and optionally \code{games} (games played behind each
-rating). Teams missing from \code{ratings} get a rating of 0 (league average).}
+matching the team names in \code{games}), \code{rating} (numeric, no \code{NA}, on the
+scale of \code{rating_type}), and optionally \code{games} (non-negative number of
+games behind each rating; \code{NA} = unknown). Teams missing from \code{ratings}
+get a rating of 0 (league average).}
 
 \item{rating_type}{One of \code{"points"} (default), \code{"adj_epa"} or
 \code{"raw_epa"}. Picks the default \code{scale}, \code{home_field} and \code{margin_sd}.}
 
 \item{scale}{Points of margin per unit of rating difference. Either one
 number or a named vector keyed by games-played buckets written
-\code{"lo-hi"} (for example \code{c("0-3" = 41, "4-5" = 49, "6-7" = 60, "8-20" = 66)}).
+\code{"lo-hi"} (for example \code{c("0-3" = 32, "4-5" = 38, "6-7" = 45, "8-20" = 50)}).
 \code{NULL} uses the default for \code{rating_type}.}
 
 \item{home_field}{Home-field advantage in points, added to the expected
@@ -48,8 +49,8 @@ margin of games that are not neutral. \code{NULL} uses the default for
 \code{rating_type}.}
 
 \item{margin_sd}{Standard deviation, in points, of a simulated margin
-around its expected value: one number or a named bucket vector, as for
-\code{scale}. \code{NULL} uses the default for \code{rating_type}.}
+around its expected value (at least 0): one number or a named bucket
+vector, as for \code{scale}. \code{NULL} uses the default for \code{rating_type}.}
 }
 \value{
 A list with two elements, as required by the \code{compute_results}
@@ -65,8 +66,8 @@ draws each unplayed game's margin from fixed team ratings instead of the
 dynamic ELO of the default \code{\link[=cfbseedR_compute_results]{cfbseedR_compute_results()}}. Three kinds of
 rating are supported, each with defaults fitted on FBS results:
 \itemize{
-\item \code{"points"}: a margin rating in points per game (for example SP+, FPI or
-a least-squares margin rating).
+\item \code{"points"}: a margin rating in points per game against an average team
+(for example a least-squares margin rating, SP+ or FPI).
 \item \code{"adj_epa"}: opponent-adjusted net EPA per play (offensive EPA/play
 minus defensive EPA/play allowed, adjusted for opponents).
 \item \code{"raw_epa"}: the same net EPA per play without opponent adjustment.
@@ -78,39 +79,52 @@ Use it through \code{...} of \code{\link[=cfb_simulations]{cfb_simulations()}}:
 \details{
 The expected home margin of a game is
 \code{scale * (rating_home - rating_away) + home_field} (no \code{home_field} on a
-neutral site), and the simulated margin is drawn from
-\code{rnorm(mean = expected, sd = margin_sd)} and rounded away from zero. A
-simulated postseason tie is re-decided by the win probability
-\code{pnorm(expected / margin_sd)} with a 1-point margin. Ratings stay fixed
-through the season, so \code{teams} is returned unchanged.
+neutral site). The simulated margin is a draw from
+\code{rnorm(mean = expected, sd = margin_sd)} rounded away from zero: up to the
+next whole number when positive, down when negative. A draw of exactly 0
+in a postseason game (in practice only with \code{margin_sd = 0}) is re-decided
+by the win probability \code{pnorm(expected / margin_sd)} with a 1-point margin.
+Ratings stay fixed through the season, so \code{teams} is returned unchanged.
 
 Bucketed \code{scale} and \code{margin_sd} take the bucket of the less-observed
 team of a game: the smaller \code{games} value of the two (a team missing from
-\code{ratings} does not count). A count above every bucket takes the top one,
-below every bucket the bottom one. Without a \code{games} column every game
-takes the top bucket, which treats the ratings as full-season ratings.
+\code{ratings}, or with \code{NA} games, does not count). A count takes the bucket
+with the largest lower bound at or below it, so a count between buckets
+takes the lower one, a count above every bucket the top one and a count
+below every bucket the bottom one. When neither team has a count (no
+\code{games} column, say) the game takes the top bucket, which treats the
+ratings as full-season ratings; early in a season that overstates how
+much the ratings are worth, so pass \code{games}.
 
 Defaults by \code{rating_type} (buckets 0-3 / 4-5 / 6-7 / 8-20 games):\tabular{llll}{
    \code{rating_type} \tab \code{scale} \tab \code{margin_sd} \tab \code{home_field} \cr
    \code{"points"} \tab 1.093 / 0.923 / 1.031 / 1.063 \tab 16.97 / 16.64 / 16.23 / 16.45 \tab 2.376 \cr
-   \code{"adj_epa"} \tab 41.23 / 49.15 / 60.18 / 65.58 \tab 17.24 \tab 2.683 \cr
+   \code{"adj_epa"} \tab 31.88 / 37.89 / 45.18 / 49.61 \tab 17.04 \tab 2.763 \cr
    \code{"raw_epa"} \tab 28.58 / 34.32 / 45.10 / 52.02 \tab 17.93 / 17.24 / 16.98 / 17.39 \tab 2.376 \cr
 }
 
 
 The \code{"points"} and \code{"raw_epa"} values are a walk-forward fit on FBS-vs-FBS
-games 2014-2025 (2020 excluded), with \code{home_field} fixed at the ELO
-generator's within-season estimate. The \code{"adj_epa"} values are the
-modern-era pregame-prediction constants of sportsdataverse-py, so a rating
-on that package's adjusted-EPA scale (\code{adj_net}) gives the same expected
-margins in both packages. Fit record: \code{data-raw/cfb_generator_constants.md}.
+games 2014-2025 (2020 excluded) of a current-season least-squares margin
+rating and of net EPA per play, with \code{home_field} fixed at the ELO
+generator's within-season estimate. The \code{"adj_epa"} values are
+sportsdataverse-py's modern-era pregame-prediction constants, fitted to
+that package's \code{adj_net} rating; a rating from another opponent adjustment
+may need its own \code{scale} and \code{margin_sd}. Fit record:
+\url{https://github.com/sportsdataverse/cfbseedR/blob/main/data-raw/cfb_generator_constants.md}.
 
-In a walk-forward comparison over the same seasons the default ELO
-generator predicted margins best overall (MAE 12.94 against 13.10 for
-points, 13.38 for adjusted EPA and 13.70 for raw EPA), because these
-ratings carry no preseason prior. Once both teams have about six games
-the points rating ties or beats ELO, which makes it a good choice for a
-late-season or postseason simulation from current ratings.
+In a walk-forward test over the same seasons, scoring each week from
+ratings built on earlier weeks, the ELO margin formula fed with
+CollegeFootballData's pregame ELO (carried over between seasons) had the
+smallest error overall: MAE 12.94 points, against 13.10 for the
+least-squares points rating and 13.38 / 13.70 for the fitting script's
+adjusted / raw EPA ratings. Its edge is early in the season, where the
+current-season ratings have little to go on. From about six games on the
+points rating is level with it (MAE 12.93 against 13.04 with 8 or more
+games), so a points rating is a reasonable input for a late-season or
+postseason simulation. To get ELO's early-season advantage from
+\code{\link[=cfbseedR_compute_results]{cfbseedR_compute_results()}}, pass carried-over starting ratings as \code{elo};
+without them every team starts from a random rating.
 }
 \examples{
 games <- cfb_games_example
