@@ -1,6 +1,9 @@
 # Fit the defaults of cfbseedR_ratings_compute_results() and compare every
 # results generator against the default ELO generator, walk-forward, on real
-# FBS seasons.
+# FBS seasons. The "points" and "raw_epa" defaults are this fit; the
+# "adj_epa" defaults are sportsdataverse-py's prediction constants instead
+# (see data-raw/cfb_generator_constants.md), and this script's adj_epa fit is
+# kept as the comparison.
 #
 # Run from the package root (needs network; cfbfastR >= 2.0):
 #   Rscript data-raw/cfb_generator_constants.R
