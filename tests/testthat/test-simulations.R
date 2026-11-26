@@ -306,3 +306,21 @@ test_that("simulations_verify_fct names each broken part of the compute_results 
     "overwrote existing results"
   )
 })
+
+test_that("a conf_game FALSE game stays out of simulated conference standings", {
+  games <- sim_input()
+  games$conf_game <- NA
+  games$conf_game[games$home_team == "A1" & games$away_team == "A2" & games$week == 1] <- FALSE
+  run <- function(g) {
+    set.seed(11)
+    suppressMessages(cfb_simulations(
+      g, load_toy_teams(), simulations = 3, playoff_seeds = 4, tiebreaker_depth = "SOS"
+    ))$standings
+  }
+  flagged <- run(games)
+  plain <- run(games[setdiff(names(games), "conf_game")])
+  a1 <- function(st) st$conf_games[st$team == "A1"]
+  expect_equal(a1(flagged), a1(plain) - 1)
+  # still an A1 win in the overall record
+  expect_equal(flagged$games[flagged$team == "A1"], plain$games[plain$team == "A1"])
+})

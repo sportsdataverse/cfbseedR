@@ -15,6 +15,13 @@
   ACC, Big 12 and American members change ranks but no championship-game
   berth. `NA` or a missing column keeps the old behavior.
 
+* `cfb_games_from_schedule()` now returns the `home_points` / `away_points`
+  columns that `cfb_standings()` documents it as emitting, so a mapped
+  cfbfastR schedule reaches the SEC capped-scoring-margin tiebreaker instead
+  of skipping it (in simulations, a tied group with a simulated conference
+  game still skips it). sdv-py's `cfb_games_from_schedule()` already returned
+  them.
+
 * The MAC and Conference USA tiebreakers are now dated epochs that follow
   the published procedures. The MAC uses its 2024 order (common opponents,
   order of finish, opponents' win pct, then SportSource) through 2024, and
@@ -90,11 +97,6 @@
   cascade. `cfb_playoff_seeds()` already accepted these spellings.
 
 ## Bug fixes
-
-* `cfb_games_from_schedule()` now returns the `home_points` / `away_points`
-  columns that `cfb_standings()` documents it as emitting, so a mapped
-  cfbfastR schedule reaches the SEC capped-scoring-margin tiebreaker instead
-  of skipping it. sdv-py's `cfb_games_from_schedule()` already returned them.
 
 * The 2026 Notre Dame clause in `cfb_playoff_seeds()` now also recognises
   Notre Dame by its ESPN team id `"87"`, so a teams table keyed by id no
