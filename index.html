@@ -182,12 +182,25 @@
 <span><span class="co"># sched &lt;- cfbfastR::load_cfb_schedules(2024)</span></span>
 <span><span class="co"># games &lt;- cfb_games_from_schedule(sched)</span></span></code></pre></div>
 <p>See the <a href="https://cfbseedR.sportsdataverse.org/articles/getting-started.html">Getting started</a> article for a full walkthrough and <a href="https://cfbseedR.sportsdataverse.org/articles/simulating-seasons.html">Simulating seasons</a> for custom <code>compute_results</code> functions, the tiebreaker ladder, and CFP-12 seeding rules.</p>
+<div class="section level3">
+<h3 id="results-generators">Results generators<a class="anchor" aria-label="anchor" href="#results-generators"></a>
+</h3>
+<p>Simulations use the ELO generator <code><a href="reference/cfbseedR_compute_results.html">cfbseedR_compute_results()</a></code> by default. <code><a href="reference/cfbseedR_ratings_compute_results.html">cfbseedR_ratings_compute_results()</a></code> simulates from fixed team ratings instead: points (SP+, FPI or your own margin rating), adjusted EPA/play or raw EPA/play, each with defaults fitted on FBS results.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># sp_plus: a data frame with team, rating (points per game) and games</span></span>
+<span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cfb_simulations.html">cfb_simulations</a></span><span class="op">(</span></span>
+<span>  <span class="va">games</span>, <span class="va">teams</span>,</span>
+<span>  compute_results <span class="op">=</span> <span class="va">cfbseedR_ratings_compute_results</span>,</span>
+<span>  ratings <span class="op">=</span> <span class="va">sp_plus</span>, rating_type <span class="op">=</span> <span class="st">"points"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>ELO predicted margins best over whole seasons in a walk-forward test on 2014-2025; a points rating ties or beats it once teams have about six games, which suits late-season and postseason simulations. <a href="https://cfbseedR.sportsdataverse.org/articles/results-generators.html">Choosing a results generator</a> compares them.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="function-naming-convention">
 <strong>Function naming convention</strong><a class="anchor" aria-label="anchor" href="#function-naming-convention"></a>
 </h2>
-<p>Following the SportsDataverse convention, the engine’s user-facing exports are prefixed with <code>cfb_</code>: <code><a href="reference/cfb_standings.html">cfb_standings()</a></code>, <code><a href="reference/cfb_playoff_seeds.html">cfb_playoff_seeds()</a></code>, <code><a href="reference/cfb_simulations.html">cfb_simulations()</a></code>, and <code><a href="reference/cfb_games_from_schedule.html">cfb_games_from_schedule()</a></code>. Two helpers mirror their nflseedR namesakes instead: <code><a href="reference/cfbseedR_compute_results.html">cfbseedR_compute_results()</a></code> (the default results generator, after <code>nflseedR_compute_results()</code>) and <code><a href="reference/simulations_verify_fct.html">simulations_verify_fct()</a></code> (the custom-generator contract checker).</p>
+<p>Following the SportsDataverse convention, the engine’s user-facing exports are prefixed with <code>cfb_</code>: <code><a href="reference/cfb_standings.html">cfb_standings()</a></code>, <code><a href="reference/cfb_playoff_seeds.html">cfb_playoff_seeds()</a></code>, <code><a href="reference/cfb_simulations.html">cfb_simulations()</a></code>, and <code><a href="reference/cfb_games_from_schedule.html">cfb_games_from_schedule()</a></code>. Two helpers mirror their nflseedR namesakes instead: <code><a href="reference/cfbseedR_compute_results.html">cfbseedR_compute_results()</a></code> (the default results generator, after <code>nflseedR_compute_results()</code>, with <code><a href="reference/cfbseedR_ratings_compute_results.html">cfbseedR_ratings_compute_results()</a></code> as its ratings-driven sibling) and <code><a href="reference/simulations_verify_fct.html">simulations_verify_fct()</a></code> (the custom-generator contract checker).</p>
 </div>
 <div class="section level2">
 <h2 id="cfb-semantics">
@@ -236,6 +249,8 @@
 <ul>
 <li><a href="https://cfbseedR.sportsdataverse.org/articles/getting-started.html">Getting started with cfbseedR</a></li>
 <li><a href="https://cfbseedR.sportsdataverse.org/articles/simulating-seasons.html">Simulating seasons</a></li>
+<li><a href="https://cfbseedR.sportsdataverse.org/articles/results-generators.html">Choosing a results generator</a></li>
+<li><a href="https://cfbseedR.sportsdataverse.org/articles/ratings-and-epa.html">Ratings and EPA inputs</a></li>
 <li><a href="https://cfbseedR.sportsdataverse.org/articles/tiebreakers-and-cfp.html">Cookbook: tiebreakers &amp; the CFP, past / present / future</a></li>
 </ul>
 </li>
@@ -371,12 +386,12 @@
 </h2>
 <p>To cite the <a href="https://cfbseedR.sportsdataverse.org/"><strong><code>cfbseedR</code></strong></a> R package in publications, use:</p>
 <p>BibTeX Citation</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="va">@misc</span>{<span class="ot">gilani_cfbseedR</span>,</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="dt">author</span> = {Saiem Gilani and Sebastian Carl and Lee Sharpe},</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="dt">title</span> = {cfbseedR: The SportsDataverse's R Package to Simulate and Evaluate College Football Seasons.},</span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="dt">url</span> = {https://cfbseedR.sportsdataverse.org/},</span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="dt">year</span> = {2026}</span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="va">@misc</span>{<span class="ot">gilani_cfbseedR</span>,</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="dt">author</span> = {Saiem Gilani and Sebastian Carl and Lee Sharpe},</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="dt">title</span> = {cfbseedR: The SportsDataverse's R Package to Simulate and Evaluate College Football Seasons.},</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="dt">url</span> = {https://cfbseedR.sportsdataverse.org/},</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="dt">year</span> = {2026}</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>}</span></code></pre></div>
 <p>If you use the season-simulation methodology, please also cite <a href="https://nflseedr.com" class="external-link">nflseedR</a> by Sebastian Carl and Lee Sharpe.</p>
 </div>
 <div class="section level2">
