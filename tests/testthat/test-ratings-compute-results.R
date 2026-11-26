@@ -178,3 +178,30 @@ test_that("cfb_simulations runs on the ratings generator", {
   expect_s3_class(sim, "cfbseedR_simulation")
   expect_false(anyNA(sim$games$result))
 })
+
+test_that("edge inputs: no games to fill, no neutral column, duplicates and bad constants", {
+  teams <- data.frame(sim = 1, team = c("A", "B"), conference = "X")
+  games <- data.frame(
+    sim = 1, week = 1, game_type = "REG", home_team = "A", away_team = "B",
+    result = NA_integer_
+  )
+  r <- data.frame(team = c("A", "B"), rating = c(1, 0))
+  # nothing unplayed in week 2: inputs come back as they are
+  same <- cfbseedR_ratings_compute_results(teams, games, 2, ratings = r)
+  expect_identical(same$games, games)
+  # no neutral column: home field applies
+  out <- cfbseedR_ratings_compute_results(teams, games, 1, ratings = r, scale = 1, home_field = 3, margin_sd = 0)
+  expect_identical(out$games$result, 4L)
+  expect_error(
+    cfbseedR_ratings_compute_results(teams, games, 1, ratings = rbind(r, r)),
+    "more than one row"
+  )
+  expect_error(
+    cfbseedR_ratings_compute_results(teams, games, 1, ratings = r, home_field = c(1, 2)),
+    "single number"
+  )
+  expect_error(
+    cfbseedR_ratings_compute_results(teams, games, 1, ratings = r, scale = "a"),
+    "named numeric vector"
+  )
+})
