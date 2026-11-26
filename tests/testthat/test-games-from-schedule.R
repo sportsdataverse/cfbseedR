@@ -14,12 +14,14 @@ test_that("cfb_games_from_schedule maps the cfbfastR schedule shape", {
 
   expect_named(
     games,
-    c("season", "week", "game_type", "home_team", "away_team", "result", "neutral")
+    c("season", "week", "game_type", "home_team", "away_team", "result", "neutral",
+      "conf_game")
   )
   expect_equal(games$season, rep(2024, 4))
   expect_equal(games$game_type, c("REG", "REG", "CONF_CHAMP", "POST"))
   expect_equal(games$result, c(7, 4, 3, NA))
   expect_equal(games$neutral, c(0L, 0L, 1L, 1L))
+  expect_equal(games$conf_game, rep(NA, 4))
 })
 
 test_that("cfb_games_from_schedule works without optional columns", {
@@ -57,4 +59,32 @@ test_that("mapped schedule feeds cfb_standings end to end", {
   st <- cfb_standings(games, teams, verbosity = "NONE")
   expect_equal(st$conf_rank[st$team == "X1"], 1L)
   expect_true("season" %in% names(st))
+})
+
+test_that("a same-conference game the schedule marks non-conference stays out of the standings", {
+  # Real 2025 rows: NC State and Virginia (both ACC) met in week 2 as a
+  # non-conference game (conference_game FALSE in the schedule); Virginia
+  # and Florida State met later as an ACC game.
+  schedule <- data.frame(
+    season = 2025, week = c(2, 6), season_type = "regular",
+    home_team = c("NC State", "Virginia"),
+    away_team = c("Virginia", "Florida State"),
+    home_points = c(35, 46), away_points = c(31, 38),
+    neutral_site = FALSE, conference_game = c(FALSE, TRUE),
+    notes = NA_character_
+  )
+  games <- cfb_games_from_schedule(schedule)
+  expect_equal(games$conf_game, c(FALSE, TRUE))
+  teams <- data.frame(team = c("NC State", "Virginia", "Florida State"), conference = "ACC")
+  st <- cfb_standings(games, teams, verbosity = "NONE")
+  row <- function(t) st[st$team == t, ]
+  expect_equal(row("NC State")$conf_games, 0)
+  expect_equal(row("NC State")$wins, 1L)
+  expect_equal(row("Virginia")$conf_games, 1)
+  expect_equal(row("Virginia")$conf_wins, 1)
+  expect_equal(row("Virginia")$losses, 1L)
+
+  # Without the flag the same two games count as two ACC games for Virginia.
+  st0 <- cfb_standings(games[setdiff(names(games), "conf_game")], teams, verbosity = "NONE")
+  expect_equal(st0$conf_games[st0$team == "Virginia"], 2)
 })

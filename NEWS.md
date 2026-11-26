@@ -2,6 +2,19 @@
 
 ## Changes that alter computed results
 
+* A game between two members of one conference no longer counts in the
+  conference standings when the schedule marks it as non-conference.
+  `cfb_games_from_schedule()` carries the schedule's `conference_game` flag
+  as a new `conf_game` column, and `cfb_standings()` / `cfb_simulations()`
+  leave a `REG` game whose `conf_game` is `FALSE` out of the conference
+  record and every tiebreaker (it still counts in the overall record).
+  Before, any regular-season game between two members counted, so the
+  Pac-12's 2026 Flex Week games (played after the conference schedule ended
+  on Nov 21) and Mountain West members' non-conference meetings would have
+  entered the 2026 standings; the 2024-2025 non-conference meetings between
+  ACC, Big 12 and American members change ranks but no championship-game
+  berth. `NA` or a missing column keeps the old behavior.
+
 * The MAC and Conference USA tiebreakers are now dated epochs that follow
   the published procedures. The MAC uses its 2024 order (common opponents,
   order of finish, opponents' win pct, then SportSource) through 2024, and

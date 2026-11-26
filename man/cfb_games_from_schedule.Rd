@@ -10,8 +10,11 @@ cfb_games_from_schedule(schedule)
 \item{schedule}{A data frame with at least \code{season}, \code{week},
 \code{season_type}, \code{home_team}, \code{away_team}. Optional columns used when
 present: \code{home_points}/\code{away_points} (to compute \code{result}),
-\code{neutral_site}, and \code{notes} (games whose notes mention "championship"
-are classified as \code{"CONF_CHAMP"}).}
+\code{neutral_site}, \code{conference_game} (carried as \code{conf_game}, so a game
+between two members of one conference that the schedule marks as
+non-conference stays out of the conference standings), and \code{notes}
+(games whose notes mention "championship" are classified as
+\code{"CONF_CHAMP"}).}
 }
 \value{
 A tibble in the engine games schema, ready for
@@ -24,6 +27,7 @@ A tibble in the engine games schema, ready for
    \code{away_team} \tab character \tab Away team name. \cr
    \code{result} \tab numeric \tab Home margin (home minus away points); \code{NA} for unplayed games. \cr
    \code{neutral} \tab integer \tab Neutral-site flag (0/1). \cr
+   \code{conf_game} \tab logical \tab The schedule's \code{conference_game} flag (\code{NA} when the schedule has none). An explicit \code{FALSE} keeps a same-conference game out of the conference standings. \cr
 }
 }
 \description{

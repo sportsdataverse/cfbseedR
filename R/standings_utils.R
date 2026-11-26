@@ -145,16 +145,21 @@ standings_double_games <- function(games, teams) {
     games$home_points <- NA_real_
     games$away_points <- NA_real_
   }
+  # Optional schedule flag: an explicit FALSE marks a game between two
+  # members of one conference that does not count in its standings (a
+  # non-conference game, the Pac-12's 2026 Flex Week). NA / absent = derive.
+  if (!"conf_game" %in% names(games)) games$conf_game <- NA
+  games$not_conf <- as.logical(games$conf_game) %in% FALSE
   dg <- dplyr::bind_rows(
     dplyr::transmute(
       games, .data$sim, .data$game_type, .data$week,
       team = .data$away_team, opp = .data$home_team, result = -.data$result,
-      pf = .data$away_points, pa = .data$home_points
+      pf = .data$away_points, pa = .data$home_points, not_conf = .data$not_conf
     ),
     dplyr::transmute(
       games, .data$sim, .data$game_type, .data$week,
       team = .data$home_team, opp = .data$away_team, result = .data$result,
-      pf = .data$home_points, pa = .data$away_points
+      pf = .data$home_points, pa = .data$away_points, not_conf = .data$not_conf
     )
   )
   dg |>
@@ -168,11 +173,14 @@ standings_double_games <- function(games, teams) {
       team_conf = unname(conf_vec[.data$team]),
       opp_conf = unname(conf_vec[.data$opp]),
       # Conference games: REG games between two members of the same
-      # (non-independent) conference. CONF_CHAMP explicitly excluded.
+      # (non-independent) conference that the schedule does not flag as
+      # non-conference. CONF_CHAMP explicitly excluded.
       conf_game = .data$game_type == "REG" &
         !is_independent(.data$team_conf) &
-        .data$team_conf == .data$opp_conf
-    )
+        .data$team_conf == .data$opp_conf &
+        !.data$not_conf
+    ) |>
+    dplyr::select(-"not_conf")
 }
 
 # Initial standings: overall record over ALL games (REG + CONF_CHAMP + POST),
