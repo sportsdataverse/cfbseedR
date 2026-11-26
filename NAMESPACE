@@ -6,6 +6,7 @@ export(cfb_playoff_seeds)
 export(cfb_simulations)
 export(cfb_standings)
 export(cfbseedR_compute_results)
+export(cfbseedR_ratings_compute_results)
 export(fmt_pct_special)
 export(simulations_verify_fct)
 importFrom(rlang,

@@ -9,10 +9,11 @@ week-by-week season simulation with a pluggable results generator. It
 adapts [nflseedR](https://nflseedr.com) (MIT, Lee Sharpe & Sebastian Carl)
 to college football semantics. Docs: https://cfbseedR.sportsdataverse.org
 
-## Exports (8 + 2 datasets)
+## Exports (9 + 2 datasets)
 
 `cfb_standings()`, `cfb_playoff_seeds()`, `cfb_simulations()`,
-`cfbseedR_compute_results()`, `simulations_verify_fct()`,
+`cfbseedR_compute_results()`, `cfbseedR_ratings_compute_results()`,
+`simulations_verify_fct()`,
 `cfb_games_from_schedule()`, `fmt_pct_special()`, plus the S3
 `summary.cfbseedR_simulation()`. Exported data: `cfb_games_example`,
 `cfb_teams_example` — use these in examples, not `read.csv(system.file())`. User-facing engine functions use the `cfb_`
@@ -35,6 +36,11 @@ prefix; the two helpers mirror their nflseedR namesakes.
   cascade at rung 1.
 - `cfbseedR_compute_results()` defaults (`home_field = 59.4`, `margin_sd = 16.7`)
   are fitted in `data-raw/cfb_elo_constants.R`; keep them equal to sdv-py's.
+  Both generators re-break a simulated postseason tie by +-1, as sdv-py does.
+- `cfbseedR_ratings_compute_results()` defaults: `"points"` / `"raw_epa"` from
+  `data-raw/cfb_generator_constants.R`; `"adj_epa"` from sdv-py's
+  `cfb_prediction_constants` (keep equal; `fixtures/cfb_2025_ratings/expected.csv`
+  is the shared parity oracle). ELO stays the default generator.
 - Simulations are chunked and run through `furrr::future_map()`;
   `sims_run_chunk()` must stay self-contained (no shared state) or parallel
   workers break, and a parallel plan must match sequential bit-for-bit for

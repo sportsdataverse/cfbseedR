@@ -69,8 +69,8 @@ Pass \code{home_field} and \code{margin_sd} through \code{\link[=cfb_simulations
 override them, e.g. \verb{home_field = 20, margin_sd = 13} reproduces the
 pre-0.3.0 (NFL) behaviour. Ties are possible in the regular season only;
 a simulated postseason tie is re-decided by the win probability with a
-3-point margin. nflseedR's rest-day adjustment is dropped (no rest data
-in the CFB schema).
+1-point margin (3 points before cfbseedR 0.3.0). nflseedR's rest-day
+adjustment is dropped (no rest data in the CFB schema).
 }
 \examples{
 games <- cfb_games_example
@@ -83,5 +83,6 @@ out$games[out$games$week == 3, ]
 
 }
 \seealso{
-\code{\link[=cfb_simulations]{cfb_simulations()}}, \code{\link[=simulations_verify_fct]{simulations_verify_fct()}}
+\code{\link[=cfbseedR_ratings_compute_results]{cfbseedR_ratings_compute_results()}} for a generator driven by
+fixed team ratings, \code{\link[=cfb_simulations]{cfb_simulations()}}, \code{\link[=simulations_verify_fct]{simulations_verify_fct()}}
 }

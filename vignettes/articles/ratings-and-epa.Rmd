@@ -1,0 +1,220 @@
+---
+title: "Ratings and EPA inputs"
+description: "Building points, adjusted EPA and raw EPA ratings from cfbfastR for the ratings generator, and how each generator scored on real seasons."
+author: "Saiem Gilani <br><a href='https://x.com/saiemgilani' target='blank'><img src='https://img.shields.io/twitter/follow/saiemgilani?color=blue&amp;label=%40saiemgilani&amp;logo=x&amp;style=for-the-badge' alt='@saiemgilani'/></a> <a href='https://github.com/saiemgilani' target='blank'><img src='https://img.shields.io/github/followers/saiemgilani?color=eee&amp;logo=Github&amp;style=for-the-badge' alt='@saiemgilani'/></a>"
+opengraph:
+  image:
+    src: "https://github.com/sportsdataverse/cfbfastR-data/blob/main/themes/social_card_cfbseedR.png?raw=true"
+  twitter:
+    card: summary_large_image
+    creator: "@saiemgilani"
+output: html_document
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+[Choosing a results generator](https://cfbseedR.sportsdataverse.org/articles/results-generators.html)
+introduces `cfbseedR_ratings_compute_results()` on toy data. This article
+feeds it real ratings from [cfbfastR](https://cfbfastR.sportsdataverse.org/)
+and reports how every generator did on real seasons. The code needs network
+access (and, for the CollegeFootballData endpoints, a `CFBD_API_KEY`), so it
+is shown but not run here.
+
+```{r setup}
+library(cfbseedR)
+library(dplyr)
+
+season <- 2026
+sched <- cfbfastR::load_cfb_schedules(season)
+games <- cfb_games_from_schedule(sched)
+teams <- unique(data.frame(
+  team = c(sched$home_team, sched$away_team),
+  conference = c(sched$home_conference, sched$away_conference)
+))
+```
+
+The `ratings` table needs `team` (spelled as in `games`), `rating` and,
+ideally, `games`: the number of games behind each rating, which picks the
+games-played bucket of `scale` and `margin_sd`. The fit counted FBS-vs-FBS
+games; counting every completed game, as here, is close enough for a
+bucket:
+
+```{r games-played}
+played <- games |>
+  filter(!is.na(result)) |>
+  tidyr::pivot_longer(c(home_team, away_team), values_to = "team") |>
+  count(team, name = "games")
+```
+
+## Starting ELO ratings for the default generator
+
+The default generator's results below were measured on CollegeFootballData's
+pregame ELO, which carries over between seasons. Pass it as `elo` to start the
+simulation from it (at the start of the season the rating from each team's
+opening game; mid-season, the rating as of the current week):
+
+```{r elo}
+elo <- cfbfastR::cfbd_ratings_elo(year = season, preseason = TRUE)
+start <- setNames(rep(1500, nrow(teams)), teams$team) # FCS teams and any gaps
+known <- elo$team %in% teams$team
+start[elo$team[known]] <- elo$elo[known]
+
+sim_elo <- cfb_simulations(games, teams, elo = start, simulations = 10000)
+```
+
+Every team in `teams` needs a starting value; one left out would start at
+`NA`.
+
+## Points ratings
+
+Any rating in points per game against an average team works with
+`rating_type = "points"`. SP+ and FPI both come through cfbfastR:
+
+```{r points}
+sp <- cfbfastR::cfbd_ratings_sp(year = season) |>
+  filter(team != "nationalAverages") |>
+  select(team, rating) |>
+  left_join(played, by = "team")
+
+fpi <- cfbfastR::cfbd_ratings_fpi(year = season) |>
+  transmute(team, rating = fpi) |>
+  left_join(played, by = "team")
+
+sim_sp <- cfb_simulations(
+  games, teams,
+  compute_results = cfbseedR_ratings_compute_results,
+  ratings = sp, rating_type = "points",
+  simulations = 10000
+)
+```
+
+The default `scale` for points is close to 1 (1.03 averaged over the
+season), so a published points rating maps almost one to one onto the
+expected margin. The fitted values are a little below 1 for ratings built on
+4-5 games and a little above it for 0-3 and 8+, which is noise around 1
+rather than a trend.
+
+## Adjusted EPA per play
+
+`rating_type = "adj_epa"` takes an opponent-adjusted net EPA per play:
+offensive EPA/play minus defensive EPA/play allowed. Its defaults are
+sportsdataverse-py's modern-era pregame-prediction constants, fitted to that
+package's `adj_net` (from `cfb_ratings()` in Python), which is the natural
+input.
+
+From R, CollegeFootballData's opponent-adjusted team EPA is one source:
+
+```{r adj-epa}
+adj <- cfbfastR::cfbd_metrics_wepa_team_season(year = season) |>
+  transmute(team, rating = epa_total - epa_allowed_total) |>
+  left_join(played, by = "team")
+
+sim_adj <- cfb_simulations(
+  games, teams,
+  compute_results = cfbseedR_ratings_compute_results,
+  ratings = adj, rating_type = "adj_epa",
+  simulations = 10000
+)
+```
+
+That is a different opponent adjustment from sportsdataverse-py's, so its
+spread across teams can differ. Compare `sd(adj$rating)` with the spread of
+the ratings you trust; if they differ a lot, pass your own `scale` (a fit of
+this package's fitting script's own adjustment gave 59 / 54 / 61 / 63
+points per EPA/play by bucket, against the shipped 32 / 38 / 45 / 50; see the
+[fit record](https://github.com/sportsdataverse/cfbseedR/blob/main/data-raw/cfb_generator_constants.md)).
+
+## Raw EPA per play
+
+`rating_type = "raw_epa"` takes net EPA per play with no opponent
+adjustment, built from cfbfastR play-by-play. The fitted defaults used pass
+and rush plays, dropped kneel-downs, and dropped garbage time (a score margin
+above 43, 37, 27 and 21 points in quarters 1 to 4; the quarter-4 value also
+covers overtime):
+
+```{r raw-epa}
+pbp <- cfbfastR::load_cfb_pbp(season)
+garbage <- c(43, 37, 27, 21)
+
+plays <- pbp |>
+  filter(
+    pass == 1 | rush == 1, !is.na(EPA),
+    !grepl("kneel", play_text, ignore.case = TRUE),
+    is.na(pos_score_diff_start) |
+      abs(pos_score_diff_start) <= garbage[pmin(pmax(period, 1), 4)]
+  )
+
+raw <- full_join(
+  plays |> group_by(team = pos_team) |> summarise(off = mean(EPA)),
+  plays |> group_by(team = def_pos_team) |> summarise(def = mean(EPA)),
+  by = "team"
+) |>
+  transmute(team, rating = off - def) |>
+  left_join(played, by = "team")
+
+sim_raw <- cfb_simulations(
+  games, teams,
+  compute_results = cfbseedR_ratings_compute_results,
+  ratings = raw, rating_type = "raw_epa",
+  simulations = 10000
+)
+```
+
+Restrict `plays` to FBS-vs-FBS games if you want the ratings on exactly the
+footing of the fit.
+
+## How the generators compared
+
+[`data-raw/cfb_generator_constants.R`](https://github.com/sportsdataverse/cfbseedR/blob/main/data-raw/cfb_generator_constants.R)
+scored every generator walk-forward on
+FBS-vs-FBS games from 2014-2025 (2020 left out): a game in week `w` was
+predicted from ratings built only on games before week `w`, from week 4 on
+and in the postseason, once both teams had at least two prior games. That
+is 6,854 games. The ratings generators' coefficients were fitted with the
+test season left out. The ELO row is the shipped ELO margin formula fed with
+CollegeFootballData's pregame ELO, whose constants were fitted on all
+seasons, a slight edge for ELO. Intervals are paired differences against
+ELO, bootstrapped over (season, week) clusters. Every prediction is one week
+ahead: ratings are refreshed with each week's real results.
+
+| Generator | Mean absolute error | vs ELO [95% interval] | Brier score of the home win | vs ELO [95% interval] |
+|---|---|---|---|---|
+| ELO (default) | 12.94 | - | 0.1875 | - |
+| points | 13.10 | +0.16 [+0.02, +0.31] | 0.1910 | +0.0035 [+0.0007, +0.0065] |
+| adjusted EPA/play | 13.38 | +0.44 [+0.27, +0.60] | 0.1969 | +0.0094 [+0.0059, +0.0130] |
+| raw EPA/play | 13.70 | +0.76 [+0.59, +0.94] | 0.2017 | +0.0142 [+0.0105, +0.0179] |
+
+By the games played behind the weaker of the two ratings (mean absolute
+error):
+
+| Games | Games scored | ELO | points | adjusted EPA | raw EPA |
+|---|---|---|---|---|---|
+| 0-3 | 1,387 | **12.73** | 13.39 | 13.75 | 14.13 |
+| 4-5 | 1,428 | **12.85** | 13.19 | 13.32 | 13.48 |
+| 6-7 | 1,412 | 13.05 | **13.03** | 13.21 | 13.56 |
+| 8-20 | 2,627 | 13.04 | **12.93** | 13.30 | 13.68 |
+
+ELO wins early because that ELO carries each team's rating over from the
+previous season; the other ratings are current-season only. From about six
+games on, the points rating is level with it (the differences in the last
+two rows are within the test's noise). Hence the advice: keep the default
+ELO generator, with carried-over `elo` starting ratings, for a full-season
+simulation, and consider a points rating for the last weeks of a season or
+for the postseason. Postseason games were scored together with the late
+regular season, not on their own.
+
+The adjusted-EPA rows score the fitting script's own adjustment with its own
+coefficients, not sportsdataverse-py's `adj_net` with the shipped defaults,
+which this test does not score.
+
+# **Our Authors**
+
+-   [Saiem Gilani](https://x.com/saiemgilani)
+<a href="https://x.com/saiemgilani" target="blank"><img src="https://img.shields.io/twitter/follow/saiemgilani?color=blue&label=%40saiemgilani&logo=x&style=for-the-badge" alt="@saiemgilani" /></a>
+<a href="https://github.com/saiemgilani" target="blank"><img src="https://img.shields.io/github/followers/saiemgilani?color=eee&logo=Github&style=for-the-badge" alt="@saiemgilani" /></a>

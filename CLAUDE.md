@@ -12,7 +12,7 @@ credit them in DESCRIPTION/README/vignettes when touching attribution.
 - **License:** MIT. **Site:** https://cfbseedR.sportsdataverse.org
 - **Branch:** `main` is default and release branch.
 
-## Exports (7 + 1 S3 method + 2 datasets)
+## Exports (8 + 1 S3 method + 2 datasets)
 
 | Function | Role |
 |---|---|
@@ -20,6 +20,7 @@ credit them in DESCRIPTION/README/vignettes when touching attribution.
 | `cfb_playoff_seeds()` | CFP 12-team straight seeding, season-keyed `autobid` policy (2026 default) |
 | `cfb_simulations()` | Week-loop season simulator, returns `cfbseedR_simulation` list |
 | `cfbseedR_compute_results()` | Default ELO results generator (nflseedR port; CFB-fitted `home_field` / `margin_sd`) |
+| `cfbseedR_ratings_compute_results()` | Fixed-ratings results generator (`rating_type` points / adj_epa / raw_epa; bucketed `scale` / `margin_sd`) |
 | `simulations_verify_fct()` | Contract checker for custom `compute_results` |
 | `cfb_games_from_schedule()` | `cfbfastR::load_cfb_schedules()` → engine games schema |
 | `summary.cfbseedR_simulation()` | S3 gt summary of a simulation (Suggests: gt, scales) |
@@ -69,7 +70,20 @@ Internal engine helpers live in `R/standings_utils.R` (mirrors nflseedR's
   `margin_sd = 16.7`, from `data-raw/cfb_elo_constants.R` (FBS-vs-FBS
   2014-2025, 2020 excluded; record in `data-raw/cfb_elo_constants.md`).
   sdv-py's `cfb_compute_results()` uses the same values; refit both
-  together.
+  together. A simulated postseason tie is re-broken by +-1 point in both
+  generators, as in sdv-py (it was +-3 before 0.3.0).
+- **Ratings-generator defaults:** `"points"` / `"raw_epa"` come from
+  `data-raw/cfb_generator_constants.R` (walk-forward, 2014-2025, 2020
+  excluded; home fixed at 2.376; record in `cfb_generator_constants.md`).
+  `"adj_epa"` is sdv-py's `cfb_prediction_constants` modern era
+  (`slope_by_games`, `margin_sd`, `hfa_points`, as refit by sdv-py #1300),
+  NOT this package's fit; keep the two equal and refit together (the shared
+  `fixtures/cfb_2025_ratings/expected.csv`, rebuilt by its `capture.R`, is
+  the regression snapshot both test suites read). The bucket is the smaller
+  `games` of the two teams, then the bucket with the largest lower bound at
+  or below it; no count -> top bucket; a team missing from `ratings` rates 0;
+  an `NA` rating aborts. ELO stays the default; the documented advice is a
+  points rating for late-season / postseason sims.
 - **Division opt-in:** a `conf_division` column on `teams` is the opt-in
   for division-format ranking (division champs take `conf_rank` 1-2);
   never gate it to a hardcoded conference list.

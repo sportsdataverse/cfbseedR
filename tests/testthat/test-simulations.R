@@ -254,6 +254,24 @@ test_that("cfbseedR_compute_results uses the fitted CFB home field and margin no
   expect_true(all(nfl$games$result[wk3] == 1L))
 })
 
+test_that("cfbseedR_compute_results re-decides a postseason tie by one point", {
+  # Equal ratings, a neutral site and no noise: the estimate is exactly 0, so
+  # every draw is a tie and goes to the win-probability re-break (+-1, as in
+  # sdv-py; +-3 before 0.3.0).
+  teams <- data.frame(sim = 1, team = c("A", "B"), conference = "X")
+  games <- data.frame(
+    sim = 1, week = 1, game_type = "POST", home_team = "A", away_team = "B",
+    result = NA_integer_, neutral = 1
+  )
+  elo <- c(A = 1500, B = 1500)
+  set.seed(1)
+  res <- replicate(20, cfbseedR_compute_results(
+    teams, games, 1, elo = elo, margin_sd = 0
+  )$games$result)
+  expect_true(all(res %in% c(-1L, 1L)))
+  expect_true(all(c(-1L, 1L) %in% res))
+})
+
 test_that("simulations_verify_fct names each broken part of the compute_results contract", {
   # Generators that break one rule each, built from a correct fill of the week.
   fill_week <- function(games, week_num, value = 3) {

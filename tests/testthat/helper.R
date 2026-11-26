@@ -24,3 +24,18 @@ load_registry_teams <- function() {
 load_registry_expected <- function() {
   read.csv(test_path("fixtures", "cfb_toy_tiebreakers", "expected_standings.csv"))
 }
+
+# Rating table for one rating column of fixtures/cfb_2025_ratings/ratings.csv
+# under one variant of expected.csv (see that fixture's README and capture.R):
+# "full" = games as recorded, "half" / "quarter" = games %/% 2 / %/% 4,
+# "missing" = Georgia Southern dropped (rates 0, no count) and Navy's games NA.
+ratings_fixture_variant <- function(ratings, type, variant) {
+  out <- data.frame(team = ratings$team, rating = ratings[[type]], games = ratings$games)
+  if (variant == "half") out$games <- out$games %/% 2
+  if (variant == "quarter") out$games <- out$games %/% 4
+  if (variant == "missing") {
+    out <- out[out$team != "Georgia Southern", ]
+    out$games[out$team == "Navy"] <- NA
+  }
+  out
+}

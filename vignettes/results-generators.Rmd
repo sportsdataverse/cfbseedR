@@ -1,0 +1,185 @@
+---
+title: "Choosing a results generator"
+description: "The default ELO generator, the ratings generator for points, adjusted EPA and raw EPA, and when to use each."
+author: "Saiem Gilani <br><a href='https://x.com/saiemgilani' target='blank'><img src='https://img.shields.io/twitter/follow/saiemgilani?color=blue&amp;label=%40saiemgilani&amp;logo=x&amp;style=for-the-badge' alt='@saiemgilani'/></a> <a href='https://github.com/saiemgilani' target='blank'><img src='https://img.shields.io/github/followers/saiemgilani?color=eee&amp;logo=Github&amp;style=for-the-badge' alt='@saiemgilani'/></a>"
+opengraph:
+  image:
+    src: "https://github.com/sportsdataverse/cfbfastR-data/blob/main/themes/social_card_cfbseedR.png?raw=true"
+  twitter:
+    card: summary_large_image
+    creator: "@saiemgilani"
+output: html_document
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+`cfb_simulations()` fills every unplayed game with a `compute_results`
+function. cfbseedR ships two:
+
+| Generator | Driven by | Ratings during the season | Defaults fitted on |
+|---|---|---|---|
+| `cfbseedR_compute_results()` (default) | a dynamic ELO rating | updated every week from the (real or simulated) results | FBS-vs-FBS games 2014-2025 |
+| `cfbseedR_ratings_compute_results()` | fixed team ratings you supply: points, adjusted EPA/play or raw EPA/play | fixed | FBS-vs-FBS games 2014-2025, walk-forward |
+
+This article shows both on the bundled toy season, offline. The companion
+article [Ratings and EPA inputs](https://cfbseedR.sportsdataverse.org/articles/ratings-and-epa.html)
+builds real ratings from cfbfastR and reports how each generator scored on
+real seasons.
+
+```{r setup}
+library(cfbseedR)
+
+games <- cfb_games_example
+teams <- cfb_teams_example
+games$result[games$week >= 3] <- NA
+```
+
+## Which one to use
+
+**Use the default ELO generator** unless you have a reason not to. In a
+walk-forward test on 2014-2025 (2020 left out), the ELO margin formula fed
+with CollegeFootballData's pregame ELO had the smallest error overall: a mean
+absolute error of 12.94 points, against 13.10 for a current-season
+least-squares points rating and 13.38 / 13.70 for the fitting script's
+adjusted / raw EPA ratings. Its edge is early in the season: that ELO carries
+over from the previous season, while a current-season rating starts from
+nothing. To get the same from the simulator, pass carried-over ratings as
+`elo` (below); without them every team starts from a random rating.
+
+**Use a points rating late in the season or for the postseason.** Once both
+teams have about six games, the points rating is level with ELO: with 8 or
+more games behind the weaker rating its error was 12.93 against ELO's 13.04,
+a difference within the test's noise. If you are simulating the last weeks
+of a season, or the bowls and the playoff, from current ratings, it is a
+sound input. The test used its own least-squares rating; published ratings
+such as SP+ or FPI are on the same points scale and work the same way, but
+they were not part of it.
+
+The EPA ratings are there as options. They need play-by-play data, and the
+script's versions trailed the points rating at every stage of the season.
+
+## The default: ELO
+
+The ELO generator needs nothing but the schedule. It starts every team at a
+random rating unless you pass `elo`, a named vector of starting ratings:
+
+```{r elo}
+elo <- setNames(seq(1700, 1300, length.out = nrow(teams)), teams$team)
+set.seed(1)
+sim_elo <- cfb_simulations(
+  games, teams,
+  simulations = 20, playoff_seeds = 4, elo = elo, verbosity = "NONE"
+)
+sim_elo$overall[, c("team", "wins", "conf_champ", "playoff")]
+```
+
+Its `home_field` (59.4 ELO points, 2.38 points of margin) and `margin_sd`
+(16.7 points) can be overridden through `cfb_simulations()`'s `...`.
+
+## Fixed ratings: `cfbseedR_ratings_compute_results()`
+
+The ratings generator takes a data frame with `team`, `rating` and,
+optionally, `games` (how many games are behind each rating), and a
+`rating_type` that picks the defaults:
+
+```{r ratings}
+ratings <- data.frame(
+  team = teams$team,
+  rating = seq(12, -12, length.out = nrow(teams)), # points per game
+  games = 8
+)
+simulations_verify_fct(
+  cfbseedR_ratings_compute_results,
+  ratings = ratings, rating_type = "points"
+)
+
+set.seed(1)
+sim_pts <- cfb_simulations(
+  games, teams,
+  compute_results = cfbseedR_ratings_compute_results,
+  ratings = ratings, rating_type = "points",
+  simulations = 20, playoff_seeds = 4, verbosity = "NONE"
+)
+sim_pts$overall[, c("team", "wins", "conf_champ", "playoff")]
+```
+
+The expected home margin of a game is
+`scale * (rating_home - rating_away) + home_field` (no `home_field` at a
+neutral site), and the simulated margin is a normal draw around it with
+standard deviation `margin_sd`, rounded away from zero. The ratings do not
+move during the simulation.
+
+### The three rating types
+
+| `rating_type` | Rating | `scale` (points per rating unit) | `margin_sd` | `home_field` |
+|---|---|---|---|---|
+| `"points"` | points per game (SP+, FPI, a margin rating) | 1.09 / 0.92 / 1.03 / 1.06 | 16.97 / 16.64 / 16.23 / 16.45 | 2.38 |
+| `"adj_epa"` | opponent-adjusted net EPA per play | 31.9 / 37.9 / 45.2 / 49.6 | 17.04 | 2.76 |
+| `"raw_epa"` | net EPA per play, no adjustment | 28.6 / 34.3 / 45.1 / 52.0 | 17.93 / 17.24 / 16.98 / 17.39 | 2.38 |
+
+Values are by the games played behind the weaker of the two ratings: 0-3,
+4-5, 6-7 and 8-20 games. An EPA rating built on two games predicts less
+well than one built on ten, so its points-per-unit `scale` is smaller: a 0.1
+raw EPA/play edge is worth about 2.9 points with three games behind it and
+5.2 points with ten (3.2 and 5.0 for adjusted EPA). The points `scale` stays
+close to 1 throughout. With the noise switched off (`margin_sd = 0`) the
+simulated margin is just the rounded expected margin, which shows the
+effect:
+
+```{r buckets}
+epa <- data.frame(team = c("A", "B"), rating = c(0.1, 0))
+one_game <- data.frame(
+  sim = 1, week = 1, game_type = "REG", home_team = "A", away_team = "B",
+  result = NA_integer_, neutral = 1
+)
+two_teams <- data.frame(sim = 1, team = c("A", "B"), conference = "X")
+sapply(c(early = 3, late = 10), function(n) {
+  cfbseedR_ratings_compute_results(
+    two_teams, one_game, 1,
+    ratings = transform(epa, games = n), rating_type = "raw_epa", margin_sd = 0
+  )$games$result
+})
+```
+
+Without a `games` column every game uses the top bucket, which treats the
+ratings as full-season ratings. Early in a season that overstates how much
+an EPA rating is worth, so pass `games` when you have it.
+
+### Your own constants
+
+`scale`, `home_field` and `margin_sd` accept your own values: one number, or
+a named vector of `"lo-hi"` games-played buckets.
+
+```{r custom}
+set.seed(3)
+sim_custom <- cfb_simulations(
+  games, teams,
+  compute_results = cfbseedR_ratings_compute_results,
+  ratings = ratings[c("team", "rating")],
+  scale = 1, home_field = 2.5, margin_sd = 16,
+  simulations = 20, playoff_seeds = 4, verbosity = "NONE"
+)
+sim_custom$overall[, c("team", "wins", "playoff")]
+```
+
+Pass your own `scale` and `margin_sd` whenever your rating is on a different
+scale from the defaults. The `"adj_epa"` defaults are sportsdataverse-py's
+pregame-prediction constants, fitted to that package's `adj_net`, so a
+rating from another opponent adjustment may need its own values.
+
+### Teams without a rating
+
+A team missing from `ratings` (an FCS opponent, say) gets a rating of 0,
+league average. For FBS ratings that flatters an FCS team, so give such
+teams an explicit low rating if their games matter to you.
+
+# **Our Authors**
+
+-   [Saiem Gilani](https://x.com/saiemgilani)
+<a href="https://x.com/saiemgilani" target="blank"><img src="https://img.shields.io/twitter/follow/saiemgilani?color=blue&label=%40saiemgilani&logo=x&style=for-the-badge" alt="@saiemgilani" /></a>
+<a href="https://github.com/saiemgilani" target="blank"><img src="https://img.shields.io/github/followers/saiemgilani?color=eee&logo=Github&style=for-the-badge" alt="@saiemgilani" /></a>
