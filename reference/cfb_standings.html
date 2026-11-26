@@ -154,7 +154,16 @@ be <code>NA</code> (play or simulate the games first).</p></dd>
 </dl><p>Optional <code>home_points</code>/<code>away_points</code> columns (per-game scores) feed the
 official SEC <code>capped_scoring_margin</code> tiebreaker rung (see "Official
 per-conference tiebreakers" below); <code><a href="cfb_games_from_schedule.html">cfb_games_from_schedule()</a></code> emits
-both. Absent -&gt; that rung is skipped, not an error.</p></dd>
+both. Absent -&gt; that rung is skipped, not an error. An optional logical
+<code>conf_game</code> column (the schedule's conference-game flag, which
+<code><a href="cfb_games_from_schedule.html">cfb_games_from_schedule()</a></code> carries over) keeps a game between two members
+of one conference out of the conference record and every
+conference-game tiebreaker (head-to-head, common opponents, SOV/SOS, the
+CFP final-week clause, <code>div_pct</code>) when it is explicitly <code>FALSE</code> - a
+non-conference game between conference members, or the Pac-12's 2026 Flex
+Week. It still counts in the overall record, and so in the Big 12
+<code>total_wins</code> rung. <code>NA</code> or absent -&gt; a <code>REG</code> game between two members of
+one conference counts.</p></dd>
 
 
 <dt id="arg-teams">teams<a class="anchor" aria-label="anchor" href="#arg-teams"></a></dt>

@@ -111,14 +111,17 @@ cfbfastR is not required - any data frame with the expected columns works.</p>
 <dd><p>A data frame with at least <code>season</code>, <code>week</code>,
 <code>season_type</code>, <code>home_team</code>, <code>away_team</code>. Optional columns used when
 present: <code>home_points</code>/<code>away_points</code> (to compute <code>result</code>),
-<code>neutral_site</code>, and <code>notes</code> (games whose notes mention "championship"
-are classified as <code>"CONF_CHAMP"</code>).</p></dd>
+<code>neutral_site</code>, <code>conference_game</code> (carried as <code>conf_game</code>, so a game
+between two members of one conference that the schedule marks as
+non-conference stays out of the conference standings), and <code>notes</code>
+(games whose notes mention "championship" are classified as
+<code>"CONF_CHAMP"</code>).</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A tibble in the engine games schema, ready for
-<code><a href="cfb_standings.html">cfb_standings()</a></code> / <code><a href="cfb_simulations.html">cfb_simulations()</a></code>:</p><table class="table table"><tr><td>Column</td><td>Type</td><td>Description</td></tr><tr><td><code>season</code></td><td>integer</td><td>Season taken from the schedule.</td></tr><tr><td><code>week</code></td><td>integer</td><td>Week number of the game.</td></tr><tr><td><code>game_type</code></td><td>character</td><td><code>"REG"</code>, <code>"CONF_CHAMP"</code> (notes mention "championship"), or <code>"POST"</code> (<code>season_type == "postseason"</code>).</td></tr><tr><td><code>home_team</code></td><td>character</td><td>Home team name.</td></tr><tr><td><code>away_team</code></td><td>character</td><td>Away team name.</td></tr><tr><td><code>result</code></td><td>numeric</td><td>Home margin (home minus away points); <code>NA</code> for unplayed games.</td></tr><tr><td><code>neutral</code></td><td>integer</td><td>Neutral-site flag (0/1).</td></tr></table></div>
+<code><a href="cfb_standings.html">cfb_standings()</a></code> / <code><a href="cfb_simulations.html">cfb_simulations()</a></code>:</p><table class="table table"><tr><td>Column</td><td>Type</td><td>Description</td></tr><tr><td><code>season</code></td><td>integer</td><td>Season taken from the schedule.</td></tr><tr><td><code>week</code></td><td>integer</td><td>Week number of the game.</td></tr><tr><td><code>game_type</code></td><td>character</td><td><code>"REG"</code>, <code>"CONF_CHAMP"</code> (notes mention "championship"), or <code>"POST"</code> (<code>season_type == "postseason"</code>).</td></tr><tr><td><code>home_team</code></td><td>character</td><td>Home team name.</td></tr><tr><td><code>away_team</code></td><td>character</td><td>Away team name.</td></tr><tr><td><code>result</code></td><td>numeric</td><td>Home margin (home minus away points); <code>NA</code> for unplayed games.</td></tr><tr><td><code>neutral</code></td><td>integer</td><td>Neutral-site flag (0/1).</td></tr><tr><td><code>home_points</code></td><td>numeric</td><td>Home team points; <code>NA</code> for unplayed games. Feeds the SEC <code>capped_scoring_margin</code> tiebreaker rung.</td></tr><tr><td><code>away_points</code></td><td>numeric</td><td>Away team points; <code>NA</code> for unplayed games.</td></tr><tr><td><code>conf_game</code></td><td>logical</td><td>The schedule's <code>conference_game</code> flag (<code>NA</code> when the schedule has none). An explicit <code>FALSE</code> keeps a same-conference game out of the conference standings.</td></tr></table></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Game type mapping: <code>season_type == "postseason"</code> becomes <code>"POST"</code>, games
@@ -147,13 +150,14 @@ the nflseedR original: <a href="https://nflseedr.com" class="external-link">http
 <span class="r-in"><span>  notes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="cn">NA</span>, <span class="st">"Alpha Championship Game"</span>, <span class="cn">NA</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">cfb_games_from_schedule</span><span class="op">(</span><span class="va">schedule</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 4 × 7</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   season  week game_type  home_team away_team result neutral</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>   <span style="text-decoration: underline;">2</span>024     1 REG        A1        A2             7       0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>   <span style="text-decoration: underline;">2</span>024     1 REG        B1        B2             4       0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>   <span style="text-decoration: underline;">2</span>024    15 CONF_CHAMP A1        A2             3       1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span>   <span style="text-decoration: underline;">2</span>024    16 POST       A1        B1            <span style="color: #BB0000;">NA</span>       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 4 × 10</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   season  week game_type  home_team away_team result neutral home_points</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>   <span style="text-decoration: underline;">2</span>024     1 REG        A1        A2             7       0          21</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>   <span style="text-decoration: underline;">2</span>024     1 REG        B1        B2             4       0          24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>   <span style="text-decoration: underline;">2</span>024    15 CONF_CHAMP A1        A2             3       1          17</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span>   <span style="text-decoration: underline;">2</span>024    16 POST       A1        B1            <span style="color: #BB0000;">NA</span>       1          <span style="color: #BB0000;">NA</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 2 more variables: away_points &lt;dbl&gt;, conf_game &lt;lgl&gt;</span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
