@@ -1,6 +1,35 @@
 # cfbseedR 0.3.0
 
+## New features
+
+* `cfbseedR_ratings_compute_results()` is a second results generator for
+  `cfb_simulations()`: it draws each unplayed game from fixed team ratings
+  instead of the default dynamic ELO. It takes a `ratings` table (`team`,
+  `rating`, optionally `games`) and a `rating_type`: `"points"` (a rating in
+  points per game, such as SP+ or FPI), `"adj_epa"` (opponent-adjusted net
+  EPA per play) or `"raw_epa"` (net EPA per play). Each type has default
+  `scale`, `margin_sd` and `home_field` values, the first two keyed by games
+  played (for the EPA types a rating built on three games counts for less
+  than one built on ten). The `"points"` and `"raw_epa"` defaults are a
+  walk-forward fit on FBS-vs-FBS games 2014-2025
+  (`data-raw/cfb_generator_constants.R` and `.md`); the `"adj_epa"` defaults
+  are sportsdataverse-py's modern-era pregame-prediction constants, fitted to
+  that package's `adj_net` rating. ELO stays the default. In the walk-forward
+  test the ELO margin formula on CollegeFootballData's pregame ELO had the
+  smallest error (MAE 12.94, against 13.10 for a least-squares points rating
+  and 13.38 / 13.70 for the script's adjusted / raw EPA ratings); from about
+  six games on the points rating is level with it. Two new articles cover
+  the choice ("Choosing a results generator") and building the ratings from
+  cfbfastR ("Ratings and EPA inputs").
+
 ## Changes that alter computed results
+
+* `cfbseedR_compute_results()` now re-decides a simulated postseason tie by
+  one point instead of three, as sportsdataverse-py's
+  `cfb_compute_results()` does. The winner of the re-break is drawn the same
+  way; the margin becomes +-1 instead of +-3, and so the ELO update after the
+  game is smaller. Margins are rounded away from zero, so a tie needs a draw
+  of exactly 0, which in practice happens only with `margin_sd = 0`.
 
 * A game between two members of one conference no longer counts in the
   conference standings when the schedule marks it as non-conference.

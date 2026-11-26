@@ -27,6 +27,10 @@ NEWS.md.
 * The default simulation generator uses college football home-field and
   margin-noise constants fitted on FBS results (2014-2025) instead of the
   NFL values inherited from nflseedR. Both are now arguments.
+* The default generator re-decides a simulated postseason tie by one point
+  instead of three, matching the Python implementation. It changes the
+  margin and the following ELO update of those games, which in practice only
+  arise with `margin_sd = 0`.
 * A regular-season game between two members of one conference that the
   schedule marks as non-conference no longer counts in the conference
   standings: `cfb_games_from_schedule()` carries the schedule's
@@ -38,6 +42,14 @@ NEWS.md.
 * `cfb_games_from_schedule()` now returns `home_points` / `away_points`, so
   a mapped schedule reaches the SEC capped-scoring-margin tiebreaker
   instead of always skipping it.
+
+### New features
+
+* A second results generator, `cfbseedR_ratings_compute_results()`,
+  simulates games from fixed team ratings (points, adjusted EPA per play or
+  raw EPA per play) with defaults fitted on FBS results. It is offline,
+  documented with a runnable example, and tested against a real 2025
+  fixture. The ELO generator stays the default.
 
 ### Other changes
 
@@ -62,9 +74,11 @@ NEWS.md.
 
 ## Test environments
 
+* local Windows 10, R 4.6.0 (ucrt): `devtools::check(cran = TRUE)`,
+  0 errors, 0 warnings, 0 notes (2026-11-26)
 * local Windows 10, R 4.6.1 (ucrt):
   `R CMD check --as-cran --run-donttest` on the built tarball, with
-  `_R_CHECK_CRAN_INCOMING_REMOTE_=true`
+  `_R_CHECK_CRAN_INCOMING_REMOTE_=true` (2026-11-24; the NOTE below)
 * GitHub Actions (R-CMD-check workflow): macos-latest (release),
   windows-latest (release), ubuntu-latest (devel, release, oldrel-1)
 * win-builder (devel and release): not yet run (win-builder unreachable
@@ -89,7 +103,7 @@ in the check directory while building the PDF manual. The package does not
 create it; the GitHub Actions checks of 0.2.0 and of the 0.3.0 development
 version on main report no notes.
 
-Tests: 287 expectations passed, 0 failed, 0 skipped, in 26 s.
+Tests: 369 expectations passed, 0 failed, 0 skipped, in about 60 s.
 
 ## Reverse dependencies
 
