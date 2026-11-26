@@ -1,0 +1,283 @@
+"rating_type","games_div","week","game_type","home_team","away_team","neutral","expected","margin_sd"
+"points",1,16,"REG","Navy","Army",1,1.63740282,16.4509
+"points",1,100,"POST","App State","Georgia Southern",1,0.40575047,16.4509
+"points",1,100,"POST","Arkansas State","Missouri State",1,-1.3274775864,16.4509
+"points",1,100,"POST","Army","UConn",1,0.1021956596,16.4509
+"points",1,100,"POST","BYU","Georgia Tech",1,9.965418596,16.4509
+"points",1,100,"POST","Cincinnati","Navy",1,1.8795150368,16.4509
+"points",1,100,"POST","Clemson","Penn State",1,-6.5283520916,16.4509
+"points",1,100,"POST","Delaware","Louisiana",1,-1.0319277856,16.4509
+"points",1,100,"POST","Duke","Arizona State",1,-0.0064852056,16.4509
+"points",1,100,"POST","East Carolina","Pittsburgh",1,-1.1143808724,16.4509
+"points",1,100,"POST","Fresno State","Miami (OH)",1,2.5228778284,16.4509
+"points",1,100,"POST","Georgia","Ole Miss",1,2.3405268556,16.4509
+"points",1,100,"POST","Hawai'i","California",0,6.7010603488,16.4509
+"points",1,100,"POST","Houston","LSU",1,-2.4734693192,16.4509
+"points",1,100,"POST","Illinois","Tennessee",1,-1.3340063668,16.4509
+"points",1,100,"POST","Indiana","Alabama",1,14.6853070192,16.4509
+"points",1,100,"POST","Indiana","Miami",1,10.7393718748,16.4509
+"points",1,100,"POST","Indiana","Oregon",1,6.9876294208,16.4509
+"points",1,100,"POST","Jacksonville State","Troy",1,-1.4923741948,16.4509
+"points",1,100,"POST","Louisiana Tech","Coastal Carolina",1,13.788028554,16.4509
+"points",1,100,"POST","Louisville","Toledo",1,-0.3875404548,16.4509
+"points",1,100,"POST","Minnesota","New Mexico",1,-5.4031402244,16.4509
+"points",1,100,"POST","Mississippi State","Wake Forest",1,-0.8018655952,16.4509
+"points",1,100,"POST","Missouri","Virginia",1,2.3980392148,16.4509
+"points",1,100,"POST","NC State","Memphis",1,-3.5011905424,16.4509
+"points",1,100,"POST","Northwestern","Central Michigan",1,9.98426204,16.4509
+"points",1,100,"POST","Ohio","UNLV",1,-4.9513737028,16.4509
+"points",1,100,"POST","Ohio State","Miami",1,6.4275189416,16.4509
+"points",1,100,"POST","Oklahoma","Alabama",0,1.2104708148,16.4509
+"points",1,100,"POST","Ole Miss","Miami",1,-4.5107070644,16.4509
+"points",1,100,"POST","Ole Miss","Tulane",0,12.3761423976,16.4509
+"points",1,100,"POST","Oregon","James Madison",0,11.4591319876,16.4509
+"points",1,100,"POST","San Diego State","North Texas",1,-7.7267058548,16.4509
+"points",1,100,"POST","SMU","Arizona",1,-0.7087823828,16.4509
+"points",1,100,"POST","South Florida","Old Dominion",1,9.26596866,16.4509
+"points",1,100,"POST","Southern Miss","Western Kentucky",1,-2.518602184,16.4509
+"points",1,100,"POST","TCU","USC",1,-10.4436902868,16.4509
+"points",1,100,"POST","Texas","Michigan",1,0.0332082488,16.4509
+"points",1,100,"POST","Texas A&M","Miami",0,-1.5473719004,16.4509
+"points",1,100,"POST","Texas State","Rice",1,14.3943952776,16.4509
+"points",1,100,"POST","Texas Tech","Oregon",1,3.8990816064,16.4509
+"points",1,100,"POST","Utah","Nebraska",1,16.4462869092,16.4509
+"points",1,100,"POST","Utah State","Washington State",1,-3.860041774,16.4509
+"points",1,100,"POST","UTSA","Florida International",1,8.2855505392,16.4509
+"points",1,100,"POST","Vanderbilt","Iowa",1,1.3132307524,16.4509
+"points",1,100,"POST","Washington","Boise State",1,5.8029528308,16.4509
+"points",1,100,"POST","Western Michigan","Kennesaw State",1,-1.234181814,16.4509
+"adj_epa",1,16,"REG","Navy","Army",1,7.829142518,17.2358
+"adj_epa",1,100,"POST","App State","Georgia Southern",1,2.6806894798,17.2358
+"adj_epa",1,100,"POST","Arkansas State","Missouri State",1,-2.5382579734,17.2358
+"adj_epa",1,100,"POST","Army","UConn",1,-0.2093192304,17.2358
+"adj_epa",1,100,"POST","BYU","Georgia Tech",1,7.6640216464,17.2358
+"adj_epa",1,100,"POST","Cincinnati","Navy",1,-0.5084778548,17.2358
+"adj_epa",1,100,"POST","Clemson","Penn State",1,-6.4316481198,17.2358
+"adj_epa",1,100,"POST","Delaware","Louisiana",1,-0.4579841808,17.2358
+"adj_epa",1,100,"POST","Duke","Arizona State",1,-9.7919037602,17.2358
+"adj_epa",1,100,"POST","East Carolina","Pittsburgh",1,-4.0691343624,17.2358
+"adj_epa",1,100,"POST","Fresno State","Miami (OH)",1,-3.7094489054,17.2358
+"adj_epa",1,100,"POST","Georgia","Ole Miss",1,5.5977155844,17.2358
+"adj_epa",1,100,"POST","Hawai'i","California",0,-0.4362008006,17.2358
+"adj_epa",1,100,"POST","Houston","LSU",1,-6.3855480512,17.2358
+"adj_epa",1,100,"POST","Illinois","Tennessee",1,-8.7482585372,17.2358
+"adj_epa",1,100,"POST","Indiana","Alabama",1,7.356665997,17.2358
+"adj_epa",1,100,"POST","Indiana","Miami",1,6.94451958,17.2358
+"adj_epa",1,100,"POST","Indiana","Oregon",1,2.3306437242,17.2358
+"adj_epa",1,100,"POST","Jacksonville State","Troy",1,-1.2570301778,17.2358
+"adj_epa",1,100,"POST","Louisiana Tech","Coastal Carolina",1,3.1779538044,17.2358
+"adj_epa",1,100,"POST","Louisville","Toledo",1,-4.935920574,17.2358
+"adj_epa",1,100,"POST","Minnesota","New Mexico",1,0.371817054,17.2358
+"adj_epa",1,100,"POST","Mississippi State","Wake Forest",1,-3.2707441274,17.2358
+"adj_epa",1,100,"POST","Missouri","Virginia",1,8.1036444912,17.2358
+"adj_epa",1,100,"POST","NC State","Memphis",1,-1.4821532724,17.2358
+"adj_epa",1,100,"POST","Northwestern","Central Michigan",1,4.5046259066,17.2358
+"adj_epa",1,100,"POST","Ohio","UNLV",1,-3.0269318158,17.2358
+"adj_epa",1,100,"POST","Ohio State","Miami",1,13.2392445942,17.2358
+"adj_epa",1,100,"POST","Oklahoma","Alabama",0,1.2708132616,17.2358
+"adj_epa",1,100,"POST","Ole Miss","Miami",1,-5.262162169,17.2358
+"adj_epa",1,100,"POST","Ole Miss","Tulane",0,10.6543740244,17.2358
+"adj_epa",1,100,"POST","Oregon","James Madison",0,12.5070328268,17.2358
+"adj_epa",1,100,"POST","San Diego State","North Texas",1,-3.8031572952,17.2358
+"adj_epa",1,100,"POST","SMU","Arizona",1,-1.425954469,17.2358
+"adj_epa",1,100,"POST","South Florida","Old Dominion",1,9.42657875,17.2358
+"adj_epa",1,100,"POST","Southern Miss","Western Kentucky",1,4.4846251656,17.2358
+"adj_epa",1,100,"POST","TCU","USC",1,-9.87905453,17.2358
+"adj_epa",1,100,"POST","Texas","Michigan",1,1.8357401428,17.2358
+"adj_epa",1,100,"POST","Texas A&M","Miami",0,9.68305935,17.2358
+"adj_epa",1,100,"POST","Texas State","Rice",1,13.2012103982,17.2358
+"adj_epa",1,100,"POST","Texas Tech","Oregon",1,2.3939903334,17.2358
+"adj_epa",1,100,"POST","Utah","Nebraska",1,15.2558438966,17.2358
+"adj_epa",1,100,"POST","Utah State","Washington State",1,-0.5135927984,17.2358
+"adj_epa",1,100,"POST","UTSA","Florida International",1,6.5767026742,17.2358
+"adj_epa",1,100,"POST","Vanderbilt","Iowa",1,7.6705792664,17.2358
+"adj_epa",1,100,"POST","Washington","Boise State",1,6.7056910596,17.2358
+"adj_epa",1,100,"POST","Western Michigan","Kennesaw State",1,3.0905407298,17.2358
+"raw_epa",1,16,"REG","Navy","Army",1,7.0245310681,17.3931
+"raw_epa",1,100,"POST","App State","Georgia Southern",1,4.0421110912,17.3931
+"raw_epa",1,100,"POST","Arkansas State","Missouri State",1,-1.2104586949,17.3931
+"raw_epa",1,100,"POST","Army","UConn",1,-7.0276525501,17.3931
+"raw_epa",1,100,"POST","BYU","Georgia Tech",1,2.8756132678,17.3931
+"raw_epa",1,100,"POST","Cincinnati","Navy",1,-2.0724559492,17.3931
+"raw_epa",1,100,"POST","Clemson","Penn State",1,-2.0775543698,17.3931
+"raw_epa",1,100,"POST","Delaware","Louisiana",1,1.3863542056,17.3931
+"raw_epa",1,100,"POST","Duke","Arizona State",1,-5.6738658067,17.3931
+"raw_epa",1,100,"POST","East Carolina","Pittsburgh",1,-1.3213233306,17.3931
+"raw_epa",1,100,"POST","Fresno State","Miami (OH)",1,-3.6408445801,17.3931
+"raw_epa",1,100,"POST","Georgia","Ole Miss",1,4.2585858679,17.3931
+"raw_epa",1,100,"POST","Hawai'i","California",0,3.7191216799,17.3931
+"raw_epa",1,100,"POST","Houston","LSU",1,-1.2953109806,17.3931
+"raw_epa",1,100,"POST","Illinois","Tennessee",1,-7.4278785672,17.3931
+"raw_epa",1,100,"POST","Indiana","Alabama",1,10.1477819079,17.3931
+"raw_epa",1,100,"POST","Indiana","Miami",1,5.406927071,17.3931
+"raw_epa",1,100,"POST","Indiana","Oregon",1,1.4266733481,17.3931
+"raw_epa",1,100,"POST","Jacksonville State","Troy",1,1.752191896,17.3931
+"raw_epa",1,100,"POST","Louisiana Tech","Coastal Carolina",1,3.941911519,17.3931
+"raw_epa",1,100,"POST","Louisville","Toledo",1,-11.2330171499,17.3931
+"raw_epa",1,100,"POST","Minnesota","New Mexico",1,-1.384897514,17.3931
+"raw_epa",1,100,"POST","Mississippi State","Wake Forest",1,-9.6468360716,17.3931
+"raw_epa",1,100,"POST","Missouri","Virginia",1,2.8793590462,17.3931
+"raw_epa",1,100,"POST","NC State","Memphis",1,-5.4841837505,17.3931
+"raw_epa",1,100,"POST","Northwestern","Central Michigan",1,-3.3002908939,17.3931
+"raw_epa",1,100,"POST","Ohio","UNLV",1,-0.1468137034,17.3931
+"raw_epa",1,100,"POST","Ohio State","Miami",1,12.4946161249,17.3931
+"raw_epa",1,100,"POST","Oklahoma","Alabama",0,2.9372424636,17.3931
+"raw_epa",1,100,"POST","Ole Miss","Miami",1,-5.4366331747,17.3931
+"raw_epa",1,100,"POST","Ole Miss","Tulane",0,4.4816997325,17.3931
+"raw_epa",1,100,"POST","Oregon","James Madison",0,3.8042861138,17.3931
+"raw_epa",1,100,"POST","San Diego State","North Texas",1,-0.741351975,17.3931
+"raw_epa",1,100,"POST","SMU","Arizona",1,-0.6938013992,17.3931
+"raw_epa",1,100,"POST","South Florida","Old Dominion",1,4.529790629,17.3931
+"raw_epa",1,100,"POST","Southern Miss","Western Kentucky",1,4.4220995,17.3931
+"raw_epa",1,100,"POST","TCU","USC",1,-9.4441998651,17.3931
+"raw_epa",1,100,"POST","Texas","Michigan",1,-2.0755774312,17.3931
+"raw_epa",1,100,"POST","Texas A&M","Miami",0,5.8703950496,17.3931
+"raw_epa",1,100,"POST","Texas State","Rice",1,12.8533784561,17.3931
+"raw_epa",1,100,"POST","Texas Tech","Oregon",1,2.9516213545,17.3931
+"raw_epa",1,100,"POST","Utah","Nebraska",1,11.041722328,17.3931
+"raw_epa",1,100,"POST","Utah State","Washington State",1,2.042489722,17.3931
+"raw_epa",1,100,"POST","UTSA","Florida International",1,1.4343730037,17.3931
+"raw_epa",1,100,"POST","Vanderbilt","Iowa",1,5.9893435875,17.3931
+"raw_epa",1,100,"POST","Washington","Boise State",1,4.0184918774,17.3931
+"raw_epa",1,100,"POST","Western Michigan","Kennesaw State",1,3.3892011062,17.3931
+"points",2,16,"REG","Navy","Army",1,1.42263621,16.6383
+"points",2,100,"POST","App State","Georgia Southern",1,0.352531035,16.6383
+"points",2,100,"POST","Arkansas State","Missouri State",1,-1.1533616892,16.6383
+"points",2,100,"POST","Army","UConn",1,0.0887913738,16.6383
+"points",2,100,"POST","BYU","Georgia Tech",1,8.658324738,16.6383
+"points",2,100,"POST","Cincinnati","Navy",1,1.6329922704,16.6383
+"points",2,100,"POST","Clemson","Penn State",1,-5.6720740698,16.6383
+"points",2,100,"POST","Delaware","Louisiana",1,-0.8965770768,16.6383
+"points",2,100,"POST","Duke","Arizona State",1,-0.0056345868,16.6383
+"points",2,100,"POST","East Carolina","Pittsburgh",1,-0.9682153722,16.6383
+"points",2,100,"POST","Fresno State","Miami (OH)",1,2.1919696902,16.6383
+"points",2,100,"POST","Georgia","Ole Miss",1,2.0335364118,16.6383
+"points",2,100,"POST","Hawai'i","California",0,6.1337726064,16.6383
+"points",2,100,"POST","Houston","LSU",1,-2.1490417476,16.6383
+"points",2,100,"POST","Illinois","Tennessee",1,-1.1590341354,16.6383
+"points",2,100,"POST","Indiana","Alabama",1,14.238999702,16.2311
+"points",2,100,"POST","Indiana","Miami",1,9.3307640094,16.6383
+"points",2,100,"POST","Indiana","Oregon",1,6.0711112224,16.6383
+"points",2,100,"POST","Jacksonville State","Troy",1,-1.4470188255,16.2311
+"points",2,100,"POST","Louisiana Tech","Coastal Carolina",1,11.979549837,16.6383
+"points",2,100,"POST","Louisville","Toledo",1,-0.3367094994,16.6383
+"points",2,100,"POST","Minnesota","New Mexico",1,-4.6944483282,16.6383
+"points",2,100,"POST","Mississippi State","Wake Forest",1,-0.6966905256,16.6383
+"points",2,100,"POST","Missouri","Virginia",1,2.0835052794,16.6383
+"points",2,100,"POST","NC State","Memphis",1,-3.0419640072,16.6383
+"points",2,100,"POST","Northwestern","Central Michigan",1,8.67469662,16.6383
+"points",2,100,"POST","Ohio","UNLV",1,-4.3019368434,16.6383
+"points",2,100,"POST","Ohio State","Miami",1,5.5844664948,16.6383
+"points",2,100,"POST","Oklahoma","Alabama",0,1.3633450794,16.6383
+"points",2,100,"POST","Ole Miss","Miami",1,-3.9190693482,16.6383
+"points",2,100,"POST","Ole Miss","Tulane",0,11.0644940628,16.6383
+"points",2,100,"POST","Oregon","James Madison",0,10.2677614578,16.6383
+"points",2,100,"POST","San Diego State","North Texas",1,-6.7132481994,16.6383
+"points",2,100,"POST","SMU","Arizona",1,-0.6158163834,16.6383
+"points",2,100,"POST","South Florida","Old Dominion",1,8.05061673,16.6383
+"points",2,100,"POST","Southern Miss","Western Kentucky",1,-2.188254852,16.6383
+"points",2,100,"POST","TCU","USC",1,-9.0738648954,16.6383
+"points",2,100,"POST","Texas","Michigan",1,0.032199003,16.2311
+"points",2,100,"POST","Texas A&M","Miami",0,-1.0327708062,16.6383
+"points",2,100,"POST","Texas State","Rice",1,12.5063837028,16.6383
+"points",2,100,"POST","Texas Tech","Oregon",1,3.3876664992,16.6383
+"points",2,100,"POST","Utah","Nebraska",1,14.2891431426,16.6383
+"points",2,100,"POST","Utah State","Washington State",1,-3.353747247,16.6383
+"points",2,100,"POST","UTSA","Florida International",1,7.1987931576,16.6383
+"points",2,100,"POST","Vanderbilt","Iowa",1,1.1409835122,16.6383
+"points",2,100,"POST","Washington","Boise State",1,5.0418203274,16.6383
+"points",2,100,"POST","Western Michigan","Kennesaw State",1,-1.1966732775,16.2311
+"adj_epa",2,16,"REG","Navy","Army",1,5.868316975,17.2358
+"adj_epa",2,100,"POST","App State","Georgia Southern",1,2.0093050475,17.2358
+"adj_epa",2,100,"POST","Arkansas State","Missouri State",1,-1.9025458175,17.2358
+"adj_epa",2,100,"POST","Army","UConn",1,-0.15689478,17.2358
+"adj_epa",2,100,"POST","BYU","Georgia Tech",1,5.74455098,17.2358
+"adj_epa",2,100,"POST","Cincinnati","Navy",1,-0.381128485,17.2358
+"adj_epa",2,100,"POST","Clemson","Penn State",1,-4.8208280475,17.2358
+"adj_epa",2,100,"POST","Delaware","Louisiana",1,-0.34328106,17.2358
+"adj_epa",2,100,"POST","Duke","Arizona State",1,-7.3395004525,17.2358
+"adj_epa",2,100,"POST","East Carolina","Pittsburgh",1,-3.05001093,17.2358
+"adj_epa",2,100,"POST","Fresno State","Miami (OH)",1,-2.7804094675,17.2358
+"adj_epa",2,100,"POST","Georgia","Ole Miss",1,4.195755705,17.2358
+"adj_epa",2,100,"POST","Hawai'i","California",0,0.3449596425,17.2358
+"adj_epa",2,100,"POST","Houston","LSU",1,-4.78627384,17.2358
+"adj_epa",2,100,"POST","Illinois","Tennessee",1,-6.557238415,17.2358
+"adj_epa",2,100,"POST","Indiana","Alabama",1,6.7507660305,17.2358
+"adj_epa",2,100,"POST","Indiana","Miami",1,5.20524975,17.2358
+"adj_epa",2,100,"POST","Indiana","Oregon",1,1.7469290025,17.2358
+"adj_epa",2,100,"POST","Jacksonville State","Troy",1,-1.1535003257,17.2358
+"adj_epa",2,100,"POST","Louisiana Tech","Coastal Carolina",1,2.382028455,17.2358
+"adj_epa",2,100,"POST","Louisville","Toledo",1,-3.699708675,17.2358
+"adj_epa",2,100,"POST","Minnesota","New Mexico",1,0.278694675,17.2358
+"adj_epa",2,100,"POST","Mississippi State","Wake Forest",1,-2.4515792425,17.2358
+"adj_epa",2,100,"POST","Missouri","Virginia",1,6.07406934,17.2358
+"adj_epa",2,100,"POST","NC State","Memphis",1,-1.110944805,17.2358
+"adj_epa",2,100,"POST","Northwestern","Central Michigan",1,3.3764326825,17.2358
+"adj_epa",2,100,"POST","Ohio","UNLV",1,-2.2688302475,17.2358
+"adj_epa",2,100,"POST","Ohio State","Miami",1,9.9234473775,17.2358
+"adj_epa",2,100,"POST","Oklahoma","Alabama",0,1.62444837,17.2358
+"adj_epa",2,100,"POST","Ole Miss","Miami",1,-3.9442423625,17.2358
+"adj_epa",2,100,"POST","Ole Miss","Tulane",0,8.657876205,17.2358
+"adj_epa",2,100,"POST","Oregon","James Madison",0,10.046532635,17.2358
+"adj_epa",2,100,"POST","San Diego State","North Texas",1,-2.85064839,17.2358
+"adj_epa",2,100,"POST","SMU","Arizona",1,-1.0688211125,17.2358
+"adj_epa",2,100,"POST","South Florida","Old Dominion",1,7.065671875,17.2358
+"adj_epa",2,100,"POST","Southern Miss","Western Kentucky",1,3.36144117,17.2358
+"adj_epa",2,100,"POST","TCU","USC",1,-7.404824125,17.2358
+"adj_epa",2,100,"POST","Texas","Michigan",1,1.6845473482,17.2358
+"adj_epa",2,100,"POST","Texas A&M","Miami",0,7.929829375,17.2358
+"adj_epa",2,100,"POST","Texas State","Rice",1,9.8949389275,17.2358
+"adj_epa",2,100,"POST","Texas Tech","Oregon",1,1.7944103175,17.2358
+"adj_epa",2,100,"POST","Utah","Nebraska",1,11.4349850575,17.2358
+"adj_epa",2,100,"POST","Utah State","Washington State",1,-0.38496238,17.2358
+"adj_epa",2,100,"POST","UTSA","Florida International",1,4.9295533775,17.2358
+"adj_epa",2,100,"POST","Vanderbilt","Iowa",1,5.74946623,17.2358
+"adj_epa",2,100,"POST","Washington","Boise State",1,5.026236345,17.2358
+"adj_epa",2,100,"POST","Western Michigan","Kennesaw State",1,2.8360017137,17.2358
+"raw_epa",2,16,"REG","Navy","Army",1,4.6341513876,17.24
+"raw_epa",2,100,"POST","App State","Georgia Southern",1,2.6666199552,17.24
+"raw_epa",2,100,"POST","Arkansas State","Missouri State",1,-0.7985513604,17.24
+"raw_epa",2,100,"POST","Army","UConn",1,-4.6362106596,17.24
+"raw_epa",2,100,"POST","BYU","Georgia Tech",1,1.8970700088,17.24
+"raw_epa",2,100,"POST","Cincinnati","Navy",1,-1.3672193232,17.24
+"raw_epa",2,100,"POST","Clemson","Penn State",1,-1.3705828008,17.24
+"raw_epa",2,100,"POST","Delaware","Louisiana",1,0.9145913376,17.24
+"raw_epa",2,100,"POST","Duke","Arizona State",1,-3.7431043932,17.24
+"raw_epa",2,100,"POST","East Carolina","Pittsburgh",1,-0.8716898376,17.24
+"raw_epa",2,100,"POST","Fresno State","Miami (OH)",1,-2.4019005396,17.24
+"raw_epa",2,100,"POST","Georgia","Ole Miss",1,2.8094304684,17.24
+"raw_epa",2,100,"POST","Hawai'i","California",0,3.2620704204,17.24
+"raw_epa",2,100,"POST","Houston","LSU",1,-0.8545292376,17.24
+"raw_epa",2,100,"POST","Illinois","Tennessee",1,-4.9002436512,17.24
+"raw_epa",2,100,"POST","Indiana","Alabama",1,8.7965245404,16.9808
+"raw_epa",2,100,"POST","Indiana","Miami",1,3.567002316,17.24
+"raw_epa",2,100,"POST","Indiana","Oregon",1,0.9411902676,17.24
+"raw_epa",2,100,"POST","Jacksonville State","Troy",1,1.518873696,16.9808
+"raw_epa",2,100,"POST","Louisiana Tech","Coastal Carolina",1,2.600517324,17.24
+"raw_epa",2,100,"POST","Louisville","Toledo",1,-7.4105305404,17.24
+"raw_epa",2,100,"POST","Minnesota","New Mexico",1,-0.913630344,17.24
+"raw_epa",2,100,"POST","Mississippi State","Wake Forest",1,-6.3641114736,17.24
+"raw_epa",2,100,"POST","Missouri","Virginia",1,1.8995411352,17.24
+"raw_epa",2,100,"POST","NC State","Memphis",1,-3.617969298,17.24
+"raw_epa",2,100,"POST","Northwestern","Central Michigan",1,-2.1772339644,17.24
+"raw_epa",2,100,"POST","Ohio","UNLV",1,-0.0968544264,17.24
+"raw_epa",2,100,"POST","Ohio State","Miami",1,8.2428196404,17.24
+"raw_epa",2,100,"POST","Oklahoma","Alabama",0,2.7462571056,17.24
+"raw_epa",2,100,"POST","Ole Miss","Miami",1,-3.5865997212,17.24
+"raw_epa",2,100,"POST","Ole Miss","Tulane",0,3.76515057,17.24
+"raw_epa",2,100,"POST","Oregon","James Madison",0,3.3182542248,17.24
+"raw_epa",2,100,"POST","San Diego State","North Texas",1,-0.4890771,17.24
+"raw_epa",2,100,"POST","SMU","Arizona",1,-0.4577075232,17.24
+"raw_epa",2,100,"POST","South Florida","Old Dominion",1,2.988346884,17.24
+"raw_epa",2,100,"POST","Southern Miss","Western Kentucky",1,2.917302,17.24
+"raw_epa",2,100,"POST","TCU","USC",1,-6.2304303996,17.24
+"raw_epa",2,100,"POST","Texas","Michigan",1,-1.7991978912,16.9808
+"raw_epa",2,100,"POST","Texas A&M","Miami",0,4.6812863616,17.24
+"raw_epa",2,100,"POST","Texas State","Rice",1,8.4794986356,17.24
+"raw_epa",2,100,"POST","Texas Tech","Oregon",1,1.947213282,17.24
+"raw_epa",2,100,"POST","Utah","Nebraska",1,7.284331488,17.24
+"raw_epa",2,100,"POST","Utah State","Washington State",1,1.347450312,17.24
+"raw_epa",2,100,"POST","UTSA","Florida International",1,0.9462698052,17.24
+"raw_epa",2,100,"POST","Vanderbilt","Iowa",1,3.95122815,17.24
+"raw_epa",2,100,"POST","Washington","Boise State",1,2.6510381304,17.24
+"raw_epa",2,100,"POST","Western Michigan","Kennesaw State",1,2.9379021912,16.9808

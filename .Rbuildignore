@@ -33,3 +33,4 @@
 ^\.git$
 ^man/figures/logo-2x\.png$
 ^debug\.log$
+^tests/testthat/fixtures/cfb_2025_ratings/capture\.R$
