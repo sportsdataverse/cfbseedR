@@ -33,6 +33,8 @@
 #' | `away_team` | character | Away team name. |
 #' | `result` | numeric | Home margin (home minus away points); `NA` for unplayed games. |
 #' | `neutral` | integer | Neutral-site flag (0/1). |
+#' | `home_points` | numeric | Home team points; `NA` for unplayed games. Feeds the SEC `capped_scoring_margin` tiebreaker rung. |
+#' | `away_points` | numeric | Away team points; `NA` for unplayed games. |
 #' | `conf_game` | logical | The schedule's `conference_game` flag (`NA` when the schedule has none). An explicit `FALSE` keeps a same-conference game out of the conference standings. |
 #'
 #' @examples
@@ -78,6 +80,8 @@ cfb_games_from_schedule <- function(schedule) {
     away_team = schedule$away_team,
     result = home_points - away_points,
     neutral = as.integer(dplyr::coalesce(as.logical(neutral_site), FALSE)),
+    home_points = as.numeric(home_points),
+    away_points = as.numeric(away_points),
     conf_game = conf_game
   )
 }

@@ -91,6 +91,11 @@
 
 ## Bug fixes
 
+* `cfb_games_from_schedule()` now returns the `home_points` / `away_points`
+  columns that `cfb_standings()` documents it as emitting, so a mapped
+  cfbfastR schedule reaches the SEC capped-scoring-margin tiebreaker instead
+  of skipping it. sdv-py's `cfb_games_from_schedule()` already returned them.
+
 * The 2026 Notre Dame clause in `cfb_playoff_seeds()` now also recognises
   Notre Dame by its ESPN team id `"87"`, so a teams table keyed by id no
   longer loses it silently. sdv-py already matched both.

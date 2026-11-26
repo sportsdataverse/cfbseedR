@@ -27,6 +27,8 @@ A tibble in the engine games schema, ready for
    \code{away_team} \tab character \tab Away team name. \cr
    \code{result} \tab numeric \tab Home margin (home minus away points); \code{NA} for unplayed games. \cr
    \code{neutral} \tab integer \tab Neutral-site flag (0/1). \cr
+   \code{home_points} \tab numeric \tab Home team points; \code{NA} for unplayed games. Feeds the SEC \code{capped_scoring_margin} tiebreaker rung. \cr
+   \code{away_points} \tab numeric \tab Away team points; \code{NA} for unplayed games. \cr
    \code{conf_game} \tab logical \tab The schedule's \code{conference_game} flag (\code{NA} when the schedule has none). An explicit \code{FALSE} keeps a same-conference game out of the conference standings. \cr
 }
 }

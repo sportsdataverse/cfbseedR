@@ -15,12 +15,14 @@ test_that("cfb_games_from_schedule maps the cfbfastR schedule shape", {
   expect_named(
     games,
     c("season", "week", "game_type", "home_team", "away_team", "result", "neutral",
-      "conf_game")
+      "home_points", "away_points", "conf_game")
   )
   expect_equal(games$season, rep(2024, 4))
   expect_equal(games$game_type, c("REG", "REG", "CONF_CHAMP", "POST"))
   expect_equal(games$result, c(7, 4, 3, NA))
   expect_equal(games$neutral, c(0L, 0L, 1L, 1L))
+  expect_equal(games$home_points, c(21, 24, 17, NA))
+  expect_equal(games$away_points, c(14, 20, 14, NA))
   expect_equal(games$conf_game, rep(NA, 4))
 })
 
