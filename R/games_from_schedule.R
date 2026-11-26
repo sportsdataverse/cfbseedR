@@ -8,8 +8,11 @@
 #' @param schedule A data frame with at least `season`, `week`,
 #'   `season_type`, `home_team`, `away_team`. Optional columns used when
 #'   present: `home_points`/`away_points` (to compute `result`),
-#'   `neutral_site`, and `notes` (games whose notes mention "championship"
-#'   are classified as `"CONF_CHAMP"`).
+#'   `neutral_site`, `conference_game` (carried as `conf_game`, so a game
+#'   between two members of one conference that the schedule marks as
+#'   non-conference stays out of the conference standings), and `notes`
+#'   (games whose notes mention "championship" are classified as
+#'   `"CONF_CHAMP"`).
 #'
 #' @details
 #' Game type mapping: `season_type == "postseason"` becomes `"POST"`, games
@@ -30,6 +33,9 @@
 #' | `away_team` | character | Away team name. |
 #' | `result` | numeric | Home margin (home minus away points); `NA` for unplayed games. |
 #' | `neutral` | integer | Neutral-site flag (0/1). |
+#' | `home_points` | numeric | Home team points; `NA` for unplayed games. Feeds the SEC `capped_scoring_margin` tiebreaker rung. |
+#' | `away_points` | numeric | Away team points; `NA` for unplayed games. |
+#' | `conf_game` | logical | The schedule's `conference_game` flag (`NA` when the schedule has none). An explicit `FALSE` keeps a same-conference game out of the conference standings. |
 #'
 #' @examples
 #' schedule <- data.frame(
@@ -60,6 +66,7 @@ cfb_games_from_schedule <- function(schedule) {
   away_points <- schedule[["away_points"]] %||% rep(NA_real_, n)
   neutral_site <- schedule[["neutral_site"]] %||% rep(FALSE, n)
   notes <- as.character(schedule[["notes"]] %||% rep(NA_character_, n))
+  conf_game <- as.logical(schedule[["conference_game"]] %||% rep(NA, n))
 
   tibble::tibble(
     season = schedule$season,
@@ -72,6 +79,9 @@ cfb_games_from_schedule <- function(schedule) {
     home_team = schedule$home_team,
     away_team = schedule$away_team,
     result = home_points - away_points,
-    neutral = as.integer(dplyr::coalesce(as.logical(neutral_site), FALSE))
+    neutral = as.integer(dplyr::coalesce(as.logical(neutral_site), FALSE)),
+    home_points = as.numeric(home_points),
+    away_points = as.numeric(away_points),
+    conf_game = conf_game
   )
 }

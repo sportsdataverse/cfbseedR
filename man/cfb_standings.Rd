@@ -30,7 +30,16 @@ be \code{NA} (play or simulate the games first).}
 Optional \code{home_points}/\code{away_points} columns (per-game scores) feed the
 official SEC \code{capped_scoring_margin} tiebreaker rung (see "Official
 per-conference tiebreakers" below); \code{\link[=cfb_games_from_schedule]{cfb_games_from_schedule()}} emits
-both. Absent -> that rung is skipped, not an error.}
+both. Absent -> that rung is skipped, not an error. An optional logical
+\code{conf_game} column (the schedule's conference-game flag, which
+\code{\link[=cfb_games_from_schedule]{cfb_games_from_schedule()}} carries over) keeps a game between two members
+of one conference out of the conference record and every
+conference-game tiebreaker (head-to-head, common opponents, SOV/SOS, the
+CFP final-week clause, \code{div_pct}) when it is explicitly \code{FALSE} - a
+non-conference game between conference members, or the Pac-12's 2026 Flex
+Week. It still counts in the overall record, and so in the Big 12
+\code{total_wins} rung. \code{NA} or absent -> a \code{REG} game between two members of
+one conference counts.}
 
 \item{teams}{A data frame with columns \code{team} and \code{conference}. Teams with
 conference \code{"FBS Independents"} or \code{NA} are treated as independents:
