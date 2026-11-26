@@ -27,6 +27,17 @@ NEWS.md.
 * The default simulation generator uses college football home-field and
   margin-noise constants fitted on FBS results (2014-2025) instead of the
   NFL values inherited from nflseedR. Both are now arguments.
+* A regular-season game between two members of one conference that the
+  schedule marks as non-conference no longer counts in the conference
+  standings: `cfb_games_from_schedule()` carries the schedule's
+  `conference_game` flag as a new `conf_game` column, and a `FALSE` keeps
+  the game out of the conference record and the conference-game
+  tiebreakers (it still counts in the overall record). This matters for
+  the 2026 Pac-12 Flex Week and Mountain West non-conference meetings; on
+  the real 2024-2025 seasons it moves ranks but no title-game berth.
+* `cfb_games_from_schedule()` now returns `home_points` / `away_points`, so
+  a mapped schedule reaches the SEC capped-scoring-margin tiebreaker
+  instead of always skipping it.
 
 ### Other changes
 
