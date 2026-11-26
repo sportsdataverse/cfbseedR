@@ -7,7 +7,8 @@
   `cfb_games_from_schedule()` carries the schedule's `conference_game` flag
   as a new `conf_game` column, and `cfb_standings()` / `cfb_simulations()`
   leave a `REG` game whose `conf_game` is `FALSE` out of the conference
-  record and every tiebreaker (it still counts in the overall record).
+  record and every conference-game tiebreaker (it still counts in the
+  overall record, and so in the Big 12 `total_wins` rung).
   Before, any regular-season game between two members counted, so the
   Pac-12's 2026 Flex Week games (played after the conference schedule ended
   on Nov 21) and Mountain West members' non-conference meetings would have

@@ -26,10 +26,13 @@
 #' both. Absent -> that rung is skipped, not an error. An optional logical
 #' `conf_game` column (the schedule's conference-game flag, which
 #' [cfb_games_from_schedule()] carries over) keeps a game between two members
-#' of one conference out of the conference record and every tiebreaker when
-#' it is explicitly `FALSE` - a non-conference game between conference
-#' members, or the Pac-12's 2026 Flex Week. `NA` or absent -> a `REG` game
-#' between two members of one conference counts.
+#' of one conference out of the conference record and every
+#' conference-game tiebreaker (head-to-head, common opponents, SOV/SOS, the
+#' CFP final-week clause, `div_pct`) when it is explicitly `FALSE` - a
+#' non-conference game between conference members, or the Pac-12's 2026 Flex
+#' Week. It still counts in the overall record, and so in the Big 12
+#' `total_wins` rung. `NA` or absent -> a `REG` game between two members of
+#' one conference counts.
 #' @param teams A data frame with columns `team` and `conference`. Teams with
 #'   conference `"FBS Independents"` or `NA` are treated as independents:
 #'   they appear in overall standings but receive no conference rank. An
