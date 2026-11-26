@@ -103,7 +103,7 @@ in the check directory while building the PDF manual. The package does not
 create it; the GitHub Actions checks of 0.2.0 and of the 0.3.0 development
 version on main report no notes.
 
-Tests: 369 expectations passed, 0 failed, 0 skipped, in about 60 s.
+Tests: 371 expectations passed, 0 failed, 0 skipped, in about 60 s.
 
 ## Reverse dependencies
 
