@@ -42,8 +42,8 @@
 #' override them, e.g. `home_field = 20, margin_sd = 13` reproduces the
 #' pre-0.3.0 (NFL) behaviour. Ties are possible in the regular season only;
 #' a simulated postseason tie is re-decided by the win probability with a
-#' 3-point margin. nflseedR's rest-day adjustment is dropped (no rest data
-#' in the CFB schema).
+#' 1-point margin (3 points before cfbseedR 0.3.0). nflseedR's rest-day
+#' adjustment is dropped (no rest data in the CFB schema).
 #'
 #' @return A list with two elements, as required by the `compute_results`
 #'   contract (see [simulations_verify_fct()]):
@@ -62,7 +62,8 @@
 #' out <- cfbseedR_compute_results(teams, games, week_num = 3)
 #' out$games[out$games$week == 3, ]
 #'
-#' @seealso [cfb_simulations()], [simulations_verify_fct()]
+#' @seealso [cfbseedR_ratings_compute_results()] for a generator driven by
+#'   fixed team ratings, [cfb_simulations()], [simulations_verify_fct()]
 #' @export
 cfbseedR_compute_results <- function(teams, games, week_num, ...,
                                      home_field = 59.4, margin_sd = 16.7) {
@@ -116,10 +117,11 @@ cfbseedR_compute_results <- function(teams, games, week_num, ...,
   fill <- is.na(res)
   if (any(fill)) {
     res[fill] <- round_out(rnorm(sum(fill), estimate[fill], margin_sd))
-    # No ties in the postseason: re-decide via win probability
+    # No ties in the postseason: re-decide via win probability, by one point
+    # (sdv-py's cfb_compute_results() does the same)
     post_tie <- fill & postseason & res == 0
     if (any(post_tie)) {
-      res[post_tie] <- ifelse(runif(sum(post_tie)) < wp[post_tie], 3L, -3L)
+      res[post_tie] <- ifelse(runif(sum(post_tie)) < wp[post_tie], 1L, -1L)
     }
     games$result[idx] <- res
   }
