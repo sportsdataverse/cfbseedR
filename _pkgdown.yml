@@ -205,6 +205,7 @@ reference:
   contents:
   - cfb_simulations
   - cfbseedR_compute_results
+  - cfbseedR_ratings_compute_results
   - simulations_verify_fct
 - title: Data preparation
   desc: Map real schedules into the engine games schema.
@@ -227,4 +228,6 @@ articles:
   contents:
   - getting-started
   - simulating-seasons
+  - results-generators
+  - articles/ratings-and-epa
   - tiebreakers-and-cfp

@@ -104,13 +104,36 @@ article for a full walkthrough and
 for custom `compute_results` functions, the tiebreaker ladder, and CFP-12
 seeding rules.
 
+### Results generators
+
+Simulations use the ELO generator `cfbseedR_compute_results()` by default.
+`cfbseedR_ratings_compute_results()` simulates from fixed team ratings
+instead: points (SP+, FPI or your own margin rating), adjusted EPA/play or
+raw EPA/play, each with defaults fitted on FBS results.
+
+```r
+# sp_plus: a data frame with team, rating (points per game) and games
+sim <- cfb_simulations(
+  games, teams,
+  compute_results = cfbseedR_ratings_compute_results,
+  ratings = sp_plus, rating_type = "points"
+)
+```
+
+ELO predicted margins best over whole seasons in a walk-forward test on
+2014-2025; a points rating ties or beats it once teams have about six games,
+which suits late-season and postseason simulations.
+[Choosing a results generator](https://cfbseedR.sportsdataverse.org/articles/results-generators.html)
+compares them.
+
 ## **Function naming convention**
 
 Following the SportsDataverse convention, the engine's user-facing exports
 are prefixed with `cfb_`: `cfb_standings()`, `cfb_playoff_seeds()`,
 `cfb_simulations()`, and `cfb_games_from_schedule()`. Two helpers mirror
 their nflseedR namesakes instead: `cfbseedR_compute_results()` (the default
-results generator, after `nflseedR_compute_results()`) and
+results generator, after `nflseedR_compute_results()`, with
+`cfbseedR_ratings_compute_results()` as its ratings-driven sibling) and
 `simulations_verify_fct()` (the custom-generator contract checker).
 
 ## **CFB semantics**
@@ -178,6 +201,8 @@ Lee Sharpe and Sebastian Carl. Huge thanks to them and the broader
 - Articles:
   - [Getting started with cfbseedR](https://cfbseedR.sportsdataverse.org/articles/getting-started.html)
   - [Simulating seasons](https://cfbseedR.sportsdataverse.org/articles/simulating-seasons.html)
+  - [Choosing a results generator](https://cfbseedR.sportsdataverse.org/articles/results-generators.html)
+  - [Ratings and EPA inputs](https://cfbseedR.sportsdataverse.org/articles/ratings-and-epa.html)
   - [Cookbook: tiebreakers & the CFP, past / present / future](https://cfbseedR.sportsdataverse.org/articles/tiebreakers-and-cfp.html)
 - [NEWS / changelog](https://cfbseedR.sportsdataverse.org/news/index.html)
 
